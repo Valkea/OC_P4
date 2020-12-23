@@ -1,20 +1,21 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-""" The purpose of this module is to handle the actors of the tournaments
+""" This module handles the actors of the tournaments
 """
 
 import json
 
+
 class Player:
-    """The purpose of this class is handle the chess players
+    """ This class handles the chess players
 
     Attributes
     ----------
     first_name : str
     family_name : str
     birthdate : str
-        must be a 'DD/MM/YYYY' string 
+        must be a 'DD/MM/YYYY' string
     sex = str
         can be either 'M' or 'F'
     elo = int
@@ -27,14 +28,11 @@ class Player:
     """
 
     def __init__(self, family_name, first_name, birthdate, sex, elo):
-        try:
-            self.family_name = family_name
-            self.first_name = first_name
-            self.sex = sex
-            self.elo = elo
-            self.birthdate = birthdate 
-        except Exception as e:
-            print(e)
+        self.family_name = family_name
+        self.first_name = first_name
+        self.sex = sex
+        self.elo = elo
+        self.birthdate = birthdate
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
