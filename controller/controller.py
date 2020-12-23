@@ -1,12 +1,12 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-''' The purpose of this module is to handle the controllers
+''' The purpose of this module is to handle the models
     of this chess tournament manager
 '''
 
 
-class Controllers:
+class Model:
 
     def __init__(self):
         pass
