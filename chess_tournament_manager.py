@@ -5,6 +5,7 @@
 """
 
 import time
+from operator import attrgetter
 
 from model.tournament import Tournament
 from model.player import Player
@@ -96,7 +97,7 @@ def main():
             t01.description = desc
             break
 
-    for player in t01.players:
+    for player in sorted(t01.players, key=attrgetter("score", "elo"), reverse=True):
         print(player)
 
 

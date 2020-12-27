@@ -61,12 +61,9 @@ class Round:
     def _sort_players(self, players):
         if self.index == 0:
             # print("TEST SORT:", players)
-            return sorted(
-                players, key=lambda x: x.elo, reverse=True
-            )  # , key=attrgetter['elo'])
+            return sorted(players, key=attrgetter("elo"), reverse=True)
         else:
-            sorted_list = sorted(players, key=lambda x: x.elo, reverse=True)
-            return sorted(sorted_list, key=lambda x: x.score, reverse=True)
+            return sorted(players, key=attrgetter("score", "elo"), reverse=True)
 
     def _get_pairs(self, players):
         # print("TEST PAIRS:", players)
