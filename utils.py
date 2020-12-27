@@ -8,7 +8,23 @@ import random
 import datetime
 
 
+def get_fake_score_from_elo(elo1, elo2):
+
+    score1 = elo1 + random.randint(0, 500)
+    score2 = elo2 + random.randint(0, 500)
+
+    print(f"{score1}/{elo1} && {score2}/{elo2}")
+
+    if score1 > score2:
+        return [1, 0]
+    elif score1 < score2:
+        return [0, 1]
+    else:
+        return [0.5, 0.5]
+
+
 def get_fake_score():
+
     scores = [[1, 0], [0, 1], [0.5, 0.5]]
     return random.choice(scores)
 
@@ -118,7 +134,7 @@ class FakePlayer:
                 player["firstname"] = random.choice(self.firstnames_M)
             player["familyname"] = random.choice(self.familynames)
             player["birthdate"] = self.randdate().strftime("%d/%m/%Y")
-            player["elo"] = random.randrange(800, 2000)
+            player["elo"] = random.randrange(1000, 2800)
             r_list.append(player)
 
         return r_list
