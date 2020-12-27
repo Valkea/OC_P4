@@ -50,42 +50,49 @@ class Round:
     def gen_games(self, players):
         """ D """
 
-        sorted_players = self._sort_players(players)
-        # print("SORTED:", sorted_players)
-        print("\n")
-        for p in sorted_players:  # TODO TMP
-            print(p)
+        paired_players = self._get_pairs(players)
 
-        paired_players = self._get_pairs(sorted_players)
-        # print("PAIRED:", paired_players)
         for p1, p2 in paired_players:
             self.games.append(([p1, 0], [p2, 0]))
 
     def _sort_players(self, players):
-        """ D """
+        """_Return a new list of the players sorted by score then by elo.
+            It works for both the first and second part of the swiss rules,
+            because the scores starts at 0, so it sort by elo only at first.
 
-        if self.index == 0:
-            # print("TEST SORT:", players)
-            return sorted(players, key=attrgetter("elo"), reverse=True)
-        else:
-            return sorted(players, key=attrgetter("score", "elo"), reverse=True)
+        Parameters
+        ----------
+        players : list
+            The list of the Players instances to sort
+        """
+
+        return sorted(players, key=attrgetter("score", "elo"), reverse=True)
 
     def _get_pairs(self, players):
         """ D """
+
+        sorted_players = self._sort_players(players)
 
         # print("TEST PAIRS:", players)
         pairs = []
         if self.index == 0:
             half = len(players) // 2
-            part1 = players[:half]
-            part2 = players[half:]
+            part1 = sorted_players[:half]
+            part2 = sorted_players[half:]
             for pair in zip(part1, part2):
                 pairs.append(pair)
         else:
-            for i in range(0, len(players), 2):
-                pairs.append((players[i], players[i + 1]))
-                # TODO vérifier que les joueurs ne se sont pas déjà rencontrés
+            drafted = []
+            for i, player1 in enumerate(sorted_players):
+                for player2 in sorted_players[i:]:
 
+                    if player1 == player2 or player1 in drafted or player2 in drafted:
+                        continue
+
+                    if player1.has_played(player2) is not True:
+                        pairs.append((player1, player2))
+                        drafted.extend([player1, player2])
+                        break
         return pairs
 
     def is_closed(self):

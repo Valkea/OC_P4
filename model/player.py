@@ -8,7 +8,7 @@ import json
 
 
 class Player:
-    """This class handles the chess players
+    """_This class handles the chess players
 
     Attributes
     ----------
@@ -22,9 +22,12 @@ class Player:
         must be greater than 0
     score = int
         points earned in the current tournament
+    games = list
+        the list of all the opponents played along with their final score
 
     Methods
     -------
+    TODO !!!!!!!!!!!!!!!!!!!!!!!
     add_to_score(value)
         add to the current player's score
     fullname()
@@ -40,9 +43,30 @@ class Player:
         self.sex = sex
         self.elo = elo
         self.score = 0
+        self.games = []
 
-    def add_to_score(self, value):
-        """Add the given value to the current player score
+    def add_game(self, opponent):
+        """_Register a game in the player's history.
+            We only register the opponent with its score,
+            but as the sum of the game worth 1pt we can deduce
+            the current player score.
+
+        Parameters
+        ----------
+        opponent : list(Player, int)
+            A list containing a Player instance and its game score
+        """
+        try:
+
+            score = 1 - opponent[1]
+            self._add_to_score(score)
+            self.games.append(opponent)
+
+        except ValueError as e:
+            raise e
+
+    def _add_to_score(self, value):
+        """_Add the given value to the current player score
             if the value is 0>=value<=1
 
         Parameters
@@ -56,9 +80,15 @@ class Player:
 
         self.score += value
 
+    def has_played(self, player):
+        """ Return True if the given Player instance is in the games history """
+
+        return player in [game[0] for game in self.games]
+
     def fullname(self):
         """ Return the concatenation of the fist and family names """
 
+        return self.first_name[0] + self.family_name[0]  # TODO TMP
         return self.first_name + " " + self.family_name
 
     def toJSON(self):

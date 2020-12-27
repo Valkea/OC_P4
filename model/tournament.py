@@ -83,13 +83,15 @@ class Tournament:
         player1 = game[0][0]
         player2 = game[1][0]
 
-        player1.add_to_score(score1)
-        player2.add_to_score(score2)
+        # player1.add_to_score(score1)
+        # player2.add_to_score(score2)
+
+        player1.add_game(game[1])
+        player2.add_game(game[0])
 
     def is_complete(self):
         """ Return True if self.rounds has been played """
 
-        print("is close:", len(self.rounds), self.num_rounds)
         if self.current_round().is_closed() is not True:
             return False
         return len(self.rounds) == self.num_rounds
@@ -118,7 +120,7 @@ class Tournament:
 
     # --- Players --- #
     def add_player(self, player):
-        """ Add a player to the current tournament instance
+        """Add a player to the current tournament instance
 
         Parameters
         ----------
