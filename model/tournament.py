@@ -34,6 +34,11 @@ class Tournament:
 
     Methods
     -------
+    start_round()
+        TODO
+    current_round()
+        TODO
+
     set_date( str )
         insert a date using 'DD/MM/YYYY' format 'into the dates list
     set_dates( list(str) )
@@ -50,31 +55,27 @@ class Tournament:
         self.game_type = game_type
         self.description = description
 
-    def set_date(self, date):
-
-        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
-
-    def set_dates(self, dates):
-        for date in dates:
-            self.set_date(date)
-
-    def set_game_type(self, type):
-        if type == "bullet" or type == "blitz" or type == "coup rapide":
-            self.game_type = type
-        else:
-            raise ValueError(
-                "Les contrôles de temps doivent être 'bullet',"
-                "'blitz' ou 'coup rapide'"
-            )
-
     # -----------------------------------
-    def set_result(self, index, score1, score2):
+
+    def set_result(self, game_index, score1, score2):
+        """Set the game result to the appropriate Game in the current Round,
+            And update the Player's score
+
+        Parameters
+        ----------
+        game_index : int
+            the index of the Game instance to update
+        score1 : int
+            the score of the first player (tuple order)
+        score2 : int
+            the score of the second player (tuple order)
+        """
 
         if score1 + score2 != 1:
             raise ValueError("La somme des deux scores doit être de 1")
 
         game = self.current_round().games[
-            index
+            game_index
         ]  # TODO sont ils vraiment dans cet ordre ?
         game[0][1] = score1
         game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
@@ -86,82 +87,70 @@ class Tournament:
         player2.add_to_score(score2)
 
     def is_complete(self):
+        """ Return True if self.rounds has been played """
+
         print("is close:", len(self.rounds), self.num_rounds)
         if self.current_round().is_closed() is not True:
             return False
         return len(self.rounds) == self.num_rounds
 
-    # -----------------------------------
-
-    # --- Game --- #
-
-    #     def current_round(self):
-    #         if len(self.rounds) == 0:
-    #             return None
-    #
-    #         return self.rounds[-1]
-    #
-    #     def start_round(self):
-    #         new_round = Round("Round {current_round+1}", round_index)
-    #         self.rounds.append(new_round)
-    #
-    #     def close_round(self):
-    #         pass
-    #
-    #
-    #     def get_games(self):
-    #
-    #         round_index = len(self.rounds)
-    #
-    #
-    #         return new_round.get_games()
-    #
-    #     def get_pairs(self):
-    #         round_index = len(self.rounds)
-    #
-    #         if( round_index == 0 ):
-    #             half = len(sorted_players)//2
-    #             sorted_players = self.players.sort() # by elo
-    #             part1 = sorted_players[:half]
-    #             part2 = sorted_players[half:]
-    #
-    #             for i in range(half):
-    #                 new_game = Game(part1[i], part2[i])
-    #         else:
-    #             sorted_players = self.players.sort() # by score & elo
-    #
-
-    #     def sorted_by_elo(self, layers):
-    #         pass
-    #
-    #     def sorted_by_score(self):
-    #         return self.players.sort()
-    #
-    #     def get_round1_games(self):
-    #         pass
-    #
-    #     def get_round_games(self):
-    #         pass
-
     # --- Rounds --- #
 
     def start_round(self):
+        """ Initialize and start a new round in the current tournament instance """
+
         round_index = len(self.rounds)
         new_round = Round(f"Round{round_index+1}", round_index, self.players)
         self.rounds.append(new_round)
 
     def current_round(self):
+        """ Return the instance of the current round if any or None otherwise """
+
         if len(self.rounds) == 0:
-            return
+            return None
         else:
             return self.rounds[-1]
 
     def close_round(self):
+        """ Make all actions required to close the current round of the tournament """
+
         self.current_round.close()
 
     # --- Players --- #
     def add_player(self, player):
+        """ Add a player to the current tournament instance
+
+        Parameters
+        ----------
+        player : Player
+            the Player instance to register as a participant of the tournament
+        """
+
         if type(player) is not Player:
             raise TypeError("Player instance expected")
 
         self.players.append(player)
+
+    # --- Properties GET & SET ----------
+
+    def set_date(self, date):
+        """ D """
+
+        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
+
+    def set_dates(self, dates):
+        """ D """
+
+        for date in dates:
+            self.set_date(date)
+
+    def set_game_type(self, type):
+        """ D """
+
+        if type == "bullet" or type == "blitz" or type == "coup rapide":
+            self.game_type = type
+        else:
+            raise ValueError(
+                "Les contrôles de temps doivent être 'bullet',"
+                "'blitz' ou 'coup rapide'"
+            )

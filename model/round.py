@@ -41,11 +41,14 @@ class Round:
         self.gen_games(players)
 
     def close(self):
+        """ D """
+
         self.close_time = self._get_time()
 
     # ----------------------
 
     def gen_games(self, players):
+        """ D """
 
         sorted_players = self._sort_players(players)
         # print("SORTED:", sorted_players)
@@ -59,6 +62,8 @@ class Round:
             self.games.append(([p1, 0], [p2, 0]))
 
     def _sort_players(self, players):
+        """ D """
+
         if self.index == 0:
             # print("TEST SORT:", players)
             return sorted(players, key=attrgetter("elo"), reverse=True)
@@ -66,6 +71,8 @@ class Round:
             return sorted(players, key=attrgetter("score", "elo"), reverse=True)
 
     def _get_pairs(self, players):
+        """ D """
+
         # print("TEST PAIRS:", players)
         pairs = []
         if self.index == 0:
@@ -82,11 +89,15 @@ class Round:
         return pairs
 
     def is_closed(self):
+        """ D """
+
         return self.close_time is not None
 
     # ----------------------
 
     def toJSON(self):
+        """ Return a JSON representation of the Round instance """
+
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __repr__(self):
