@@ -16,6 +16,9 @@ class Menu:
             ("Tournois", "open_tournois"),
             ("Rapports", "open_rapports"),
             ("Quitter", "quit"),
+            ("Test1", "open_goodbye"),
+            ("Test2", "open_test2"),
+            ("Test3", "open_test3"),
         )
 
     def menu_tournois(self):

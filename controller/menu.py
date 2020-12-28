@@ -6,100 +6,127 @@
 """
 
 import curses
-import time
 import sys
+import atexit
+import logging
 
-from view.menu import MenuView
-from view.main import MainView
+from view.main import CurseView
+# from view.menu import MenuView
+# from view.main import MainView
+
 from model.menu import Menu
+
+logging.basicConfig(filename="debug.txt", filemode="w", level=logging.DEBUG)
 
 
 class Controller:
+    """D """
+
     def __init__(self):
-        pass
+        logging.debug("< Open Controller")
+        self.curses_view = CurseView()
+        self.menu_model = Menu()
 
+        atexit.register(self._close)
 
-class MenuController:
-    def __init__(self):
-        self.view = MenuView()
-        self.model = Menu()
-        self.current_options = self.model.menu_base()
+    def _close(self):
+        logging.debug("> Close Controller")
+        self.curses_view.close()
 
-    # Options du menu #
+    # Main controls #
+
+    def open_goodbye(self):
+        self.curses_view.say_goodbye()
+        # self._control_center()
+
+    def open_test2(self):
+        self.curses_view.print_center("Test2", self.curses_view.main)  # Pas de print ici
+
+    def open_test3(self):
+        self.curses_view.print_center("Test3", self.curses_view.main)  # Pas de print ici
+
+    # Menu controls #
 
     def open_menu_base(self):
-        self.current_options = self.model.menu_base()
-        self.open_menu()
+        options = self.menu_model.menu_base()
+        colorset = [1, 2]
+        self._control_menu(options, colorset)
 
     def open_tournois(self):
-        self.current_options = self.model.menu_tournois()
-        self.open_menu()
+        options = self.menu_model.menu_tournois()
+        colorset = [1, 2]
+        self._control_menu(options, colorset)
 
     def open_tournois_select(self):
-        self.current_options = self.model.menu_tournois_select()
-        self.open_menu()
+        options = self.menu_model.menu_tournois_select()
+        colorset = [1, 2]
+        self._control_menu(options, colorset)
 
     def open_tournoi_actions(self):
-        self.current_options = self.model.menu_tournoi_actions()
-        self.open_menu()
+        options = self.menu_model.menu_tournoi_actions()
+        colorset = [1, 2]
+        self._control_menu(options, colorset)
 
     def open_rapports(self):
-        self.current_options = self.model.menu_rapports()
-        self.open_menu()
+        options = self.menu_model.menu_rapports()
+        colorset = [1, 2]
+        self._control_menu(options, colorset)
 
     def quit(self):
-        MainView.say_goodbye(self.stdscr)
-        time.sleep(1)
+        self.curses_view.say_goodbye()
+        curses.napms(1000)
         sys.exit(0)
 
-    # Control du menu #
+    # Private methods #
 
-    def open_menu(self):
-        curses.wrapper(self.control_menu)
+    def _align_to_larger(self, options):
+        max_size = max([len(option) for option in options])
+        return [option.ljust(max_size) for option in options]
 
-    def close_menu(self):
-        self.current_options = tuple()  # TODO ??
+    def _control_menu(self, options, colorset):
 
-    def control_menu(self, stdscr):
-
-        self.stdscr = stdscr
+        logging.debug(f"CONTROL MENU : {options}")
+        logging.debug(f"CONTROL MENU : {self.curses_view}")
 
         current_row = 0
-        labels = [x[0] for x in self.current_options]
-        actions = [x[1] for x in self.current_options]
-        buttons = self.align_to_larger(labels)
+        labels = [x[0] for x in options]
+        actions = [x[1] for x in options]
+        buttons = self._align_to_larger(labels)
 
-        self.view.display_menu(stdscr, current_row, buttons)
+        self.curses_view.display_menu(buttons, current_row, colorset)
+
+        logging.debug("CONTROL MENU : pre while")
 
         while 1:
-            key = stdscr.getch()
+            key = self.curses_view.screen.getch()
+            logging.debug(f"CONTROL MENU : key = {key}")
+            logging.debug(f"CONTROL MENU : current_row = {current_row}")
 
             # clear existing texts
-            stdscr.clear()
+            self.curses_view.menu.clear()
 
             if key == curses.KEY_UP:
+                logging.debug("KEY UP")
                 if current_row > 0:
                     current_row -= 1
                 else:
                     current_row = len(buttons) - 1
             elif key == curses.KEY_DOWN:
+                logging.debug("KEY DOWN")
                 if current_row < len(buttons) - 1:
                     current_row += 1
                 else:
                     current_row = 0
             elif key == curses.KEY_ENTER or key in [10, 13]:
+                logging.debug("KEY ENTER")
 
                 if actions[current_row] is None:
-                    self.view.print_center(
-                        stdscr, "You selected '{}'".format(labels[current_row])
+                    self.curses_view.print_center(
+                        "You selected '{}'".format(labels[current_row]),
+                        self.curses_view.main
                     )
-                    stdscr.getch()
+                    self.curses_view.screen.getch()
                 else:
                     eval("self." + actions[current_row] + "()")
 
-            self.view.display_menu(stdscr, current_row, buttons)
-
-    @staticmethod
-    def align_to_larger(options):
-        max_size = max([len(option) for option in options])
-        return [option.ljust(max_size) for option in options]
+            self.curses_view.display_menu(buttons, current_row, colorset)
