@@ -10,6 +10,7 @@ import time
 import sys
 
 from view.menu import MenuView
+from view.main import MainView
 from model.menu import Menu
 
 
@@ -30,16 +31,16 @@ class MenuController:
         self.current_options = self.model.menu_base()
         self.open_menu()
 
-    def open_tournoi(self):
-        self.current_options = self.model.menu_tournoi()
+    def open_tournois(self):
+        self.current_options = self.model.menu_tournois()
         self.open_menu()
 
-    def open_tournoi_list(self):
-        self.current_options = self.model.menu_tournoi_list()
+    def open_tournois_select(self):
+        self.current_options = self.model.menu_tournois_select()
         self.open_menu()
 
-    def open_tournoi_choix(self):
-        self.current_options = self.model.menu_tournoi_choix()
+    def open_tournoi_actions(self):
+        self.current_options = self.model.menu_tournoi_actions()
         self.open_menu()
 
     def open_rapports(self):
@@ -47,7 +48,7 @@ class MenuController:
         self.open_menu()
 
     def quit(self):
-        self.view.say_goodbye(self.stdscr)
+        MainView.say_goodbye(self.stdscr)
         time.sleep(1)
         sys.exit(0)
 
@@ -76,10 +77,16 @@ class MenuController:
             # clear existing texts
             stdscr.clear()
 
-            if key == curses.KEY_UP and current_row > 0:
-                current_row -= 1
-            elif key == curses.KEY_DOWN and current_row < len(buttons) - 1:
-                current_row += 1
+            if key == curses.KEY_UP:
+                if current_row > 0:
+                    current_row -= 1
+                else:
+                    current_row = len(buttons) - 1
+            elif key == curses.KEY_DOWN:
+                if current_row < len(buttons) - 1:
+                    current_row += 1
+                else:
+                    current_row = 0
             elif key == curses.KEY_ENTER or key in [10, 13]:
 
                 if actions[current_row] is None:

@@ -7,21 +7,11 @@
 
 import curses
 
+from view.main import CurseView
 
-class MenuView:
+
+class MenuView(CurseView):
     """ D """
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def print_center(stdscr, text):
-        stdscr.clear()
-        h, w = stdscr.getmaxyx()
-        x = w // 2 - len(text) // 2
-        y = h // 2
-        stdscr.addstr(y, x, text)
-        stdscr.refresh()
 
     @staticmethod
     def display_menu(stdscr, current_row, options):
@@ -54,7 +44,3 @@ class MenuView:
 
         # update screen
         stdscr.refresh()
-
-    @classmethod
-    def say_goodbye(cls, stdscr):
-        cls.print_center(stdscr, "Vous quittez le programme")
