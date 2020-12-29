@@ -4,6 +4,8 @@
 """ This module handles the menu model
 """
 
+import logging
+
 
 class Menu:
     """ TODO """
@@ -16,9 +18,6 @@ class Menu:
             ("Tournois", "open_tournois"),
             ("Rapports", "open_rapports"),
             ("Quitter", "quit"),
-            ("Test1", "open_goodbye"),
-            ("Test2", "open_test2"),
-            ("Test3", "open_test3"),
         )
 
     def menu_tournois(self):
@@ -28,15 +27,21 @@ class Menu:
             ("< Retour", "open_menu_base"),
         )
 
-    def menu_tournois_select(self):
-        return (
-            ("Tournoi 01", "open_tournoi_actions"),
-            ("Tournoi 02", "open_tournoi_actions"),
-            ("Tournoi 03", "open_tournoi_actions"),
-            ("Tournoi 04", "open_tournoi_actions"),
-            ("Tournoi 05", "open_tournoi_actions"),
-            ("< Retour", "open_tournois"),
-        )
+    def menu_tournois_select(self, world):
+        # world.add_tournament("Tournoi 01", "Caen", ["20/12/2020", "21/12/2020"], "bullet")
+        logging.debug(f"menu_tournois_select: {world}")
+
+        back_btn = ("< Retour", "open_tournois")
+        tournaments = world.tournaments
+        if len(tournaments) > 0:
+            retv = [(f"{t.name}", "open_tournoi_actions") for t in tournaments]
+            retv.append(back_btn)
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun tournoi", back_btn[1]),
+                back_btn,
+            )
 
     def menu_tournoi_actions(self):
         return (

@@ -5,9 +5,30 @@
 """
 
 import datetime
+import re
 
 from model.player import Player
 from model.round import Round
+
+
+class World:
+    """ D """
+
+    def __init__(self):
+        self.tournaments = []
+
+    def add_tournament(self, name, place, dates, gtype, desc="", rounds=4):
+        """ D """
+        self.tournaments.append(
+            Tournament(
+                name,
+                place,
+                dates,
+                gtype,
+                desc,
+                rounds,
+            )
+        )
 
 
 class Tournament:
@@ -156,3 +177,90 @@ class Tournament:
                 "Les contrôles de temps doivent être 'bullet',"
                 "'blitz' ou 'coup rapide'"
             )
+
+    @staticmethod
+    def get_fields_new():
+        """ D """
+
+        fields = [
+            {
+                "name": "name",
+                "label": "Nom du tournoi",
+                "test": "x is not ''",
+                "errormsg": "Vous devez saisir un nom",
+                "placeholder": None,
+            },
+            {
+                "name": "place",
+                "label": "Lieu du tournoi",
+                "placeholder": None,
+                "test": "x is not ''",
+                "errormsg": "Vous devez saisir un lieu",
+            },
+            {
+                "name": "start_date",
+                "label": "Date de début [Jour/Mois/Année]",
+                "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
+                "test": "Tournament.is_valid_date(x)",
+                "errormsg": "Le format demandé est JJ/MM/YYYY",
+            },
+            {
+                "name": "end_date",
+                "label": "Date de fin [Jour/Mois/Année]",
+                "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
+                "test": "Tournament.is_valid_date(x)",
+                "errormsg": "Le format demandé est JJ/MM/YYYY",
+            },
+            {
+                "name": "rounds",
+                "label": "Nombre de tours",
+                "placeholder": "4",
+                "test": "Tournament.is_valid_posint(x)",
+                "errormsg": "Vous devez saisir un entier positif",
+            },
+            {
+                "name": "gtype",
+                "label": "Contrôle de temps [Bullet|Blitz|Coups rapides]",
+                "placeholder": 'Bullet',
+                "test": "Tournament.is_valid_gtype(x)",
+                "errormsg": "Vous devez saisir l'une de ces options Bullet, Blitz, Coups rapides",
+            },
+            {
+                "name": "desc",
+                "label": "Description",
+                "placeholder": None,
+                "test": None,
+                "errormsg": None,
+            },
+        ]
+
+        return fields
+
+    @staticmethod
+    def is_valid_date(v):
+        """ D """
+        try:
+            s = re.search(
+                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})", v
+            ).groups()
+            if int(s[0]) > 31 or int(s[1]) > 12 or len(s) != 3:
+                return False
+            return True
+        except AttributeError:
+            return False
+
+    @staticmethod
+    def is_valid_posint(v):
+        """ D """
+        try:
+            return int(v) > 0
+        except ValueError:
+            return False
+
+    @staticmethod
+    def is_valid_gtype(v):
+        """ D """
+        v = v.lower()
+        if v == "bullet" or v == "blitz" or v == "coups rapides" or v == "coup rapide":
+            return True
+        return False

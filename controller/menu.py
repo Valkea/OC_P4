@@ -9,9 +9,12 @@ import curses
 import sys
 import atexit
 import logging
+
 # import random
 
 from view.main import CurseView
+from model.tournament import Tournament, World
+
 # from view.menu import MenuView
 # from view.main import MainView
 
@@ -23,10 +26,12 @@ class Controller:
 
     def __init__(self):
         logging.info("< Open Controller")
-        self.curses_view = CurseView()
-        self.menu_model = Menu()
-        self.focus = "menu"
 
+        self.curses_view = CurseView()
+        self.world_model = World()
+        self.menu_model = Menu()
+
+        self.focus = "menu"
         atexit.register(self._close)
 
     def _close(self):
@@ -34,19 +39,6 @@ class Controller:
         self.curses_view.close()
 
     # Main controls #
-
-    def open_goodbye(self):
-        self.curses_view.say_goodbye()
-        # self._control_center()
-        self.focus = "main"
-
-    def open_test2(self):
-        #self.curses_view.print_center("Test2", self.curses_view.screen)  # Pas de print ici
-        self._set_main()
-        self.focus = "main"
-
-    def open_test3(self):
-        self.curses_view.print_center("Test3", self.curses_view.main)  # Pas de print ici
 
     def start(self):
         while 1:
@@ -76,12 +68,17 @@ class Controller:
         options = self.menu_model.menu_tournois()
         colorset = [1, 2]
         self._set_menu(options, colorset)
-        #self.focus = "main"
+        # self.focus = "main"
 
     def open_tournois_select(self):
-        options = self.menu_model.menu_tournois_select()
+        options = self.menu_model.menu_tournois_select(self.world_model)
         colorset = [1, 2]
         self._set_menu(options, colorset)
+
+    # def test(self):
+    #     logging.warning("ICI")
+    #     options = self.menu_model.menu_tournois_select(self.world_model)
+    #     self._set_menu(options, colorset)
 
     def open_tournoi_actions(self):
         options = self.menu_model.menu_tournoi_actions()
@@ -97,6 +94,43 @@ class Controller:
         self.curses_view.say_goodbye()
         curses.napms(1000)
         sys.exit(0)
+
+    def open_new_tournament(self):
+        logging.debug("START SET MAIN")
+        # self.curses_view.clear_menu()
+
+        fields = Tournament.get_fields_new()
+        inputs = {}
+        for field in fields:
+            logging.debug(f">>>{field} {type(field)}")
+            inputs[field["name"]] = self._check_input(
+                field["label"],
+                field["placeholder"],
+                field["test"],
+                field["errormsg"],
+            )
+
+        self.curses_view.clear_main()
+        logging.debug("END SET MAIN")
+        # TODO renvoyer vers la page principal du tournoi + menu tournoi
+
+        self.world_model.add_tournament(
+            inputs["name"],
+            inputs["place"],
+            [inputs["start_date"], inputs["end_date"]],
+            inputs["rounds"],
+            inputs["gtype"],
+            inputs["desc"],
+        )
+
+    def open_new_actor(self):
+        logging.debug("START SET MAIN")
+        # self.curses_view.clear_menu()
+        self.curses_view.get_input("Nom")
+        self.curses_view.get_input("Prénom")
+        self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
+        self.curses_view.clear_main()
+        logging.debug("END SET MAIN")
 
     # Private methods #
 
@@ -130,7 +164,7 @@ class Controller:
             if actions[current_row] is None:
                 self.curses_view.print_center(
                     "You selected '{}'".format(labels[current_row]),
-                    self.curses_view.main
+                    self.curses_view.main,
                 )
             else:
                 eval("self." + actions[current_row] + "()")
@@ -151,52 +185,30 @@ class Controller:
         self.menu_data = [current_row, labels, actions, buttons, colorset]
         self.curses_view.display_menu(buttons, current_row, colorset)
 
-    def open_new_tournament(self):
-        logging.debug("START SET MAIN")
-        #self.curses_view.clear_menu()
-        
-        name = self.check_input("Nom du tournoi", "x.isalpha()", None, "Des lettres...")
-        place = self.check_input("Lieu du tournoi", "len(x) > 3", None, "Plus de 3...")
-        start_date = self.check_input("Date de début", "self.test(x)", None, "Plus de 4...")
-        end_date = self.curses_view.get_input("Date de fin [JJ/MM/YYYY]")
-        num_rounds = self.curses_view.get_input("Nombre de tours")
-        time_control = self.curses_view.get_input("Contrôle de temps [Bullet|Blitz|Coup rapide]")
-        description = self.curses_view.get_input("Description")
-        self.curses_view.clear_main()
-        logging.debug("END SET MAIN")
-
-    def test(self, v):
-        if len(v) > 4:
-            return True
-        else:
-            return False
-
-    def check_input(self, label, test, placeholder=None, error=None):
-
-        e = None
-        testx = test.replace("x", "value")
-        while 1:
-            value = self.curses_view.get_input(label, e)
-            if eval(testx):
-                break
-            else:
-                e = error
-
-        return value
-
-
-    def open_new_actor(self):
-        logging.debug("START SET MAIN")
-        #self.curses_view.clear_menu()
-        self.curses_view.get_input("Nom")
-        self.curses_view.get_input("Prénom")
-        self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
-        self.curses_view.clear_main()
-        logging.debug("END SET MAIN")
-
     def _get_main(self, key):
         self.focus = "menu"
-        self.open_menu_base()
-        #x = random.randint(0, 100)
-        #self.curses_view.print_center(f"Test {x}", self.curses_view.screen)
+        self.main_data[0]()
+        # self.open_menu_base()
+        # x = random.randint(0, 100)
+        # self.curses_view.print_center(f"Test {x}", self.curses_view.screen)
         pass
+
+    # def _set_main(self, hook, colorset):
+    #     self.focus = "main"
+    #     self.main_data = [hook, colorset]
+
+    def _check_input(self, label, placeholder=None, test=None, error=None):
+
+        logging.debug(f"_check_input::{test}")
+
+        errormsg = None
+        if test is not None:
+            test = test.replace("x", "value")
+        while 1:
+            value = self.curses_view.get_input(label, placeholder, errormsg)
+            if test is None or eval(test) is True:
+                break
+            else:
+                errormsg = error
+
+        return value

@@ -32,8 +32,8 @@ class CurseView:
 
         # Init menu window & main window
         maxH, maxW = self.screen.getmaxyx()
-        self.menu = curses.newwin(10, maxW, maxH-10, 0)
-        self.main = curses.newwin(maxH-10, maxW, 0, 0)
+        self.menu = curses.newwin(10, maxW, maxH - 10, 0)
+        self.main = curses.newwin(maxH - 10, maxW, 0, 0)
 
     def close(self):
         logging.info("> Close Main View")
@@ -101,8 +101,7 @@ class CurseView:
         screen.addstr(y, x, text)
         screen.refresh()
 
-
-    def get_input(self, text, error = None):
+    def get_input(self, label, placeholder=None, errormsg=None):
         logging.info("DISPLAY INPUT")
 
         # turn on cursor blinking
@@ -110,22 +109,22 @@ class CurseView:
 
         self.main.clear()
         h, w = self.main.getmaxyx()
-        x = w // 2 - len(text) // 2
+        x = w // 2 - len(label) // 2
         y = h // 2
-        self.main.addstr(y, x, text)
+        self.main.addstr(y, x, label)
 
-
-        logging.error(f"ERROR TXT: {error}")
-        if error is not None:
-            x = w // 2 - len(error) // 2
-            self.main.addstr(y+5, x, error)
+        logging.error(f"ERROR TXT: {errormsg}")
+        if errormsg is not None:
+            x = w // 2 - len(errormsg) // 2
+            self.main.addstr(y + 5, x, errormsg)
 
         x = w // 2 - 40 // 2
-        sub = self.main.subwin(3, 40, y+1, x)
+        sub = self.main.subwin(3, 40, y + 1, x)
         sub.border()
 
-        sub2 = sub.subwin(1, 38, y+2, x+1)
-        # sub2.addstr("Blop")
+        sub2 = sub.subwin(1, 38, y + 2, x + 1)
+        if placeholder is not None:
+            sub2.addstr(placeholder)
 
         tb = curses.textpad.Textbox(sub2)
         self.main.refresh()
