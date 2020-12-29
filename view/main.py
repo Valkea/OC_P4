@@ -6,12 +6,13 @@
 """
 
 import curses
+import curses.textpad
 import logging
 
 
 class CurseView:
     def __init__(self):
-        logging.debug("< Open Main View")
+        logging.info("< Open Main View")
 
         self.screen = curses.initscr()
 
@@ -31,11 +32,11 @@ class CurseView:
 
         # Init menu window & main window
         maxH, maxW = self.screen.getmaxyx()
-        self.menu = curses.newwin(10, maxW, 0, 0)
-        self.main = curses.newwin(maxH-10, maxW, 10, 0)
+        self.menu = curses.newwin(10, maxW, maxH-10, 0)
+        self.main = curses.newwin(maxH-10, maxW, 0, 0)
 
     def close(self):
-        logging.debug("> Close Main View")
+        logging.info("> Close Main View")
 
         # reverse terminal settings
         curses.nocbreak()
@@ -45,12 +46,22 @@ class CurseView:
         # close the application
         curses.endwin()
 
+    def clear_menu(self):
+        self.menu.clear()
+        self.menu.refresh()
+
+    def clear_main(self):
+        self.main.clear()
+        self.main.refresh()
+
+    # --------------------------------
+
     def say_goodbye(self):
         self.print_center("Vous quittez le programme", self.screen)
 
     def display_menu(self, options, current_row, colors=[1, 2]):
 
-        logging.debug(f"DISPLAY MENU : {options}, {current_row}")
+        logging.info(f"DISPLAY MENU : {options}, {current_row}")
 
         # turn off cursor blinking
         curses.curs_set(0)
@@ -80,7 +91,6 @@ class CurseView:
         self.menu.border()
 
         # update screen
-        logging.debug("REFRESH")
         self.menu.refresh()
 
     def print_center(self, text, screen):
@@ -90,3 +100,50 @@ class CurseView:
         y = h // 2
         screen.addstr(y, x, text)
         screen.refresh()
+
+
+    def get_input(self, text, error = None):
+        logging.info("DISPLAY INPUT")
+
+        # turn on cursor blinking
+        curses.curs_set(1)
+
+        self.main.clear()
+        h, w = self.main.getmaxyx()
+        x = w // 2 - len(text) // 2
+        y = h // 2
+        self.main.addstr(y, x, text)
+
+
+        logging.error(f"ERROR TXT: {error}")
+        if error is not None:
+            x = w // 2 - len(error) // 2
+            self.main.addstr(y+5, x, error)
+
+        x = w // 2 - 40 // 2
+        sub = self.main.subwin(3, 40, y+1, x)
+        sub.border()
+
+        sub2 = sub.subwin(1, 38, y+2, x+1)
+        # sub2.addstr("Blop")
+
+        tb = curses.textpad.Textbox(sub2)
+        self.main.refresh()
+
+        tb.edit()
+        self.main.refresh()
+
+        value = tb.gather()[:-1].strip()
+        logging.debug(f"INPUT: ->{value}<-")
+
+        # Reset the content of the input window
+        tb.do_command(curses.ascii.SOH)
+        tb.do_command(curses.ascii.VT)
+        tb.do_command(curses.ascii.FF)
+        sub.border()
+        sub.refresh()
+
+        # turn off cursor blinking
+        curses.curs_set(0)
+
+        return value

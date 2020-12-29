@@ -1,15 +1,15 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
+import logging
+
 from controller.menu import Controller  # , MenuController
 
-# menu = MenuController()
-# menu.open_menu()
+logging.basicConfig(filename="debug.txt", filemode="w", level=logging.DEBUG)
 
-control = Controller()
-#control.test()
-control.open_menu_base()
-# control.open_curses()
-#control.open_menu()
-#control.close_menu()
-# control.close_curses()
+try:
+    control = Controller()
+    control.open_menu_base()
+    control.start()
+except Exception as e:
+    logging.error(e)

@@ -23,7 +23,7 @@ class Menu:
 
     def menu_tournois(self):
         return (
-            ("Créer un tournoi", None),
+            ("Créer un tournoi", "open_new_tournament"),
             ("Liste de tous les tournois", "open_tournois_select"),
             ("< Retour", "open_menu_base"),
         )
