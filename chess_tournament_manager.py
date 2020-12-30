@@ -4,7 +4,7 @@
 """ The purpose of this module is to simulate a chess tournament managment tool
 """
 
-import time
+# import time
 from operator import attrgetter
 
 from model.tournament import Tournament

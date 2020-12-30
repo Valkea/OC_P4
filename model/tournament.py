@@ -221,7 +221,7 @@ class Tournament:
             {
                 "name": "gtype",
                 "label": "Contrôle de temps [Bullet|Blitz|Coups rapides]",
-                "placeholder": 'Bullet',
+                "placeholder": "Bullet",
                 "test": "Tournament.is_valid_gtype(x)",
                 "errormsg": "Vous devez saisir l'une de ces options Bullet, Blitz, Coups rapides",
             },
