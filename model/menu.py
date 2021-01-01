@@ -43,7 +43,7 @@ class Menu:
                 back_btn,
             )
 
-    def menu_tournoi_actions(self):
+    def menu_tournoi_select_actions(self):
         return (
             ("Charger", None),
             ("Editer", None),
@@ -51,11 +51,46 @@ class Menu:
             ("< Retour", "open_tournois_select"),
         )
 
-    def menu_rapports(self):
+    def menu_tournoi_base(self):
         return (
+            ("Editer le tournoi", None),
+            ("Ajouter un acteur", 'open_new_actor'),
+            ("Gérer les acteurs", 'open_tournoi_actors'),  # affiche liste des acteurs & menu tournoi_actors
+            ("Rapports", 'open_tournoi_rapport'),
+            ("Sauvegarder le tournoi", None),
+            ("Charger un autre tournoi", 'open_tournois_select'),
+        )
+
+    def menu_tournoi_actor_select(self):
+        return (
+            ("< Retour", "open_tournois_infos"),
+        )
+
+    def menu_tournoi_actor_manager(self):
+        return (
+            # ("Editer l'acteur", None),
+            ("Supprimer l'acteur", None),
+            ("< Retour", "open_tournoi_actors"),
+        )
+
+    def menu_tournoi_rapports(self):
+        return (
+            ("Liste de tous les joueurs de ce tournoi", None),
+            ("Liste de tous les tours de ce tournoi", None),
+            ("Liste de tous les matchs de ce tournoi", None),
+            ("Liste de tous les tournois", None),
             ("Liste de tous les acteurs de tous les tournois", None),
             ("Liste de tous les joueurs de tous les tournois", None),
+            ("< Retour", "open_tournois_infos"),
+        )
+
+    def menu_rapports(self):
+        return (
+            ("Liste de tous les joueurs d'un tournoi", None),
             ("Liste de tous les tours d'un tournoi", None),
             ("Liste de tous les matchs d'un tournoi", None),
+            ("Liste de tous les tournois", None),
+            ("Liste de tous les acteurs de tous les tournois", None),
+            ("Liste de tous les joueurs de tous les tournois", None),
             ("< Retour", "open_menu_base"),
         )

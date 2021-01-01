@@ -55,6 +55,10 @@ class Round:
         for p1, p2 in paired_players:
             self.games.append(([p1, 0], [p2, 0]))
 
+    def get_current_games(self):
+        """ D """
+        return self.games
+
     def _sort_players(self, players):
         """_Return a new list of the players sorted by score then by elo.
             It works for both the first and second part of the swiss rules,

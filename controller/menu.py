@@ -64,7 +64,7 @@ class Controller:
         )
 
     def open_tournoi_actions(self):
-        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actions)
+        self._set_menu_view("list", call=self.menu_model.menu_tournoi_select_actions)
         self._set_main_view("clear")
 
     def open_rapports(self):
@@ -85,16 +85,12 @@ class Controller:
             inputs["name"],
             inputs["place"],
             [inputs["start_date"], inputs["end_date"]],
-            inputs["rounds"],
             inputs["gtype"],
             inputs["desc"],
+            inputs["rounds"],
         )
 
-        # TODO renvoyer vers la page principal du tournoi + menu tournoi
-        # self.open_tournois_select()
-        self._set_full_view(
-            "list", call=self.menu_model.menu_tournois_select, param=self.world_model
-        )
+        self.open_tournois_infos()  # TODO passer un id ??
 
     def open_new_actor(self):
         logging.debug("START SET MAIN")
@@ -103,7 +99,33 @@ class Controller:
         # self.curses_view.get_input("Prénom")
         # self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
         # self.curses_view.clear_main()
+        self._set_full_view("print-line", text="TODO ACTOR INPUT")  # TODO
+        curses.napms(2000)
+        self.open_tournoi_actors()
         logging.debug("END SET MAIN")
+
+    def open_tournois_infos(self):
+        tournament = self.world_model.tournaments
+        infos = tournament[0].get_overall_infos()  # TODO rendre l'ID dynamique
+        self._set_main_view("print-lines", rows=infos.values())
+        self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
+
+    def tmp(self):
+        return (("TODO ACTOR", 'open_edit_actor'),)
+
+    def open_tournoi_actors(self):
+        self._set_main_view("list", call=self.tmp)
+        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_select)
+
+    def open_edit_actor(self):
+        self._set_main_view("print-line", text="TODO ACTOR EDIT")  # TODO
+        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_manager)
+
+    def open_tournoi_rapport(self):
+        self._set_menu_view("list", call=self.menu_model.menu_tournoi_rapports)
+
+    # def open_tournoi_menu_base(self):
+    #    self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
 
     # Private methods #
 
@@ -220,6 +242,10 @@ class Controller:
         # --- Print one text line into the view ---
         elif action == "print-line":
             self.curses_view.print_center(screen, kwargs.get("text", "Error"))
+
+        # --- Print several text lines into the view ---
+        elif action == "print-lines":
+            self.curses_view.print_center_multi(screen, kwargs.get("rows", ['Error']))
 
         # --- Print a sequence of one-line inputs ---
         elif action == "input-lines":

@@ -6,6 +6,7 @@
 
 import datetime
 import re
+import logging
 
 from model.player import Player
 from model.round import Round
@@ -66,7 +67,26 @@ class Tournament:
         insert several dates using 'DD/MM/YYYY' format 'into the dates list
     """
 
+    labels = {
+        "name": "Nom du tournoi",
+        "place": "Lieu du tournoi",
+        "place_short": "Lieu",
+        "dates": "Date(s)",
+        "start_date": "Date de début",
+        "end_date": "Date de fin",
+        "num_rounds": "Nombre de tours",
+        "gtype": "Contrôle du temps",
+        "list_rounds": "Tournées",  # TODO unused
+        "desc": "Description",
+        "num_players": "Nombre de joueurs",
+        "list_players": "Joueurs",  # TODO unused
+        "unstarted": "Pas commencé",
+        "format_date": "[Jour/Mois/Année]",
+        "format_gtype": "[Bullet, Blitz, Coup rapide]",
+    }
+
     def __init__(self, name, place, dates, game_type, description="", num_rounds=4):
+        logging.debug(f"SELF:1>{name}< 2>{place}< 3>{dates}< 4>{num_rounds}< 5>{game_type}< 6>{description}<")
         self.name = name
         self.place = place
         self.dates = dates
@@ -178,56 +198,85 @@ class Tournament:
                 "'blitz' ou 'coup rapide'"
             )
 
-    @staticmethod
-    def get_fields_new():
+    def get_overall_infos(self):
+        """ D """
+        infos = {
+            "name": f"{self.labels['name']}: {self.name}",
+            "place": f"{self.labels['place_short']}: {self.place}",
+            "dates": f"{self.labels['dates']}: {' - '.join(self.dates)}",
+            "num_rounds": f"{self.labels['num_rounds']}: {self.num_rounds}",
+            "game_type": f"{self.labels['gtype']}: {self.game_type}",
+            "desc": f"{self.labels['desc']}: {self.description}",
+            "num_players": f"{self.labels['num_players']}: {len(self.players)}",
+        }
+
+        if len(self.rounds) > 0:
+            infos[
+                "current_round"
+            ] = f"{self.current_round().name}: {len(self.rounds)}/{self.num_rounds}"
+        else:
+            infos["current_round"] = f"{self.labels['unstarted']}"
+
+        if self.current_round() is not None:
+            logging.critical(f"Coucou {type(self.current_round())}")
+            for i, game in enumerate(self.current_round().get_current_games()):
+                infos[f"game{i}"] = (
+                    f"Table {i+1} : {game[0][0].fullname()} "
+                    f"[{game[0][0].elo}] vs {game[1][0].fullname() [{game[1][0].elo}]}"
+                )
+
+        return infos
+
+    @classmethod
+    def get_fields_new(cls):
         """ D """
 
         fields = [
             {
                 "name": "name",
-                "label": "Nom du tournoi",
+                "label": cls.labels["name"],
                 "test": "x is not ''",
                 "errormsg": "Vous devez saisir un nom",
                 "placeholder": None,
             },
             {
                 "name": "place",
-                "label": "Lieu du tournoi",
+                "label": cls.labels["place"],
                 "placeholder": None,
                 "test": "x is not ''",
                 "errormsg": "Vous devez saisir un lieu",
             },
             {
                 "name": "start_date",
-                "label": "Date de début [Jour/Mois/Année]",
+                "label": cls.labels["start_date"] + " " + cls.labels["format_date"],
                 "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
                 "test": "Tournament.is_valid_date(x)",
                 "errormsg": "Le format demandé est JJ/MM/YYYY",
             },
             {
                 "name": "end_date",
-                "label": "Date de fin [Jour/Mois/Année]",
+                "label": cls.labels["end_date"] + " " + cls.labels["format_date"],
                 "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
                 "test": "Tournament.is_valid_date(x)",
                 "errormsg": "Le format demandé est JJ/MM/YYYY",
             },
             {
                 "name": "rounds",
-                "label": "Nombre de tours",
+                "label": cls.labels["num_rounds"],
                 "placeholder": "4",
                 "test": "Tournament.is_valid_posint(x)",
                 "errormsg": "Vous devez saisir un entier positif",
             },
             {
                 "name": "gtype",
-                "label": "Contrôle de temps [Bullet|Blitz|Coups rapides]",
+                "label": cls.labels["gtype"] + " " + cls.labels["format_gtype"],
                 "placeholder": "Bullet",
                 "test": "Tournament.is_valid_gtype(x)",
                 "errormsg": "Vous devez saisir l'une de ces options Bullet, Blitz, Coups rapides",
             },
             {
                 "name": "desc",
-                "label": "Description",
+                "label": cls.labels["desc"],
                 "placeholder": None,
                 "test": None,
                 "errormsg": None,

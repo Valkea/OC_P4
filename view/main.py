@@ -90,6 +90,16 @@ class CurseView:
         # update screen
         screen.refresh()
 
+    def print_center_multi(self, screen, rows):
+        screen.clear()
+        h, w = screen.getmaxyx()
+        max_txt = max([len(x) for x in rows])
+        x = w // 2 - max_txt // 2
+        y = (h-len(rows)) // 2
+        for i, row in enumerate(rows):
+            screen.addstr(y+i, x, row)
+        screen.refresh()
+
     def print_center(self, screen, text):
         screen.clear()
         h, w = screen.getmaxyx()
