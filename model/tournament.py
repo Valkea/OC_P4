@@ -5,7 +5,6 @@
 """
 
 import datetime
-import re
 import logging
 
 from model.player import Player
@@ -250,28 +249,28 @@ class Tournament:
                 "name": "start_date",
                 "label": cls.labels["start_date"] + " " + cls.labels["format_date"],
                 "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
-                "test": "Tournament.is_valid_date(x)",
+                "test": "Validation.is_valid_date(x)",
                 "errormsg": "Le format demandé est JJ/MM/YYYY",
             },
             {
                 "name": "end_date",
                 "label": cls.labels["end_date"] + " " + cls.labels["format_date"],
                 "placeholder": datetime.datetime.now().strftime("%d/%m/%Y"),
-                "test": "Tournament.is_valid_date(x)",
+                "test": "Validation.is_valid_date(x)",
                 "errormsg": "Le format demandé est JJ/MM/YYYY",
             },
             {
                 "name": "rounds",
                 "label": cls.labels["num_rounds"],
                 "placeholder": "4",
-                "test": "Tournament.is_valid_posint(x)",
+                "test": "Validation.is_valid_posint(x)",
                 "errormsg": "Vous devez saisir un entier positif",
             },
             {
                 "name": "gtype",
                 "label": cls.labels["gtype"] + " " + cls.labels["format_gtype"],
                 "placeholder": "Bullet",
-                "test": "Tournament.is_valid_gtype(x)",
+                "test": "Validation.is_valid_gtype(x)",
                 "errormsg": "Vous devez saisir l'une de ces options Bullet, Blitz, Coups rapides",
             },
             {
@@ -284,32 +283,3 @@ class Tournament:
         ]
 
         return fields
-
-    @staticmethod
-    def is_valid_date(v):
-        """ D """
-        try:
-            s = re.search(
-                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})", v
-            ).groups()
-            if int(s[0]) > 31 or int(s[1]) > 12 or len(s) != 3:
-                return False
-            return True
-        except AttributeError:
-            return False
-
-    @staticmethod
-    def is_valid_posint(v):
-        """ D """
-        try:
-            return int(v) > 0
-        except ValueError:
-            return False
-
-    @staticmethod
-    def is_valid_gtype(v):
-        """ D """
-        v = v.lower()
-        if v == "bullet" or v == "blitz" or v == "coups rapides" or v == "coup rapide":
-            return True
-        return False

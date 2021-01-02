@@ -8,6 +8,7 @@
 import curses
 import sys
 import atexit
+import re
 import logging
 
 from view.main import CurseView
@@ -263,3 +264,36 @@ class Controller:
                     field["errormsg"],
                 )
             return inputs
+
+
+class Validation:
+    """ D """
+
+    @staticmethod
+    def is_valid_date(v):
+        """ D """
+        try:
+            s = re.search(
+                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})", v
+            ).groups()
+            if int(s[0]) > 31 or int(s[1]) > 12 or len(s) != 3:
+                return False
+            return True
+        except AttributeError:
+            return False
+
+    @staticmethod
+    def is_valid_posint(v):
+        """ D """
+        try:
+            return int(v) > 0
+        except ValueError:
+            return False
+
+    @staticmethod
+    def is_valid_gtype(v):
+        """ D """
+        v = v.lower()
+        if v == "bullet" or v == "blitz" or v == "coups rapides" or v == "coup rapide":
+            return True
+        return False
