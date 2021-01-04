@@ -15,10 +15,13 @@ from view.main import CurseView
 from model.tournament import Tournament, World
 from model.menu import Menu
 
-nav_history = []
-
 
 def saveNav(f):
+    """ Decorator used to track the navigation history """
+
+    global nav_history
+    nav_history = []
+
     def wrapper(*args, **kwargs):
         global nav_history
         nav_history.append([f, args, kwargs])
@@ -85,8 +88,7 @@ class Controller:
             self._set_focus("main")
             self._set_head_view("print-line", text="Nouveau tournoi")
             self._set_menu_view("list", call=self.menu_model.Xonly_back)
-            # self._set_main_view("list", call=self.debug_tournoi)
-            self._set_main_view("print-line", text="Test")
+            self._set_main_view("list", call=self.debug_tournoi)
 
             # self.curses_view.set_focus(self.curses_view.main)
             # inputs = self._set_main_view(
@@ -101,9 +103,9 @@ class Controller:
             #     inputs["desc"],
             #     inputs["rounds"],
             # )
-            # self._set_main_view("print-line", text="Tournoi INPUTS")
-            # curses.napms(10000)
 
+            # self._set_main_view("print-line", text="Tournoi INPUTS")
+            # curses.napms(1000)
             # self.open_tournament_initialize()
 
         except Exception as e:
@@ -222,6 +224,7 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.Xreports_tournament)
 
+    @saveNav
     def open_save(self):
         self._set_focus("full")
         # self._set_menu_view("list", call=self.menu_model.Xonly_back)
@@ -446,8 +449,6 @@ class Controller:
             actions = [x[1] for x in options]
             params = [x[2] if len(x) > 2 else None for x in options]
             buttons = self._align_to_larger(labels)
-
-            # self.list_data_swap = self.list_data
 
             self.list_data[screen] = {
                 "screen": screen,
