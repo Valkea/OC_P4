@@ -13,6 +13,97 @@ class Menu:
     def __init__(self):
         pass
 
+    def Xbase(self):
+        return (
+            ("Créer un nouveau tournoi", "open_input_tournament_new"),
+            ("Charger un tournoi", "open_select_tournament_load"),
+            ("Rapports", "open_reports", "base"),
+            ("Quitter", "quit"),
+        )
+
+    # --- Tournament ---
+
+    def Xtournament_initialize(self):
+        return (
+            ("Ajouter un joueur au tournoi", "open_input_actor_new"),
+            ("Modifier un acteur", "open_select_actor"),
+            ("Commencer le tournoi", "open_tournament_opened"),
+            ("Rapports", "open_reports", "tournament"),  # R1
+            ("Sauvegarder", "open_save"),  # R1
+            ("Fermer le tournoi", "open_menu_base"),  # R1
+        )
+
+    def Xtournament_opened(self):
+        return (
+            ("Saisir les résultats du round", "open_tournament_finalize"),
+            ("Modifier un acteur", "open_select_actor"),  # R1
+            ("Rapports", "open_reports", "tournament"),  # R1
+            ("Sauvegarder", "open_save"),  # R1
+            ("Fermer le tournoi", "open_menu_base"),  # R1
+        )
+
+    def Xtournament_finalize(self):
+        return (
+            ("Saisir la note de fin de tournoi / Clore le tournoi", "open_tournament_closed"),
+            ("Modifier un acteur", "open_select_actor"),  # R1
+            ("Rapports", "open_reports", "tournament"),  # R1
+            ("Sauvegarder", "open_save"),  # R1
+            ("Fermer le tournoi", "open_menu_base"),  # R1
+        )
+
+    def Xtournament_closed(self):
+        return (
+            ("Modifier un acteur", "open_select_actor"),  # R1
+            ("Rapports", "open_reports", "tournament"),  # R1
+            ("Fermer le tournoi", "open_menu_base"),  # R1
+        )
+
+    # --- Reports ---
+
+    def Xreports_base(self):
+        return (
+            ("Tous les acteurs", None),  # R3
+            ("Tous les tournois", None),  # R3
+            ("Tous les joueurs d'un tournoi", None),
+            ("Tous les tours d'un tournoi", None),
+            ("Tous les matchs d'un tournoi", None),
+            ("<< Retour >>", "goback"),
+        )
+
+    def Xreports_tournament(self):
+        return (
+            ("Tous les acteurs", None),  # R3
+            ("Tous les tournois", None),  # R3
+            ("Tous les joueurs de ce tournoi", None),
+            ("Tous les tours de ce tournoi", None),
+            ("Tous les matchs de ce tournoi", None),
+            ("<< Retour >>", "goback"),
+        )
+
+    # --- Actors ---
+
+    def Xactors_alpha(self):
+        return (
+            ("Tri par ordre alphabétique", "open_menu_actor_order", "alpha"),
+            ("<< Retour >>", "goback"),
+        )
+
+    def Xactors_elo(self):
+        return (
+            ("Tri par classement ELO", "open_menu_actor_order", "elo"),
+            ("<< Retour >>", "goback"),
+        )
+
+    # --- Solo buttons ---
+
+    def Xonly_back(self):
+        return (
+            ("<< RETOUR >>", "goback"),
+            ("<< RETOUR >>", "goback"),  # TODO delete...
+        )
+
+    # ------------------------------------------------------------------------
+
     def menu_base(self):
         return (
             ("Tournois", "open_tournois"),

@@ -16,8 +16,26 @@ from model.tournament import Tournament, World
 from model.menu import Menu
 
 
+# def registerCall(f):
+#     #logging.critical(f"registerCall {f}")
+#     print(f"registerCall {f}")
+#     f.last_call = [f]
+#     print(f"registerCall {f.last_call}")
+#     return f
+# 
+# 
+# def getLastCall(cls):
+#     #logging.debug(f"getLastCall {cls}")
+#     print(f"getLastCall {cls}")
+#     cls.last_call = []
+#     return cls
+
+
+# @getLastCall
 class Controller:
     """D """
+
+    last_call = None
 
     def __init__(self):
         logging.info("< Open Controller")
@@ -52,6 +70,96 @@ class Controller:
     # Menu controls #
 
     def open_menu_base(self):
+        self.last_call = 'open_menu_base'
+        logging.debug(f"last.call: {self.last_call}")
+        self._set_main_view("clear")
+        self._set_menu_view("list", call=self.menu_model.Xbase)
+
+    def open_input_tournament_new(self):
+        self.last_call = 'open_input_tournament_new'
+        self._set_main_view("print-line", text="Inputs d'un nouveau tournoi")
+        self._set_menu_view("list", call=self.menu_model.Xonly_back)
+        curses.napms(3000)
+        self.open_tournament_initialize()
+
+    def open_select_tournament_load(self):
+        self.last_call = 'open_select_tournament_load'
+        self._set_main_view("print-line", text="Select d'un nouveau tournoi")
+        self._set_menu_view("list", call=self.menu_model.Xonly_back)
+        curses.napms(3000)
+        self.open_tournament_initialize()
+
+    def open_tournament_initialize(self):
+        self.last_call = 'open_tournament_initialize'
+        self._set_main_view("print-line", text="Infos tournoi (initialize screen)")
+        self._set_menu_view("list", call=self.menu_model.Xtournament_initialize)
+
+    def open_tournament_opened(self):
+        self.last_call = 'open_tournament_opened'
+        self._set_main_view("print-line", text="Infos tournoi + tables du round (opened)")
+        self._set_menu_view("list", call=self.menu_model.Xtournament_opened)
+
+    def open_tournament_finalize(self):
+        self.last_call = 'open_tournament_finalize'
+        self._set_main_view("print-line", text="Infos tournoi + classement (finialized)")
+        self._set_menu_view("list", call=self.menu_model.Xtournament_finalize)
+
+    def open_tournament_closed(self):
+        self.last_call = 'open_tournament_closed'
+        self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
+        self._set_menu_view("list", call=self.menu_model.Xtournament_closed)
+
+    def open_input_actor_new(self):
+        self.last_call = 'open_input_actor_new'
+        self._set_main_view("print-line", text="Inputs d'un nouvel acteur")
+        self._set_menu_view("list", call=self.menu_model.Xonly_back)
+        curses.napms(3000)
+        self.open_tournament_initialize()
+
+    def debug_actors(self):
+        return (
+                ("Bob1", "open_input_actor_edit"),
+                ("Bob2", "open_input_actor_edit"),
+                ("Bob3", "open_input_actor_edit"),
+                )
+
+    def open_select_actor(self):
+        self.last_call = 'open_input_actor_new'
+        self._set_main_view("list", call=self.debug_actors)
+        self._set_menu_view("list", call=self.menu_model.Xactors_alpha)
+
+    def open_menu_actor_order(self, order):
+        if order == "elo":
+            self._set_menu_view("list", call=self.menu_model.Xactors_alpha)
+        else:
+            self._set_menu_view("list", call=self.menu_model.Xactors_elo)
+
+    def open_input_actor_edit(self):
+        self.last_call = 'open_input_actor_new'
+        self._set_main_view("print-line", text="Modification d'un acteur")
+        self._set_menu_view("list", call=self.menu_model.Xonly_back)
+        curses.napms(3000)
+        self.open_tournament_initialize()
+
+    def open_reports(self, source):
+        logging.debug(f"open_reports source: {source}")
+        self._set_main_view("clear")
+        if source == 'base':
+            self._set_menu_view("list", call=self.menu_model.Xreports_base)
+        else:
+            self._set_menu_view("list", call=self.menu_model.Xreports_tournament)
+
+    def open_save(self):
+        self._set_full_view("print-line", text="Sauvegarde du tournoi")
+        curses.napms(3000)
+        self.goback()
+
+    def goback(self):
+        eval(f"self.{self.last_call}()")
+
+    # --------------------------------------
+
+    def open_menu_baseOld(self):
         self._set_menu_view("list", call=self.menu_model.menu_base)
         self._set_main_view("clear")
 
@@ -158,6 +266,7 @@ class Controller:
         elif key == curses.KEY_ENTER or key in [10, 13]:
             logging.debug("KEY ENTER")
             actions = self.list_data["actions"]
+            params = self.list_data["params"]
 
             if actions[current_row] is None:
                 labels = self.list_data["labels"]
@@ -165,7 +274,10 @@ class Controller:
                     "print-line", text=f"You selected '{labels[current_row]}'"
                 ),
             else:
-                eval("self." + actions[current_row] + "()")
+                if params[current_row] is None:
+                    eval(f"self.{actions[current_row]}")()
+                else:
+                    eval(f"self.{actions[current_row]}")(params[current_row])
                 return
 
         self.list_data["current_row"] = current_row
@@ -225,6 +337,8 @@ class Controller:
             current_row = 0
             labels = [x[0] for x in options]
             actions = [x[1] for x in options]
+            params = [x[2] if len(x) > 2 else None for x in options]
+            logging.debug(f"PARAMS: {params}")
             buttons = self._align_to_larger(labels)
 
             self.list_data_swap = self.list_data
@@ -234,6 +348,7 @@ class Controller:
                 "current_row": 0,
                 "labels": labels,
                 "actions": actions,
+                "params": params,
                 "buttons": buttons,
                 # "colorset": colorset,
             }
