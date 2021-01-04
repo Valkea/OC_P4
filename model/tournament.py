@@ -85,7 +85,9 @@ class Tournament:
     }
 
     def __init__(self, name, place, dates, game_type, description="", num_rounds=4):
-        logging.debug(f"SELF:1>{name}< 2>{place}< 3>{dates}< 4>{num_rounds}< 5>{game_type}< 6>{description}<")
+        logging.debug(
+            f"SELF:1>{name}< 2>{place}< 3>{dates}< 4>{num_rounds}< 5>{game_type}< 6>{description}<"
+        )
         self.name = name
         self.place = place
         self.dates = dates

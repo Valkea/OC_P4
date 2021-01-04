@@ -15,27 +15,20 @@ from view.main import CurseView
 from model.tournament import Tournament, World
 from model.menu import Menu
 
-
-# def registerCall(f):
-#     #logging.critical(f"registerCall {f}")
-#     print(f"registerCall {f}")
-#     f.last_call = [f]
-#     print(f"registerCall {f.last_call}")
-#     return f
-# 
-# 
-# def getLastCall(cls):
-#     #logging.debug(f"getLastCall {cls}")
-#     print(f"getLastCall {cls}")
-#     cls.last_call = []
-#     return cls
+nav_history = []
 
 
-# @getLastCall
+def saveNav(f):
+    def wrapper(*args, **kwargs):
+        global nav_history
+        nav_history.append([f, args, kwargs])
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 class Controller:
     """D """
-
-    last_call = None
 
     def __init__(self):
         logging.info("< Open Controller")
@@ -58,59 +51,130 @@ class Controller:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
 
-            if key == 9:
-                if len(self.list_data_swap) > 0:
-                    self.list_data, self.list_data_swap = (
-                        self.list_data_swap,
-                        self.list_data,
-                    )
+            if key == 9:  # Tilde Key
+                self.curses_view.swap_focus()
+                # self.list_data, self.list_data_swap = self.list_data_swap, self.list_data
 
             self._move_selection(key)
+            self._input_text(key)
+
+    def _input_text(self, key):
+        logging.debug(f"_input_text: {key} --> {chr(key)}")
 
     # Menu controls #
 
+    @saveNav
     def open_menu_base(self):
-        self.last_call = 'open_menu_base'
-        logging.debug(f"last.call: {self.last_call}")
+
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Menu général")
         self._set_main_view("clear")
-        self._set_menu_view("list", call=self.menu_model.Xbase)
+        self._set_menu_view("list", call=self.menu_model.Xbase, colors=[2, 3])
 
+    def debug_tournoi(self):
+        return (
+            ("Tournoi 1", "open_tournament_initialize"),
+            ("Tournoi 2", "open_tournament_initialize"),
+            ("Tournoi 3", "open_tournament_initialize"),
+        )
+
+    @saveNav
     def open_input_tournament_new(self):
-        self.last_call = 'open_input_tournament_new'
-        self._set_main_view("print-line", text="Inputs d'un nouveau tournoi")
-        self._set_menu_view("list", call=self.menu_model.Xonly_back)
-        curses.napms(3000)
-        self.open_tournament_initialize()
 
+        try:
+            self._set_focus("main")
+            self._set_head_view("print-line", text="Nouveau tournoi")
+            self._set_menu_view("list", call=self.menu_model.Xonly_back)
+            # self._set_main_view("list", call=self.debug_tournoi)
+            self._set_main_view("print-line", text="Test")
+
+            # self.curses_view.set_focus(self.curses_view.main)
+            # inputs = self._set_main_view(
+            #     "input-lines", fields=Tournament.get_fields_new()
+            # )
+
+            # self.world_model.add_tournament(
+            #     inputs["name"],
+            #     inputs["place"],
+            #     [inputs["start_date"], inputs["end_date"]],
+            #     inputs["gtype"],
+            #     inputs["desc"],
+            #     inputs["rounds"],
+            # )
+            # self._set_main_view("print-line", text="Tournoi INPUTS")
+            # curses.napms(10000)
+
+            # self.open_tournament_initialize()
+
+        except Exception as e:
+            logging.debug(f"EXCEPTION: {e}")
+            self.goback()
+
+    @saveNav
     def open_select_tournament_load(self):
-        self.last_call = 'open_select_tournament_load'
-        self._set_main_view("print-line", text="Select d'un nouveau tournoi")
-        self._set_menu_view("list", call=self.menu_model.Xonly_back)
-        curses.napms(3000)
-        self.open_tournament_initialize()
 
+        # self.world_model.add_tournament(  # TODO remove
+        #     "Fake tournament"
+        #     "Fake place",
+        #     ['01/01/1999', '02/01/1999'],
+        #     "Blitz",
+        #     "Desc",
+        #     "4",
+        # )
+
+        # if len(self.world_model.tournaments) == 0:
+        #    return self.open_input_tournament_new()
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Chargement d'un tournoi")
+        self._set_menu_view("list", call=self.menu_model.Xonly_back)
+        self._set_main_view(
+            "list", call=self.menu_model.select_tournament_load, param=self.world_model
+        )
+
+    @saveNav
     def open_tournament_initialize(self):
-        self.last_call = 'open_tournament_initialize'
+
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Tournoi [NAME] en phase préparatoire")
         self._set_main_view("print-line", text="Infos tournoi (initialize screen)")
         self._set_menu_view("list", call=self.menu_model.Xtournament_initialize)
 
+    @saveNav
     def open_tournament_opened(self):
-        self.last_call = 'open_tournament_opened'
-        self._set_main_view("print-line", text="Infos tournoi + tables du round (opened)")
+
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Tournoi [NAME] au round X/X")
+        self._set_main_view(
+            "print-line", text="Infos tournoi + tables du round (opened)"
+        )
         self._set_menu_view("list", call=self.menu_model.Xtournament_opened)
 
+    @saveNav
     def open_tournament_finalize(self):
-        self.last_call = 'open_tournament_finalize'
-        self._set_main_view("print-line", text="Infos tournoi + classement (finialized)")
+
+        self._set_focus("menu")
+        self._set_head_view(
+            "print-line", text="Tournoi [NAME] en phase de finalisation"
+        )
+        self._set_main_view(
+            "print-line", text="Infos tournoi + classement (finialized)"
+        )
         self._set_menu_view("list", call=self.menu_model.Xtournament_finalize)
 
+    @saveNav
     def open_tournament_closed(self):
-        self.last_call = 'open_tournament_closed'
+
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Tournoi clos [NAME]")
         self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
         self._set_menu_view("list", call=self.menu_model.Xtournament_closed)
 
+    @saveNav
     def open_input_actor_new(self):
-        self.last_call = 'open_input_actor_new'
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Nouvel acteur")
         self._set_main_view("print-line", text="Inputs d'un nouvel acteur")
         self._set_menu_view("list", call=self.menu_model.Xonly_back)
         curses.napms(3000)
@@ -118,13 +182,16 @@ class Controller:
 
     def debug_actors(self):
         return (
-                ("Bob1", "open_input_actor_edit"),
-                ("Bob2", "open_input_actor_edit"),
-                ("Bob3", "open_input_actor_edit"),
-                )
+            ("Bob 1", "open_input_actor_edit"),
+            ("Bob 2", "open_input_actor_edit"),
+            ("Bob 3", "open_input_actor_edit"),
+        )
 
+    @saveNav
     def open_select_actor(self):
-        self.last_call = 'open_input_actor_new'
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Selection d'un acteur à modifier")
         self._set_main_view("list", call=self.debug_actors)
         self._set_menu_view("list", call=self.menu_model.Xactors_alpha)
 
@@ -134,28 +201,39 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.Xactors_elo)
 
+    @saveNav
     def open_input_actor_edit(self):
-        self.last_call = 'open_input_actor_new'
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Modification d'un acteur")
         self._set_main_view("print-line", text="Modification d'un acteur")
         self._set_menu_view("list", call=self.menu_model.Xonly_back)
         curses.napms(3000)
         self.open_tournament_initialize()
 
+    @saveNav
     def open_reports(self, source):
-        logging.debug(f"open_reports source: {source}")
+
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Rapports")
         self._set_main_view("clear")
-        if source == 'base':
+        if source == "base":
             self._set_menu_view("list", call=self.menu_model.Xreports_base)
         else:
             self._set_menu_view("list", call=self.menu_model.Xreports_tournament)
 
     def open_save(self):
+        self._set_focus("full")
+        # self._set_menu_view("list", call=self.menu_model.Xonly_back)
         self._set_full_view("print-line", text="Sauvegarde du tournoi")
         curses.napms(3000)
         self.goback()
 
     def goback(self):
-        eval(f"self.{self.last_call}()")
+        if len(nav_history) > 1:
+            nav_history.pop()
+            target = nav_history[-1]
+            target[0](*target[1], **target[2])
 
     # --------------------------------------
 
@@ -202,7 +280,6 @@ class Controller:
         self.open_tournois_infos()  # TODO passer un id ??
 
     def open_new_actor(self):
-        logging.debug("START SET MAIN")
         # # self.curses_view.clear_menu()
         # self.curses_view.get_input("Nom")
         # self.curses_view.get_input("Prénom")
@@ -211,16 +288,15 @@ class Controller:
         self._set_full_view("print-line", text="TODO ACTOR INPUT")  # TODO
         curses.napms(2000)
         self.open_tournoi_actors()
-        logging.debug("END SET MAIN")
 
     def open_tournois_infos(self):
-        tournament = self.world_model.tournaments
-        infos = tournament[0].get_overall_infos()  # TODO rendre l'ID dynamique
+        tournaments = self.world_model.tournaments
+        infos = tournaments[0].get_overall_infos()  # TODO rendre l'ID dynamique
         self._set_main_view("print-lines", rows=infos.values())
         self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
 
     def tmp(self):
-        return (("TODO ACTOR", 'open_edit_actor'),)
+        return (("TODO ACTOR", "open_edit_actor"),)
 
     def open_tournoi_actors(self):
         self._set_main_view("list", call=self.tmp)
@@ -244,50 +320,63 @@ class Controller:
 
     def _move_selection(self, key):
 
-        current_row = self.list_data["current_row"]
-        buttons = self.list_data["buttons"]
-        screen = self.list_data["screen"]
+        for screen in self.list_data.keys():
+            logging.debug(f"MOVE {screen}")
 
-        # clear existing texts
-        self.curses_view.menu.clear()
+            sdata = self.list_data[screen]
+            # screen = sdata["screen"]
+            # screen = self.curses_view.focus
 
-        if key == curses.KEY_UP:
-            logging.debug("KEY UP")
-            if current_row > 0:
-                current_row -= 1
-            else:
-                current_row = len(buttons) - 1
-        elif key == curses.KEY_DOWN:
-            logging.debug("KEY DOWN")
-            if current_row < len(buttons) - 1:
-                current_row += 1
-            else:
-                current_row = 0
-        elif key == curses.KEY_ENTER or key in [10, 13]:
-            logging.debug("KEY ENTER")
-            actions = self.list_data["actions"]
-            params = self.list_data["params"]
+            if screen is not self.curses_view.focus:
+                logging.debug(
+                    f"MOVE SELECT disable -- : {screen} <--> {self.curses_view.focus}"
+                )
+                continue
 
-            if actions[current_row] is None:
-                labels = self.list_data["labels"]
-                self._set_main_view(
-                    "print-line", text=f"You selected '{labels[current_row]}'"
-                ),
-            else:
-                if params[current_row] is None:
-                    eval(f"self.{actions[current_row]}")()
+            current_row = sdata["current_row"]
+            buttons = sdata["buttons"]
+            colors = sdata["colors"]
+
+            # clear existing texts
+            self.curses_view.menu.clear()
+
+            if key == curses.KEY_UP:
+                logging.debug("KEY UP")
+                if current_row > 0:
+                    current_row -= 1
                 else:
-                    eval(f"self.{actions[current_row]}")(params[current_row])
-                return
+                    current_row = len(buttons) - 1
+            elif key == curses.KEY_DOWN:
+                logging.debug("KEY DOWN")
+                if current_row < len(buttons) - 1:
+                    current_row += 1
+                else:
+                    current_row = 0
+            elif key == curses.KEY_ENTER or key in [10, 13]:
+                logging.debug("KEY ENTER")
+                actions = sdata["actions"]
+                params = sdata["params"]
 
-        self.list_data["current_row"] = current_row
-        # colorset = self.list_data["colorset"]
+                if actions[current_row] is None:
+                    labels = sdata["labels"]
+                    self._set_main_view(
+                        "print-line",
+                        text=f"You selected '{labels[current_row]}'",
+                        colors=colors,
+                    )
+                else:
+                    if params[current_row] is None:
+                        eval(f"self.{actions[current_row]}")()
+                    else:
+                        eval(f"self.{actions[current_row]}")(params[current_row])
+                    return
 
-        self.curses_view.display_list(screen, buttons, current_row)
+            self.list_data[screen]["current_row"] = current_row
+            # colorset = self.list_data["colorset"]
+
+            self.curses_view.display_list(screen, buttons, current_row)
 
     def _check_input(self, screen, label, placeholder=None, test=None, error=None):
-
-        logging.debug(f"_check_input::{test}")
 
         errormsg = None
         if test is not None:
@@ -302,6 +391,17 @@ class Controller:
         return value
 
     # --- View direct controls ---
+
+    def _set_focus(self, focus):
+        if focus == "main":
+            self.curses_view.focus = self.curses_view.main
+        elif focus == "full":
+            self.curses_view.focus = self.curses_view.screen
+        else:
+            self.curses_view.focus = self.curses_view.menu
+
+    def _set_head_view(self, action, **kwargs):
+        return self._set_view("head", action, **kwargs)
 
     def _set_menu_view(self, action, **kwargs):
         return self._set_view("menu", action, **kwargs)
@@ -319,8 +419,15 @@ class Controller:
             screen = self.curses_view.menu
         elif view == "main":
             screen = self.curses_view.main
+        elif view == "head":
+            screen = self.curses_view.head
         else:
             screen = self.curses_view.screen
+
+        if kwargs.get("colors", False):
+            colors = kwargs["colors"]
+        else:
+            colors = [1, 2]
 
         # --- Clear the view ---
         if action == "clear":
@@ -338,30 +445,31 @@ class Controller:
             labels = [x[0] for x in options]
             actions = [x[1] for x in options]
             params = [x[2] if len(x) > 2 else None for x in options]
-            logging.debug(f"PARAMS: {params}")
             buttons = self._align_to_larger(labels)
 
-            self.list_data_swap = self.list_data
+            # self.list_data_swap = self.list_data
 
-            self.list_data = {
+            self.list_data[screen] = {
                 "screen": screen,
-                "current_row": 0,
+                "current_row": current_row,
                 "labels": labels,
                 "actions": actions,
                 "params": params,
                 "buttons": buttons,
-                # "colorset": colorset,
+                "colors": colors,
             }
 
-            self.curses_view.display_list(screen, buttons, current_row)
+            self.curses_view.display_list(screen, buttons, current_row, colors)
 
         # --- Print one text line into the view ---
         elif action == "print-line":
-            self.curses_view.print_center(screen, kwargs.get("text", "Error"))
+            self.curses_view.print_center(screen, kwargs.get("text", "Error"), colors)
 
         # --- Print several text lines into the view ---
         elif action == "print-lines":
-            self.curses_view.print_center_multi(screen, kwargs.get("rows", ['Error']))
+            self.curses_view.print_center_multi(
+                screen, kwargs.get("rows", ["Error"]), colors
+            )
 
         # --- Print a sequence of one-line inputs ---
         elif action == "input-lines":

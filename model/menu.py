@@ -44,7 +44,10 @@ class Menu:
 
     def Xtournament_finalize(self):
         return (
-            ("Saisir la note de fin de tournoi / Clore le tournoi", "open_tournament_closed"),
+            (
+                "Saisir la note de fin de tournoi / Clore le tournoi",
+                "open_tournament_closed",
+            ),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Sauvegarder", "open_save"),  # R1
@@ -67,7 +70,7 @@ class Menu:
             ("Tous les joueurs d'un tournoi", None),
             ("Tous les tours d'un tournoi", None),
             ("Tous les matchs d'un tournoi", None),
-            ("<< Retour >>", "goback"),
+            ("<< RETOUR", "goback"),
         )
 
     def Xreports_tournament(self):
@@ -77,7 +80,7 @@ class Menu:
             ("Tous les joueurs de ce tournoi", None),
             ("Tous les tours de ce tournoi", None),
             ("Tous les matchs de ce tournoi", None),
-            ("<< Retour >>", "goback"),
+            ("<< RETOUR", "goback"),
         )
 
     # --- Actors ---
@@ -85,22 +88,32 @@ class Menu:
     def Xactors_alpha(self):
         return (
             ("Tri par ordre alphabétique", "open_menu_actor_order", "alpha"),
-            ("<< Retour >>", "goback"),
+            ("<< RETOUR", "goback"),
         )
 
     def Xactors_elo(self):
         return (
             ("Tri par classement ELO", "open_menu_actor_order", "elo"),
-            ("<< Retour >>", "goback"),
+            ("<< RETOUR", "goback"),
         )
 
     # --- Solo buttons ---
 
     def Xonly_back(self):
-        return (
-            ("<< RETOUR >>", "goback"),
-            ("<< RETOUR >>", "goback"),  # TODO delete...
-        )
+        return (("<< RETOUR", "goback"),)
+
+    # --- Dynamic menus ---
+
+    def select_tournament_load(self, world):
+        # world.add_tournament("Tournoi 01", "Caen", ["20/12/2020", "21/12/2020"], "bullet")
+        logging.debug(f"menu_tournois_select: {world}")
+
+        tournaments = world.tournaments
+        if len(tournaments) > 0:
+            retv = [(f"{t.name}", "open_tournament_initialize") for t in tournaments]
+            return tuple(retv)
+        else:
+            return (("Aucun tournoi", "goback"),)
 
     # ------------------------------------------------------------------------
 
@@ -118,22 +131,6 @@ class Menu:
             ("< Retour", "open_menu_base"),
         )
 
-    def menu_tournois_select(self, world):
-        # world.add_tournament("Tournoi 01", "Caen", ["20/12/2020", "21/12/2020"], "bullet")
-        logging.debug(f"menu_tournois_select: {world}")
-
-        back_btn = ("< Retour", "open_tournois")
-        tournaments = world.tournaments
-        if len(tournaments) > 0:
-            retv = [(f"{t.name}", "open_tournoi_actions") for t in tournaments]
-            retv.append(back_btn)
-            return tuple(retv)
-        else:
-            return (
-                ("Aucun tournoi", back_btn[1]),
-                back_btn,
-            )
-
     def menu_tournoi_select_actions(self):
         return (
             ("Charger", None),
@@ -145,17 +142,18 @@ class Menu:
     def menu_tournoi_base(self):
         return (
             ("Editer le tournoi", None),
-            ("Ajouter un acteur", 'open_new_actor'),
-            ("Gérer les acteurs", 'open_tournoi_actors'),  # affiche liste des acteurs & menu tournoi_actors
-            ("Rapports", 'open_tournoi_rapport'),
+            ("Ajouter un acteur", "open_new_actor"),
+            (
+                "Gérer les acteurs",
+                "open_tournoi_actors",
+            ),
+            ("Rapports", "open_tournoi_rapport"),
             ("Sauvegarder le tournoi", None),
-            ("Charger un autre tournoi", 'open_tournois_select'),
+            ("Charger un autre tournoi", "open_tournois_select"),
         )
 
     def menu_tournoi_actor_select(self):
-        return (
-            ("< Retour", "open_tournois_infos"),
-        )
+        return (("< Retour", "open_tournois_infos"),)
 
     def menu_tournoi_actor_manager(self):
         return (
