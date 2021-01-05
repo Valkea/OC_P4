@@ -110,12 +110,15 @@ class Menu:
 
         tournaments = world.tournaments
         if len(tournaments) > 0:
-            retv = [(f"{t.name}", "open_tournament_initialize") for t in tournaments]
+            retv = [(f"{t.name}", "open_tournament_initialize", t) for t in tournaments]
             return tuple(retv)
         else:
-            return (("Aucun tournoi", 'goback'), )  # ("Créer un tournoi", "open_input_tournament_new"),)
+            return (
+                ("Aucun tournoi", "goback"),
+            )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
     # ------------------------------------------------------------------------
+
 
 #    def menu_base(self):
 #        return (

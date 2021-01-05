@@ -62,7 +62,7 @@ class Controller:
 
 #    def _input_text(self, key):
 #        logging.debug(f"_input_text: {key} --> {chr(key)}")
-#
+
     # === PUBLIC NAVIGATION METHODS ===
 
     @saveNav
@@ -137,11 +137,19 @@ class Controller:
         )
 
     @saveNav
-    def open_tournament_initialize(self):
+    def open_tournament_initialize(self, tournament=None):
 
+        if tournament is not None:
+            self.world_model.set_active_tournament(tournament)
+
+        tournament = self.world_model.get_active_tournament()
+        logging.debug("OPEN_TOURNOI_INIT")
         self._set_focus("menu")
-        self._set_head_view("print-line", text="Tournoi [NAME] en phase préparatoire")
-        self._set_main_view("print-line", text="Infos tournoi (initialize screen)")
+        self._set_head_view(
+            "print-line", text=f"Tournoi <{tournament.name}> en phase préparatoire"
+        )
+        # self._set_main_view("print-line", text="Infos tournoi (initialize screen)")
+        self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_initialize)
 
     @saveNav
@@ -587,7 +595,7 @@ class Controller:
             inputs[row["name"]] = tb.gather().strip()
 
         logging.debug(f"VALUES: {inputs}")
-        self.world_model.add_tournament(
+        tournament = self.world_model.add_tournament(
             inputs["name"],
             inputs["place"],
             [inputs["start_date"], inputs["end_date"]],
@@ -595,6 +603,8 @@ class Controller:
             inputs["desc"],
             inputs["rounds"],
         )
+
+        self.world_model.set_active_tournament(tournament)
 
         raise UnstackAll("SUBMIT")
 

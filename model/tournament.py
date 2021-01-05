@@ -16,19 +16,28 @@ class World:
 
     def __init__(self):
         self.tournaments = []
+        self.active_tournament = None
 
     def add_tournament(self, name, place, dates, gtype, desc="", rounds=4):
         """ D """
-        self.tournaments.append(
-            Tournament(
-                name,
-                place,
-                dates,
-                gtype,
-                desc,
-                rounds,
-            )
+        tournament = Tournament(
+            name,
+            place,
+            dates,
+            gtype,
+            desc,
+            rounds,
         )
+
+        self.tournaments.append(tournament)
+
+        return tournament
+
+    def set_active_tournament(self, tournament):
+        self.active_tournament = tournament
+
+    def get_active_tournament(self):
+        return self.active_tournament
 
 
 class Tournament:
