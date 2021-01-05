@@ -13,7 +13,7 @@ class Menu:
     def __init__(self):
         pass
 
-    def Xbase(self):
+    def base(self):
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
             ("Charger un tournoi", "open_select_tournament_load"),
@@ -23,7 +23,7 @@ class Menu:
 
     # --- Tournament ---
 
-    def Xtournament_initialize(self):
+    def tournament_initialize(self):
         return (
             ("Ajouter un joueur au tournoi", "open_input_actor_new"),
             ("Modifier un acteur", "open_select_actor"),
@@ -33,7 +33,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
-    def Xtournament_opened(self):
+    def tournament_opened(self):
         return (
             ("Saisir les résultats du round", "open_tournament_finalize"),
             ("Modifier un acteur", "open_select_actor"),  # R1
@@ -42,7 +42,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
-    def Xtournament_finalize(self):
+    def tournament_finalize(self):
         return (
             (
                 "Saisir la note de fin de tournoi / Clore le tournoi",
@@ -54,7 +54,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
-    def Xtournament_closed(self):
+    def tournament_closed(self):
         return (
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
@@ -63,7 +63,7 @@ class Menu:
 
     # --- Reports ---
 
-    def Xreports_base(self):
+    def reports_base(self):
         return (
             ("Tous les acteurs", None),  # R3
             ("Tous les tournois", None),  # R3
@@ -73,7 +73,7 @@ class Menu:
             ("<< RETOUR", "goback"),
         )
 
-    def Xreports_tournament(self):
+    def reports_tournament(self):
         return (
             ("Tous les acteurs", None),  # R3
             ("Tous les tournois", None),  # R3
@@ -85,13 +85,13 @@ class Menu:
 
     # --- Actors ---
 
-    def Xactors_alpha(self):
+    def actors_alpha(self):
         return (
             ("Tri par ordre alphabétique", "open_menu_actor_order", "alpha"),
             ("<< RETOUR", "goback"),
         )
 
-    def Xactors_elo(self):
+    def actors_elo(self):
         return (
             ("Tri par classement ELO", "open_menu_actor_order", "elo"),
             ("<< RETOUR", "goback"),
@@ -99,7 +99,7 @@ class Menu:
 
     # --- Solo buttons ---
 
-    def Xonly_back(self):
+    def only_back(self):
         return (("<< RETOUR", "goback"),)
 
     # --- Dynamic menus ---
@@ -113,73 +113,73 @@ class Menu:
             retv = [(f"{t.name}", "open_tournament_initialize") for t in tournaments]
             return tuple(retv)
         else:
-            return (("Aucun tournoi", "goback"),)
+            return (("Aucun tournoi", 'goback'), )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
     # ------------------------------------------------------------------------
 
-    def menu_base(self):
-        return (
-            ("Tournois", "open_tournois"),
-            ("Rapports", "open_rapports"),
-            ("Quitter", "quit"),
-        )
-
-    def menu_tournois(self):
-        return (
-            ("Créer un tournoi", "open_new_tournament"),
-            ("Liste de tous les tournois", "open_tournois_select"),
-            ("< Retour", "open_menu_base"),
-        )
-
-    def menu_tournoi_select_actions(self):
-        return (
-            ("Charger", None),
-            ("Editer", None),
-            ("Supprimer", None),
-            ("< Retour", "open_tournois_select"),
-        )
-
-    def menu_tournoi_base(self):
-        return (
-            ("Editer le tournoi", None),
-            ("Ajouter un acteur", "open_new_actor"),
-            (
-                "Gérer les acteurs",
-                "open_tournoi_actors",
-            ),
-            ("Rapports", "open_tournoi_rapport"),
-            ("Sauvegarder le tournoi", None),
-            ("Charger un autre tournoi", "open_tournois_select"),
-        )
-
-    def menu_tournoi_actor_select(self):
-        return (("< Retour", "open_tournois_infos"),)
-
-    def menu_tournoi_actor_manager(self):
-        return (
-            # ("Editer l'acteur", None),
-            ("Supprimer l'acteur", None),
-            ("< Retour", "open_tournoi_actors"),
-        )
-
-    def menu_tournoi_rapports(self):
-        return (
-            ("Liste de tous les joueurs de ce tournoi", None),
-            ("Liste de tous les tours de ce tournoi", None),
-            ("Liste de tous les matchs de ce tournoi", None),
-            ("Liste de tous les tournois", None),
-            ("Liste de tous les acteurs de tous les tournois", None),
-            ("Liste de tous les joueurs de tous les tournois", None),
-            ("< Retour", "open_tournois_infos"),
-        )
-
-    def menu_rapports(self):
-        return (
-            ("Liste de tous les joueurs d'un tournoi", None),
-            ("Liste de tous les tours d'un tournoi", None),
-            ("Liste de tous les matchs d'un tournoi", None),
-            ("Liste de tous les tournois", None),
-            ("Liste de tous les acteurs de tous les tournois", None),
-            ("Liste de tous les joueurs de tous les tournois", None),
-            ("< Retour", "open_menu_base"),
-        )
+#    def menu_base(self):
+#        return (
+#            ("Tournois", "open_tournois"),
+#            ("Rapports", "open_rapports"),
+#            ("Quitter", "quit"),
+#        )
+#
+#    def menu_tournois(self):
+#        return (
+#            ("Créer un tournoi", "open_new_tournament"),
+#            ("Liste de tous les tournois", "open_tournois_select"),
+#            ("< Retour", "open_menu_base"),
+#        )
+#
+#    def menu_tournoi_select_actions(self):
+#        return (
+#            ("Charger", None),
+#            ("Editer", None),
+#            ("Supprimer", None),
+#            ("< Retour", "open_tournois_select"),
+#        )
+#
+#    def menu_tournoi_base(self):
+#        return (
+#            ("Editer le tournoi", None),
+#            ("Ajouter un acteur", "open_new_actor"),
+#            (
+#                "Gérer les acteurs",
+#                "open_tournoi_actors",
+#            ),
+#            ("Rapports", "open_tournoi_rapport"),
+#            ("Sauvegarder le tournoi", None),
+#            ("Charger un autre tournoi", "open_tournois_select"),
+#        )
+#
+#    def menu_tournoi_actor_select(self):
+#        return (("< Retour", "open_tournois_infos"),)
+#
+#    def menu_tournoi_actor_manager(self):
+#        return (
+#            # ("Editer l'acteur", None),
+#            ("Supprimer l'acteur", None),
+#            ("< Retour", "open_tournoi_actors"),
+#        )
+#
+#    def menu_tournoi_rapports(self):
+#        return (
+#            ("Liste de tous les joueurs de ce tournoi", None),
+#            ("Liste de tous les tours de ce tournoi", None),
+#            ("Liste de tous les matchs de ce tournoi", None),
+#            ("Liste de tous les tournois", None),
+#            ("Liste de tous les acteurs de tous les tournois", None),
+#            ("Liste de tous les joueurs de tous les tournois", None),
+#            ("< Retour", "open_tournois_infos"),
+#        )
+#
+#    def menu_rapports(self):
+#        return (
+#            ("Liste de tous les joueurs d'un tournoi", None),
+#            ("Liste de tous les tours d'un tournoi", None),
+#            ("Liste de tous les matchs d'un tournoi", None),
+#            ("Liste de tous les tournois", None),
+#            ("Liste de tous les acteurs de tous les tournois", None),
+#            ("Liste de tous les joueurs de tous les tournois", None),
+#            ("< Retour", "open_menu_base"),
+#        )

@@ -138,6 +138,7 @@ class CurseView:
         self._set_background_color(screen)
 
         text_boxes, text_wins, error_box = self._draw_them_all(screen, rows)
+        screen.border()
         screen.refresh()
         return text_boxes, text_wins, error_box
 
