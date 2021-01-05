@@ -33,9 +33,9 @@ class CurseView:
 
         # Init menu window & main window
         maxH, maxW = self.screen.getmaxyx()
-        headH = 1
-        self.head = curses.newwin(headH, maxW, 0, 0)
-        self.main = curses.newwin(maxH - 10 - headH, maxW, headH, 0)
+        self.headH = 1
+        self.head = curses.newwin(self.headH, maxW, 0, 0)
+        self.main = curses.newwin(maxH - 10 - self.headH, maxW, self.headH, 0)
         self.menu = curses.newwin(10, maxW, maxH - 10, 0)
 
         self.focus = self.menu
@@ -127,66 +127,58 @@ class CurseView:
         self._set_focus_design()
         screen.refresh()
 
-    def get_input(self, screen, label, placeholder=None, errormsg=None, colors=[1, 2]):
-        self._save_last_draw(
-            screen, label, placeholder=placeholder, errormsg=errormsg, colors=colors
-        )
+    # --- FORMS ---
 
-        # self.set_focus(screen, False)
+    def init_form(self, screen, rows):
+
+        logging.debug("INIT FORM")
+        # self._save_last_draw(screen, rows)
 
         curses.curs_set(1)  # turn on cursor blinking
         self._set_background_color(screen)
 
-        # Place one line input
-        h, w = screen.getmaxyx()
-        x = w // 2 - len(label) // 2
-        y = h // 2
-
-        screen.addstr(y - self.head.getmaxyx()[0], x, label)
-
-        # logging.error(f"ERROR TXT: {errormsg}")
-        if errormsg is not None:
-            x = w // 2 - len(errormsg) // 2
-            screen.addstr(y + 5, x, errormsg)
-
-        x = w // 2 - 40 // 2
-        sub = screen.subwin(3, 40, y + 1, x)
-        sub.border()
-
-        sub2 = sub.subwin(1, 38, y + 2, x + 1)
-        if placeholder is not None:
-            sub2.addstr(placeholder)
-
-        tb = curses.textpad.Textbox(sub2)
+        text_boxes = self._draw_them_all(screen, rows), None  # TODO errorbox
         screen.refresh()
+        return text_boxes
 
-        def check_key(k):
-            logging.debug(k)
-            if k == 9:
-                raise Exception("Test")
-                self.swap_focus()
-            return k
-
-        tb.edit(check_key)
+    def close_form(self, screen):
         screen.refresh()
-
-        value = tb.gather()[:-1].strip()
-        # logging.debug(f"INPUT: ->{value}<-")
-
-        # Reset the content of the input window
-        tb.do_command(curses.ascii.SOH)
-        tb.do_command(curses.ascii.VT)
-        tb.do_command(curses.ascii.FF)
-        sub.border()
-        sub.refresh()
-
+        # textboxes = self._draw_them_all(screen, rows)
+        # screen.move(5, 5)
         curses.curs_set(0)  # turn off cursor blinking
 
-        # update screen
-        self._set_focus_design()
-        screen.refresh()
+    def _draw_them_all(self, screen, rows):
+        maxW = max([len(x["label"]) for x in rows])
 
-        return value
+        textboxes = []
+        for i, row in enumerate(rows):
+            logging.debug(f"------>{row['name']} / {row['label']}")
+            label = row["label"]
+
+            h, w = screen.getmaxyx()
+            s = 4
+            x = w // 2 - maxW // 2
+            y = (h - self.headH - len(rows) * s) // 2 + i * s
+
+            # label display
+            screen.addstr(y - self.head.getmaxyx()[0], x, label)
+
+            # input box display
+            sub = screen.subwin(3, max(maxW, 35), y + 1, x)
+            sub.border()
+
+            sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
+            sub2.addstr(row["name"])
+            tb = curses.textpad.Textbox(sub2)
+            textboxes.append(tb)
+
+        return textboxes
+
+    def place_input_field(self, screen, x, y, w, h, label, placeholder, colors):
+        logging.debug("PLACE_INPUT_FIELD")
+        pass
+
+    # --- FOCUS ---
 
     def swap_focus(self):
         if self.focus == self.menu:
@@ -208,10 +200,12 @@ class CurseView:
     def _set_focus_design(self):
         self.focus.border()
         self.focus.refresh()
-        #self.main.refresh()
-        #self.menu.refresh()
-        #self.head.refresh()
-        #self.screen.refresh()
+        # self.main.refresh()
+        # self.menu.refresh()
+        # self.head.refresh()
+        # self.screen.refresh()
+
+    # --- GENERIC ---
 
     def _save_last_draw(self, *args, **kwargs):
         f = inspect.stack()[1][3]  # caller function name

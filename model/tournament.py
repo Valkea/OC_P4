@@ -236,7 +236,7 @@ class Tournament:
             {
                 "name": "name",
                 "label": cls.labels["name"],
-                "test": "x is not ''",
+                "test": "x != ''",
                 "errormsg": "Vous devez saisir un nom",
                 "placeholder": None,
             },
@@ -244,7 +244,7 @@ class Tournament:
                 "name": "place",
                 "label": cls.labels["place"],
                 "placeholder": None,
-                "test": "x is not ''",
+                "test": "x != ''",
                 "errormsg": "Vous devez saisir un lieu",
             },
             {

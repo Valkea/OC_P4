@@ -54,9 +54,11 @@ class Controller:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
 
-            if key == 9:  # Tilde Key
+            if key == 147:  # Tilde Key
                 self.curses_view.swap_focus()
                 # self.list_data, self.list_data_swap = self.list_data_swap, self.list_data
+            elif key == curses.KEY_RESIZE:
+                logging.debug("RESIZE")
 
             self._move_selection(key)
             self._input_text(key)
@@ -88,7 +90,8 @@ class Controller:
             self._set_focus("main")
             self._set_head_view("print-line", text="Nouveau tournoi")
             self._set_menu_view("list", call=self.menu_model.Xonly_back)
-            self._set_main_view("list", call=self.debug_tournoi)
+            self._set_main_view("form", rows=Tournament.get_fields_new())
+            # self._set_main_view("list", call=self.debug_tournoi)
 
             # self.curses_view.set_focus(self.curses_view.main)
             # inputs = self._set_main_view(
@@ -103,6 +106,8 @@ class Controller:
             #     inputs["desc"],
             #     inputs["rounds"],
             # )
+
+            # name, label, test, errormsg, placeholder
 
             # self._set_main_view("print-line", text="Tournoi INPUTS")
             # curses.napms(1000)
@@ -488,6 +493,74 @@ class Controller:
                     field["errormsg"],
                 )
             return inputs
+
+        # --- Print several inputs as a form ---
+        elif action == "form":
+
+            if screen == "menu":
+                return
+
+            # self.curses_view.draw_input_fields(
+            self._setup_form(screen, kwargs.get("rows"))
+
+    def _test_form(self, value, test, errormsg, errorwin):
+        if test is not None:
+            test = test.replace("x", "value")
+
+        if test is None or eval(test) is True:
+            logging.debug("TEST OK")
+            return True
+        else:
+            logging.debug("TEST ERROR")
+            return False
+
+    def _setup_form(self, screen, rows):
+        text_boxes, error_box = self.curses_view.init_form(screen, rows)
+
+        j = 0
+
+        def gather(text_boxes):
+            retV = []
+            for tb in text_boxes:
+                retV.append(tb.gather()[:-1].strip())
+
+            return retV
+
+        # logging.debug(f"INPUT: ->{value}<-")
+
+        def swapfield(x):
+            nonlocal j
+            if x == 9 or x == 10:
+                if j >= len(rows) - 1:
+                    v = gather(text_boxes)
+                    logging.debug(f"VALUES: {v}")
+                else:
+                    test = self._test_form(
+                        text_boxes[j].gather()[:-1].strip(),
+                        rows[j]["test"],
+                        rows[j]["errormsg"],
+                        error_box,
+                    )
+                    if test:
+                        j += 1
+                        logging.debug(f"TAB {j}")
+                        text_boxes[j].edit(swapfield)
+
+            elif x == 353:
+                if j > 0:
+                    j -= 1
+                    logging.debug(f"INB TAB {j}")
+                    text_boxes[j].edit(swapfield)
+
+            elif x == 147:
+                self.curses_view.swap_focus()
+
+            screen.refresh()
+            return x
+
+        text_boxes[j].edit(swapfield)
+
+        self.curses_view.close_form()
 
 
 class Validation:
