@@ -177,7 +177,8 @@ class CurseView:
             sub.border()
 
             sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
-            sub2.addstr(row["name"])
+            if row['placeholder'] is not None:
+                sub2.addstr(row["placeholder"])
             tb = curses.textpad.Textbox(sub2)
             textboxes.append([tb, sub2])
 
