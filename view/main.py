@@ -137,15 +137,24 @@ class CurseView:
         curses.curs_set(1)  # turn on cursor blinking
         self._set_background_color(screen)
 
-        text_boxes = self._draw_them_all(screen, rows), None  # TODO errorbox
+        text_boxes, error_box = self._draw_them_all(screen, rows)
         screen.refresh()
-        return text_boxes
+        return text_boxes, error_box
 
     def close_form(self, screen):
         screen.refresh()
         # textboxes = self._draw_them_all(screen, rows)
         # screen.move(5, 5)
         curses.curs_set(0)  # turn off cursor blinking
+
+    def set_input_focus(self, input_win, input_tb, control_function):
+
+        v = input_tb.gather().strip()
+
+        input_win.clear()
+        input_win.addstr(v)
+
+        input_tb.edit(control_function)
 
     def _draw_them_all(self, screen, rows):
         maxW = max([len(x["label"]) for x in rows])
@@ -170,9 +179,12 @@ class CurseView:
             sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
             sub2.addstr(row["name"])
             tb = curses.textpad.Textbox(sub2)
-            textboxes.append(tb)
+            textboxes.append([tb, sub2])
 
-        return textboxes
+        error_win = screen.subwin(3, max(maxW, 35), y + 5, x)
+        error_win.addstr("ERRROR")
+
+        return textboxes, error_win
 
     def place_input_field(self, screen, x, y, w, h, label, placeholder, colors):
         logging.debug("PLACE_INPUT_FIELD")

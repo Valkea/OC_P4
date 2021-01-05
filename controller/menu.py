@@ -503,7 +503,8 @@ class Controller:
             # self.curses_view.draw_input_fields(
             self._setup_form(screen, kwargs.get("rows"))
 
-    def _test_form(self, value, test, errormsg, errorwin):
+    def _test_form(self, value, test, errormsg, error_win):
+
         if test is not None:
             test = test.replace("x", "value")
 
@@ -512,12 +513,19 @@ class Controller:
             return True
         else:
             logging.debug("TEST ERROR")
+            error_win.clear()
+            error_win.addstr(errormsg)
+            error_win.refresh()
             return False
 
     def _setup_form(self, screen, rows):
         text_boxes, error_box = self.curses_view.init_form(screen, rows)
+        error_box.addstr("FROM02")
+        logging.debug(f"FROM02 {error_box} {type(error_box)}")
+        error_box.refresh()
 
-        j = 0
+        text_wins = [x[1] for x in text_boxes]
+        text_boxes = [x[0] for x in text_boxes]
 
         def gather(text_boxes):
             retV = []
@@ -530,37 +538,60 @@ class Controller:
 
         def swapfield(x):
             nonlocal j
+            logging.debug(f"SWAP INIT j:{j}")
             if x == 9 or x == 10:
-                if j >= len(rows) - 1:
-                    v = gather(text_boxes)
-                    logging.debug(f"VALUES: {v}")
-                else:
+                if j < len(rows)-1:
+
                     test = self._test_form(
-                        text_boxes[j].gather()[:-1].strip(),
+                        text_boxes[j].gather().strip(),
                         rows[j]["test"],
                         rows[j]["errormsg"],
                         error_box,
                     )
-                    if test:
+
+                    if test is True:
                         j += 1
-                        logging.debug(f"TAB {j}")
-                        text_boxes[j].edit(swapfield)
+
+                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swapfield)
+                    logging.debug("@@@@@@@@@@@@@@@@ERROR@@@@@@@@@@@@@@@@@@1")
+            #     if j >= len(rows) - 1:
+            #         v = gather(text_boxes)
+            #         logging.debug(f"VALUES: {v}")
+            #     else:
+            #         test = self._test_form(
+            #             text_boxes[j].gather()[:-1].strip(),
+            #             rows[j]["test"],
+            #             rows[j]["errormsg"],
+            #             error_box,
+            #         )
+            #         if test:
+            #             j += 1
+            #             logging.debug(f"TAB {j}")
+
+            #         text_boxes[j].edit(swapfield)
 
             elif x == 353:
                 if j > 0:
                     j -= 1
-                    logging.debug(f"INB TAB {j}")
-                    text_boxes[j].edit(swapfield)
+                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swapfield)
+                    logging.debug("@@@@@@@@@@@@@@@@ERROR@@@@@@@@@@@@@@@@@@2")
+            #     if j > 0:
+            #         j -= 1
+            #         logging.debug(f"INB TAB {j}")
+            #         text_boxes[j].edit(swapfield)
 
-            elif x == 147:
-                self.curses_view.swap_focus()
+            # elif x == 147:
+            #     self.curses_view.swap_focus()
 
-            screen.refresh()
+            # screen.refresh()
+            # text_wins[j].refresh()
+            logging.debug(f"SWAP EXIT j:{j}\n")
             return x
 
+        j = 0
         text_boxes[j].edit(swapfield)
 
-        self.curses_view.close_form()
+        self.curses_view.close_form(screen)
 
 
 class Validation:
