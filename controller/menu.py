@@ -47,18 +47,15 @@ class Controller:
         logging.info("> Close Controller")
         self.curses_view.close()
 
-    # Main controls #
-
     def start(self):
         while 1:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
 
-            if key == 147:  # Tilde Key
+            if key == 147:  # TAB
                 self.curses_view.swap_focus()
-                # self.list_data, self.list_data_swap = self.list_data_swap, self.list_data
             elif key == curses.KEY_RESIZE:
-                logging.debug("RESIZE")
+                logging.debug("RESIZE")  # TODO ?
 
             self._move_selection(key)
             self._input_text(key)
@@ -66,7 +63,7 @@ class Controller:
     def _input_text(self, key):
         logging.debug(f"_input_text: {key} --> {chr(key)}")
 
-    # Menu controls #
+    # === PUBLIC NAVIGATION METHODS ===
 
     @saveNav
     def open_menu_base(self):
@@ -243,7 +240,7 @@ class Controller:
             target = nav_history[-1]
             target[0](*target[1], **target[2])
 
-    # --------------------------------------
+    # --- OLD ??
 
     def open_menu_baseOld(self):
         self._set_menu_view("list", call=self.menu_model.menu_base)
@@ -320,7 +317,7 @@ class Controller:
     # def open_tournoi_menu_base(self):
     #    self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
 
-    # Private methods #
+    # === PRIVATE METHODS ===
 
     def _align_to_larger(self, options):
         max_size = max([len(option) for option in options])
@@ -398,7 +395,7 @@ class Controller:
 
         return value
 
-    # --- View direct controls ---
+    # === View controls ===
 
     def _set_focus(self, focus):
         if focus == "main":
@@ -500,98 +497,114 @@ class Controller:
             if screen == "menu":
                 return
 
-            # self.curses_view.draw_input_fields(
-            self._setup_form(screen, kwargs.get("rows"))
+            self._form_setup(screen, kwargs.get("rows"))
 
-    def _test_form(self, value, test, errormsg, error_win):
+    # === Form controls ===
+
+    def _form_setup(self, screen, rows):
+        text_boxes, text_wins, error_box = self.curses_view.init_form(screen, rows)
+
+        def swapfield(x):
+            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield)
+            return x
+
+        try:
+            j = 0
+            text_boxes[j].edit(swapfield)
+
+        except UnstackAll as e:
+            if str(e) == "SUBMIT":
+                self.curses_view.close_form(screen)
+                self.open_tournament_initialize()
+            elif str(e) == "TAB":
+                return
+
+    def _form_input_swap(
+        self, x, rows, text_boxes, text_wins, error_box, swap_func, j_save=[0]
+    ):
+
+        j = j_save[0]
+
+        logging.debug(f"SWAP INIT j:{j}")
+        if x == 9 or x == 10:
+            if j < len(rows) - 1:
+
+                test = self._form_test(
+                    text_boxes[j].gather().strip(),
+                    rows[j]["test"],
+                    rows[j]["errormsg"],
+                    error_box,
+                )
+
+                if test is True:
+                    j += 1
+                    j_save[0] = j
+
+                self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
+                return
+
+            elif j == len(rows) - 1:
+                j = 0
+                j_save[0] = j
+                self._form_gather_inputs(text_boxes, rows)
+
+        elif x == 353:
+            if j > 0:
+                j -= 1
+                j_save[0] = j
+                error_box.clear()
+                error_box.refresh()
+                self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
+                return
+
+        elif x == 147:
+            raise UnstackAll("TAB")
+
+        logging.debug(f"SWAP EXIT j:{j}\n")
+        return x
+
+    def _form_test(self, value, test, errormsg, error_win):
 
         if test is not None:
             test = test.replace("x", "value")
 
         if test is None or eval(test) is True:
             logging.debug("TEST OK")
+            error_win.clear()
+            error_win.refresh()
             return True
         else:
             logging.debug("TEST ERROR")
             error_win.clear()
             error_win.addstr(errormsg)
             error_win.refresh()
-            return False
 
-    def _setup_form(self, screen, rows):
-        text_boxes, error_box = self.curses_view.init_form(screen, rows)
-        error_box.addstr("FROM02")
-        logging.debug(f"FROM02 {error_box} {type(error_box)}")
-        error_box.refresh()
+    def _form_gather_inputs(self, text_boxes, rows):
 
-        text_wins = [x[1] for x in text_boxes]
-        text_boxes = [x[0] for x in text_boxes]
+        inputs = {}
+        for row, tb in zip(rows, text_boxes):
+            inputs[row["name"]] = tb.gather().strip()
 
-        def gather(text_boxes):
-            retV = []
-            for tb in text_boxes:
-                retV.append(tb.gather()[:-1].strip())
+        logging.debug(f"VALUES: {inputs}")
+        self.world_model.add_tournament(
+            inputs["name"],
+            inputs["place"],
+            [inputs["start_date"], inputs["end_date"]],
+            inputs["gtype"],
+            inputs["desc"],
+            inputs["rounds"],
+        )
 
-            return retV
+        raise UnstackAll("SUBMIT")
 
-        # logging.debug(f"INPUT: ->{value}<-")
 
-        def swapfield(x):
-            nonlocal j
-            logging.debug(f"SWAP INIT j:{j}")
-            if x == 9 or x == 10:
-                if j < len(rows)-1:
+class UnstackAll(Exception):
+    """Exception used to exit nested curses edit calls.
 
-                    test = self._test_form(
-                        text_boxes[j].gather().strip(),
-                        rows[j]["test"],
-                        rows[j]["errormsg"],
-                        error_box,
-                    )
+    There must be a better way to do that, but that's my best call at the moment..
+    """
 
-                    if test is True:
-                        j += 1
-
-                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swapfield)
-                    logging.debug("@@@@@@@@@@@@@@@@ERROR@@@@@@@@@@@@@@@@@@1")
-            #     if j >= len(rows) - 1:
-            #         v = gather(text_boxes)
-            #         logging.debug(f"VALUES: {v}")
-            #     else:
-            #         test = self._test_form(
-            #             text_boxes[j].gather()[:-1].strip(),
-            #             rows[j]["test"],
-            #             rows[j]["errormsg"],
-            #             error_box,
-            #         )
-            #         if test:
-            #             j += 1
-            #             logging.debug(f"TAB {j}")
-
-            #         text_boxes[j].edit(swapfield)
-
-            elif x == 353:
-                if j > 0:
-                    j -= 1
-                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swapfield)
-                    logging.debug("@@@@@@@@@@@@@@@@ERROR@@@@@@@@@@@@@@@@@@2")
-            #     if j > 0:
-            #         j -= 1
-            #         logging.debug(f"INB TAB {j}")
-            #         text_boxes[j].edit(swapfield)
-
-            # elif x == 147:
-            #     self.curses_view.swap_focus()
-
-            # screen.refresh()
-            # text_wins[j].refresh()
-            logging.debug(f"SWAP EXIT j:{j}\n")
-            return x
-
-        j = 0
-        text_boxes[j].edit(swapfield)
-
-        self.curses_view.close_form(screen)
+    pass
 
 
 class Validation:
@@ -602,7 +615,7 @@ class Validation:
         """ D """
         try:
             s = re.search(
-                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})", v
+                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", v
             ).groups()
             if int(s[0]) > 31 or int(s[1]) > 12 or len(s) != 3:
                 return False

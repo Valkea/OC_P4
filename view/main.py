@@ -137,11 +137,13 @@ class CurseView:
         curses.curs_set(1)  # turn on cursor blinking
         self._set_background_color(screen)
 
-        text_boxes, error_box = self._draw_them_all(screen, rows)
+        text_boxes, text_wins, error_box = self._draw_them_all(screen, rows)
         screen.refresh()
-        return text_boxes, error_box
+        return text_boxes, text_wins, error_box
 
     def close_form(self, screen):
+        logging.debug("CLOSE FORM")
+        screen.clear()
         screen.refresh()
         # textboxes = self._draw_them_all(screen, rows)
         # screen.move(5, 5)
@@ -155,11 +157,14 @@ class CurseView:
         input_win.addstr(v)
 
         input_tb.edit(control_function)
+        pass
 
     def _draw_them_all(self, screen, rows):
         maxW = max([len(x["label"]) for x in rows])
 
-        textboxes = []
+        text_boxes = []
+        text_wins = []
+
         for i, row in enumerate(rows):
             logging.debug(f"------>{row['name']} / {row['label']}")
             label = row["label"]
@@ -177,15 +182,17 @@ class CurseView:
             sub.border()
 
             sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
-            if row['placeholder'] is not None:
+            if row["placeholder"] is not None:
                 sub2.addstr(row["placeholder"])
             tb = curses.textpad.Textbox(sub2)
-            textboxes.append([tb, sub2])
+
+            # save instances
+            text_boxes.append(tb)
+            text_wins.append(sub2)
 
         error_win = screen.subwin(3, max(maxW, 35), y + 5, x)
-        error_win.addstr("ERRROR")
 
-        return textboxes, error_win
+        return text_boxes, text_wins, error_win
 
     def place_input_field(self, screen, x, y, w, h, label, placeholder, colors):
         logging.debug("PLACE_INPUT_FIELD")
