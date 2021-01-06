@@ -31,7 +31,7 @@ def get_fake_score():
 
 class FakePlayer:
 
-    firstnames_M = [
+    firstnames_H = [
         "Albert",
         "Bernard",
         "Charles",
@@ -106,7 +106,12 @@ class FakePlayer:
         "Oldman",
         "Bricoo",
         "Paulin",
-        "Du carré",
+        "Ducarré",
+        "Lechêne",
+        "Le tremble",
+        "Du moulin",
+        "Rivière",
+        "Oisan",
     ]
 
     def __init__(self):
@@ -127,14 +132,14 @@ class FakePlayer:
 
         for i in range(number):
             player = {}
-            player["sex"] = "F" if random.random() < 0.5 else "M"
+            player["sex"] = "F" if random.random() < 0.5 else "H"
             if player["sex"] == "F":
                 player["firstname"] = random.choice(self.firstnames_F)
             else:
-                player["firstname"] = random.choice(self.firstnames_M)
+                player["firstname"] = random.choice(self.firstnames_H)
             player["familyname"] = random.choice(self.familynames)
             player["birthdate"] = self.randdate().strftime("%d/%m/%Y")
-            player["elo"] = random.randrange(1000, 2800)
+            player["elo"] = str(random.randrange(1000, 2800))
             r_list.append(player)
 
         return r_list

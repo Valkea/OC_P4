@@ -16,6 +16,8 @@ from model.tournament import Tournament, World
 from model.player import Player
 from model.menu import Menu
 
+from utils import FakePlayer
+
 
 def saveNav(f):
     """ Decorator used to track the navigation history """
@@ -57,6 +59,8 @@ class Controller:
                 self.curses_view.swap_focus()
             elif key == curses.KEY_RESIZE:
                 logging.debug("RESIZE")  # TODO ?
+            elif key == 300:  # CTRL + F12
+                self._generate_fake_players()
 
             self._move_selection(key)
             # self._input_text(key)
@@ -69,6 +73,7 @@ class Controller:
     @saveNav
     def open_menu_base(self):
 
+        self.world_model.set_active_tournament(None)
         self._set_focus("menu")
         self._set_head_view("print-line", text="Menu général")
         self._set_main_view("clear")
@@ -244,6 +249,33 @@ class Controller:
         self._set_full_view("print-line", text="Bye!")
         curses.napms(500)
         sys.exit(0)
+
+    # --- DEMO methods ---
+
+    def _generate_fake_players(self):
+
+        if self.world_model.get_active_tournament() is None:
+            logging.debug("GEN FAKE USERS: need an active tournament")
+            return
+
+        num_players = 2
+        fakeInputs = FakePlayer()
+        fakePlayers = fakeInputs.gen(num_players)
+
+        for p in fakePlayers:
+
+            family_name = p['familyname']
+            first_name = p['firstname']
+            birthdate = p['birthdate']
+            sex = p['sex']
+            elo = p['elo']
+
+            player = Player(family_name, first_name, birthdate, sex, elo)
+            self.world_model.get_active_tournament().add_player(player)
+
+        self.open_tournament_initialize()
+        # self.open_select_actor()
+        # nav_history.pop()
 
     # --- OLD ??
 
