@@ -25,6 +25,7 @@ class Menu:
         return (
             ("Ajouter un joueur au tournoi", "open_input_actor_new"),
             ("Modifier un acteur", "open_select_actor"),
+            ("Modifier le tournoi", "open_input_tournament_edit"),
             ("Commencer le tournoi", "open_tournament_opened"),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Sauvegarder", "open_save"),  # R1

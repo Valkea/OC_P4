@@ -98,6 +98,25 @@ class Controller:
             "list", call=self.menu_model.select_tournament_load, param=self.world_model
         )
 
+    # @saveNav
+    def open_input_tournament_edit(self, tournament=None):
+
+        logging.debug(f"EDIT tournament: {tournament}")
+
+        try:
+            if tournament is None:
+                tournament = self.world_model.get_active_tournament()
+
+            self._set_focus("main")
+            self._set_head_view("print-line", text=f"Modification du tournoi <{tournament.name}>")
+            self._set_menu_view("list", call=self.menu_model.only_back)
+            self._set_main_view("form", rows=Tournament.get_fields_new(),
+                                exit_func=self._form_exit_edit_tournament, source=tournament)
+
+        except Exception as e:
+            logging.debug(f"EXCEPTION: {e}")
+            self.goback()
+
     @saveNav
     def open_tournament_initialize(self, tournament=None):
 
@@ -574,12 +593,27 @@ class Controller:
         tournament = self.world_model.add_tournament(
             inputs["name"],
             inputs["place"],
-            [inputs["start_date"], inputs["end_date"]],
-            inputs["gtype"],
-            inputs["desc"],
-            inputs["rounds"],
+            inputs["start_date"],
+            inputs["end_date"],
+            inputs["game_type"],
+            inputs["description"],
+            inputs["num_rounds"],
         )
         self.world_model.set_active_tournament(tournament)
+        self.open_tournament_initialize()
+
+    def _form_exit_edit_tournament(self, inputs, source):
+
+        logging.debug(f"NEW TOURNAMENT VALUES: {inputs}")
+        source.name = inputs["name"]
+        source.place = inputs["place"]
+        source.start_date = inputs["start_date"]
+        source.end_date = inputs["end_date"]
+        source.game_type = inputs["game_type"]
+        source.description = inputs["description"]
+        source.num_rounds = inputs["num_rounds"]
+
+        # self.goback()
         self.open_tournament_initialize()
 
     def _form_exit_new_actor(self, inputs, source):
@@ -605,7 +639,6 @@ class Controller:
         source.sex = inputs['sex']
         source.elo = inputs['elo']
 
-        # self.open_tournament_initialize()  # TODO DYNAMIQUE selon page source
         self.goback()
 
 

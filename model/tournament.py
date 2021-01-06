@@ -18,12 +18,13 @@ class World:
         self.tournaments = []
         self.active_tournament = None
 
-    def add_tournament(self, name, place, dates, gtype, desc="", rounds=4):
+    def add_tournament(self, name, place, start_date, end_date, gtype, desc="", rounds=4):
         """ D """
         tournament = Tournament(
             name,
             place,
-            dates,
+            start_date,
+            end_date,
             gtype,
             desc,
             rounds,
@@ -49,8 +50,10 @@ class Tournament:
         the tournament's name
     place : str
         the place where the tournament takes place
-    dates : list(Datetime)
-        the dates when the tournament takes place
+    start_date : str
+        the stating date of the tournament
+    end_date : str
+        the ending date of the tournament
     num_rounds : int
         the number of rounds in the tournament (defaut is 4)
     rounds : list(Round)
@@ -69,9 +72,9 @@ class Tournament:
     current_round()
         TODO
 
-    set_date( str )
+    #set_date( str )
         insert a date using 'DD/MM/YYYY' format 'into the dates list
-    set_dates( list(str) )
+    #set_dates( list(str) )
         insert several dates using 'DD/MM/YYYY' format 'into the dates list
     """
 
@@ -93,13 +96,14 @@ class Tournament:
         "format_gtype": "[Bullet, Blitz, Coup rapide]",
     }
 
-    def __init__(self, name, place, dates, game_type, description="", num_rounds=4):
+    def __init__(self, name, place, start_date, end_date, game_type, description="", num_rounds=4):
         logging.debug(
-            f"SELF:1>{name}< 2>{place}< 3>{dates}< 4>{num_rounds}< 5>{game_type}< 6>{description}<"
+            f"SELF:1>{name}< 2>{place}< 3>{start_date}/{end_date}< 4>{num_rounds}< 5>{game_type}< 6>{description}<"
         )
         self.name = name
         self.place = place
-        self.dates = dates
+        self.start_date = start_date
+        self.end_date = end_date
         self.num_rounds = num_rounds
         self.rounds = []
         self.players = []
@@ -186,27 +190,27 @@ class Tournament:
 
     # --- Properties GET & SET ----------
 
-    def set_date(self, date):
-        """ D """
-
-        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
-
-    def set_dates(self, dates):
-        """ D """
-
-        for date in dates:
-            self.set_date(date)
-
-    def set_game_type(self, type):
-        """ D """
-
-        if type == "bullet" or type == "blitz" or type == "coup rapide":
-            self.game_type = type
-        else:
-            raise ValueError(
-                "Les contrôles de temps doivent être 'bullet',"
-                "'blitz' ou 'coup rapide'"
-            )
+#    def set_date(self, date):
+#        """ D """
+#
+#        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
+#
+#    def set_dates(self, dates):
+#        """ D """
+#
+#        for date in dates:
+#            self.set_date(date)
+#
+#    def set_game_type(self, type):
+#        """ D """
+#
+#        if type == "bullet" or type == "blitz" or type == "coup rapide":
+#            self.game_type = type
+#        else:
+#            raise ValueError(
+#                "Les contrôles de temps doivent être 'bullet',"
+#                "'blitz' ou 'coup rapide'"
+#            )
 
     def get_actors(self):
         """ D """
@@ -217,7 +221,8 @@ class Tournament:
         infos = {
             "name": f"{self.labels['name']}: {self.name}",
             "place": f"{self.labels['place_short']}: {self.place}",
-            "dates": f"{self.labels['dates']}: {' - '.join(self.dates)}",
+            "start_date": f"{self.labels['start_date']}: {self.start_date}",
+            "end_date": f"{self.labels['end_date']}: {self.end_date}",
             "num_rounds": f"{self.labels['num_rounds']}: {self.num_rounds}",
             "game_type": f"{self.labels['gtype']}: {self.game_type}",
             "desc": f"{self.labels['desc']}: {self.description}",
@@ -275,21 +280,21 @@ class Tournament:
                 "errormsg": "Le format demandé est JJ/MM/YYYY",
             },
             {
-                "name": "rounds",
+                "name": "num_rounds",
                 "label": cls.labels["num_rounds"],
                 "placeholder": "4",
                 "test": "Validation.is_valid_posint(value)",
                 "errormsg": "Vous devez saisir un entier positif",
             },
             {
-                "name": "gtype",
+                "name": "game_type",
                 "label": cls.labels["gtype"] + " " + cls.labels["format_gtype"],
                 "placeholder": "Bullet",
                 "test": "Validation.is_valid_gtype(value)",
                 "errormsg": "Vous devez saisir l'une de ces options Bullet, Blitz, Coups rapides",
             },
             {
-                "name": "desc",
+                "name": "description",
                 "label": cls.labels["desc"],
                 "placeholder": None,
                 "test": None,
