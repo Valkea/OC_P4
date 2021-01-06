@@ -144,8 +144,8 @@ class CurseView:
 
     def close_form(self, screen):
         logging.debug("CLOSE FORM")
-        screen.clear()
-        screen.refresh()
+        # screen.clear()
+        # screen.refresh()
         # textboxes = self._draw_them_all(screen, rows)
         # screen.move(5, 5)
         curses.curs_set(0)  # turn off cursor blinking

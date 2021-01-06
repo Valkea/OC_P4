@@ -13,6 +13,7 @@ import logging
 
 from view.main import CurseView
 from model.tournament import Tournament, World
+from model.player import Player
 from model.menu import Menu
 
 
@@ -87,28 +88,8 @@ class Controller:
             self._set_focus("main")
             self._set_head_view("print-line", text="Nouveau tournoi")
             self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view("form", rows=Tournament.get_fields_new())
-            # self._set_main_view("list", call=self.debug_tournoi)
-
-            # self.curses_view.set_focus(self.curses_view.main)
-            # inputs = self._set_main_view(
-            #     "input-lines", fields=Tournament.get_fields_new()
-            # )
-
-            # self.world_model.add_tournament(
-            #     inputs["name"],
-            #     inputs["place"],
-            #     [inputs["start_date"], inputs["end_date"]],
-            #     inputs["gtype"],
-            #     inputs["desc"],
-            #     inputs["rounds"],
-            # )
-
-            # name, label, test, errormsg, placeholder
-
-            # self._set_main_view("print-line", text="Tournoi INPUTS")
-            # curses.napms(1000)
-            # self.open_tournament_initialize()
+            self._set_main_view("form", rows=Tournament.get_fields_new(),
+                                exit_func=self._form_exit_new_tournament)
 
         except Exception as e:
             logging.debug(f"EXCEPTION: {e}")
@@ -116,18 +97,6 @@ class Controller:
 
     @saveNav
     def open_select_tournament_load(self):
-
-        # self.world_model.add_tournament(  # TODO remove
-        #     "Fake tournament"
-        #     "Fake place",
-        #     ['01/01/1999', '02/01/1999'],
-        #     "Blitz",
-        #     "Desc",
-        #     "4",
-        # )
-
-        # if len(self.world_model.tournaments) == 0:
-        #    return self.open_input_tournament_new()
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Chargement d'un tournoi")
@@ -185,12 +154,16 @@ class Controller:
     @saveNav
     def open_input_actor_new(self):
 
-        self._set_focus("main")
-        self._set_head_view("print-line", text="Nouvel acteur")
-        self._set_main_view("print-line", text="Inputs d'un nouvel acteur")
-        self._set_menu_view("list", call=self.menu_model.only_back)
-        curses.napms(3000)
-        self.open_tournament_initialize()
+        try:
+            self._set_focus("main")
+            self._set_head_view("print-line", text="Nouvel acteur")
+            self._set_menu_view("list", call=self.menu_model.only_back)
+            self._set_main_view("form", rows=Player.get_fields_new(),
+                                exit_func=self._form_exit_new_actor)
+
+        except Exception as e:
+            logging.debug(f"EXCEPTION: {e}")
+            self.goback()
 
     def debug_actors(self):
         return (
@@ -489,7 +462,7 @@ class Controller:
             if screen == "menu":
                 return
 
-            self._form_setup(screen, kwargs.get("rows"))
+            self._form_setup(screen, kwargs.get("rows"), kwargs.get("exit_func"))
 
 #        # --- Print a sequence of one-line inputs ---
 #        elif action == "input-lines":
@@ -510,11 +483,11 @@ class Controller:
 
     # === Form controls ===
 
-    def _form_setup(self, screen, rows):
+    def _form_setup(self, screen, rows, exit_func):
         text_boxes, text_wins, error_box = self.curses_view.init_form(screen, rows)
 
         def swapfield(x):
-            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield)
+            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield, exit_func)
             return x
 
         try:
@@ -524,38 +497,43 @@ class Controller:
         except UnstackAll as e:
             if str(e) == "SUBMIT":
                 self.curses_view.close_form(screen)
-                self.open_tournament_initialize()
             elif str(e) == "TAB":
                 return
 
     def _form_input_swap(
-        self, x, rows, text_boxes, text_wins, error_box, swap_func, j_save=[0]
+        self, x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, j_save=[0]
     ):
 
         j = j_save[0]
 
         logging.debug(f"SWAP INIT j:{j}")
         if x == 9 or x == 10:
-            if j < len(rows) - 1:
+            test = self._form_test(
+                text_boxes[j].gather().strip(),
+                rows[j]["test"],
+                rows[j]["errormsg"],
+                error_box,
+            )
 
-                test = self._form_test(
-                    text_boxes[j].gather().strip(),
-                    rows[j]["test"],
-                    rows[j]["errormsg"],
-                    error_box,
-                )
+            if test is True:
+                if j < len(rows) - 1:
+                    logging.debug("A")
 
-                if test is True:
                     j += 1
                     j_save[0] = j
 
-                self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
-                return
+                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
+                    return
 
-            elif j == len(rows) - 1:
-                j = 0
-                j_save[0] = j
-                self._form_gather_inputs(text_boxes, rows)
+                elif j == len(rows) - 1:
+                    logging.debug("B")
+
+                    j = 0
+                    j_save[0] = j
+
+                    self._form_gather_inputs(text_boxes, rows, exit_func)
+            else:
+                self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
 
         elif x == 353:
             if j > 0:
@@ -574,8 +552,8 @@ class Controller:
 
     def _form_test(self, value, test, errormsg, error_win):
 
-        if test is not None:
-            test = test.replace("x", "value")
+        # if test is not None:
+        # test = test.replace("$", "value")
 
         if test is None or eval(test) is True:
             logging.debug("TEST OK")
@@ -588,11 +566,17 @@ class Controller:
             error_win.addstr(errormsg)
             error_win.refresh()
 
-    def _form_gather_inputs(self, text_boxes, rows):
+    def _form_gather_inputs(self, text_boxes, rows, exit_func):
 
         inputs = {}
         for row, tb in zip(rows, text_boxes):
             inputs[row["name"]] = tb.gather().strip()
+
+        exit_func(inputs)
+
+        raise UnstackAll("SUBMIT")
+
+    def _form_exit_new_tournament(self, inputs):
 
         logging.debug(f"VALUES: {inputs}")
         tournament = self.world_model.add_tournament(
@@ -603,10 +587,22 @@ class Controller:
             inputs["desc"],
             inputs["rounds"],
         )
-
         self.world_model.set_active_tournament(tournament)
+        self.open_tournament_initialize()
 
-        raise UnstackAll("SUBMIT")
+    def _form_exit_new_actor(self, inputs):
+
+        logging.debug(f"VALUES: {inputs}")
+        tournament = self.world_model.get_active_tournament()
+        actor = Player(
+            inputs["family_name"],
+            inputs["first_name"],
+            inputs["birthdate"],
+            inputs["sex"],
+            inputs["elo"],
+        )
+        tournament.add_player(actor)
+        self.open_tournament_initialize()
 
 
 class UnstackAll(Exception):
@@ -647,5 +643,13 @@ class Validation:
         """ D """
         v = v.lower()
         if v == "bullet" or v == "blitz" or v == "coups rapides" or v == "coup rapide":
+            return True
+        return False
+
+    @staticmethod
+    def is_valid_sex(v):
+        """ D """
+        v = v.lower()[0:1]
+        if v == "h" or v == "f":
             return True
         return False

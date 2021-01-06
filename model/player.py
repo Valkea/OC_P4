@@ -36,6 +36,16 @@ class Player:
         convert the current instance to a JSON dictionnary
     """
 
+    labels = {
+        "family_name": "Nom de famille",
+        "first_name": "Prénom",
+        "birthdate": "Date de naissance",
+        "elo": "Classement ELO",
+        "sex": "Sexe",
+        "format_date": "[Jour/Mois/Année]",
+        "format_sex": "[H, F]",
+    }
+
     def __init__(self, family_name, first_name, birthdate, sex, elo):
         self.family_name = family_name
         self.first_name = first_name
@@ -101,3 +111,47 @@ class Player:
             f"Player('{self.family_name}', '{self.first_name}', "
             f"'{self.birthdate}', '{self.sex}', {self.elo}, {self.score})"
         )
+
+    @classmethod
+    def get_fields_new(cls):
+        """ D """
+
+        fields = [
+            {
+                "name": "family_name",
+                "label": cls.labels["family_name"],
+                "test": "value != ''",
+                "errormsg": "Vous devez saisir un nom de famille",
+                "placeholder": None,
+            },
+            {
+                "name": "first_name",
+                "label": cls.labels["first_name"],
+                "placeholder": None,
+                "test": "value != ''",
+                "errormsg": "Vous devez saisir un prénom",
+            },
+            {
+                "name": "birthdate",
+                "label": cls.labels["birthdate"] + " " + cls.labels["format_date"],
+                "placeholder": "20/02/1991",
+                "test": "Validation.is_valid_date(value)",
+                "errormsg": "Le format demandé est JJ/MM/YYYY",
+            },
+            {
+                "name": "elo",
+                "label": cls.labels["elo"],
+                "placeholder": "1000",
+                "test": "Validation.is_valid_posint(value)",
+                "errormsg": "Vous devez saisir un entier positif",
+            },
+            {
+                "name": "sex",
+                "label": cls.labels["sex"] + " " + cls.labels["format_sex"],
+                "placeholder": None,
+                "test": "Validation.is_valid_sex(value)",
+                "errormsg": "Vous devez saisir l'une de ces options; H pour Homme, F pour Femme",
+            },
+        ]
+
+        return fields
