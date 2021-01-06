@@ -130,7 +130,7 @@ class Menu:
 
         actors = world.get_all_actors()
         if len(actors) > 0:
-            retv = [(f" {actor.oneline(30)} ", "open_input_actor_edit", actor) for actor in actors]
+            retv = [(f" {actor.oneline(30)} ", None, actor) for actor in actors]
             return tuple(retv)
         else:
             return (

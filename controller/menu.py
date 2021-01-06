@@ -227,7 +227,7 @@ class Controller:
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
         self._set_menu_view("list", call=self.menu_model.actors_alpha)
-        self._set_main_view("list", call=self.menu_model.list_all_actors, param=self.world_model)
+        self._set_main_view("list", call=self.menu_model.list_all_actors, param=self.world_model, autostart=False)
 
     # @saveNav
     def open_save(self):
@@ -477,7 +477,13 @@ class Controller:
             else:
                 options = kwargs["call"]()
 
-            current_row = 0
+            if kwargs.get('autostart') is not False:
+                logging.debug('AUTOSTART FALSE')
+                current_row = 0
+            else:
+                logging.debug('AUTOSTART TRUE')
+                current_row = -1
+
             labels = [x[0] for x in options]
             actions = [x[1] for x in options]
             params = [x[2] if len(x) > 2 else None for x in options]
