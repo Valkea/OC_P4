@@ -65,8 +65,8 @@ class Controller:
             self._move_selection(key)
             # self._input_text(key)
 
-#    def _input_text(self, key):
-#        logging.debug(f"_input_text: {key} --> {chr(key)}")
+    #    def _input_text(self, key):
+    #        logging.debug(f"_input_text: {key} --> {chr(key)}")
 
     # === PUBLIC NAVIGATION METHODS ===
 
@@ -86,8 +86,11 @@ class Controller:
             self._set_focus("main")
             self._set_head_view("print-line", text="Nouveau tournoi")
             self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view("form", rows=Tournament.get_fields_new(),
-                                exit_func=self._form_exit_new_tournament)
+            self._set_main_view(
+                "form",
+                rows=Tournament.get_fields_new(),
+                exit_func=self._form_exit_new_tournament,
+            )
 
         except Exception as e:
             logging.debug(f"EXCEPTION: {e}")
@@ -113,10 +116,16 @@ class Controller:
                 tournament = self.world_model.get_active_tournament()
 
             self._set_focus("main")
-            self._set_head_view("print-line", text=f"Modification du tournoi <{tournament.name}>")
+            self._set_head_view(
+                "print-line", text=f"Modification du tournoi <{tournament.name}>"
+            )
             self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view("form", rows=Tournament.get_fields_new(),
-                                exit_func=self._form_exit_edit_tournament, source=tournament)
+            self._set_main_view(
+                "form",
+                rows=Tournament.get_fields_new(),
+                exit_func=self._form_exit_edit_tournament,
+                source=tournament,
+            )
 
         except Exception as e:
             logging.debug(f"EXCEPTION: {e}")
@@ -175,8 +184,11 @@ class Controller:
             self._set_focus("main")
             self._set_head_view("print-line", text="Nouvel acteur")
             self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view("form", rows=Player.get_fields_new(),
-                                exit_func=self._form_exit_new_actor)
+            self._set_main_view(
+                "form",
+                rows=Player.get_fields_new(),
+                exit_func=self._form_exit_new_actor,
+            )
 
         except Exception as e:
             logging.debug(f"EXCEPTION: {e}")
@@ -188,7 +200,9 @@ class Controller:
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un acteur à modifier")
         self._set_menu_view("list", call=self.menu_model.actors_alpha)
-        self._set_main_view("list", call=self.menu_model.select_actor, param=self.world_model)
+        self._set_main_view(
+            "list", call=self.menu_model.select_actor, param=self.world_model
+        )
 
     def open_menu_actor_order(self, order):
         if order == "elo":
@@ -203,10 +217,16 @@ class Controller:
 
         try:
             self._set_focus("main")
-            self._set_head_view("print-line", text=f"Modification de l'acteur <{actor.getFullname()}>")
+            self._set_head_view(
+                "print-line", text=f"Modification de l'acteur <{actor.getFullname()}>"
+            )
             self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view("form", rows=Player.get_fields_new(),
-                                exit_func=self._form_exit_edit_actor, source=actor)
+            self._set_main_view(
+                "form",
+                rows=Player.get_fields_new(),
+                exit_func=self._form_exit_edit_actor,
+                source=actor,
+            )
 
         except Exception as e:
             logging.debug(f"EXCEPTION: {e}")
@@ -223,13 +243,32 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.reports_tournament)
 
+    @saveNav
     def open_report_all_actors(self):
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
         self._set_menu_view("list", call=self.menu_model.actors_alpha)
-        self._set_main_view("list", call=self.menu_model.list_all_actors, param=self.world_model, autostart=False)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.list_all_actors,
+            param=self.world_model,
+            autostart=False,
+        )
 
-    # @saveNav
+    @saveNav
+    def open_report_all_tournament(self):
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Chargement d'un tournoi")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.select_tournament_load,
+            param=self.world_model,
+            active_links=False,
+            autostart=False,
+        )
+
+    @saveNav
     def open_save(self):
         self._set_focus("full")
         # self._set_menu_view("list", call=self.menu_model.only_back)
@@ -264,11 +303,11 @@ class Controller:
 
         for p in fakePlayers:
 
-            family_name = p['familyname']
-            first_name = p['firstname']
-            birthdate = p['birthdate']
-            sex = p['sex']
-            elo = p['elo']
+            family_name = p["familyname"]
+            first_name = p["firstname"]
+            birthdate = p["birthdate"]
+            sex = p["sex"]
+            elo = p["elo"]
 
             player = Player(family_name, first_name, birthdate, sex, elo)
             self.world_model.get_active_tournament().add_player(player)
@@ -279,74 +318,74 @@ class Controller:
 
     # --- OLD ??
 
-#    def open_menu_baseOld(self):
-#        self._set_menu_view("list", call=self.menu_model.menu_base)
-#        self._set_main_view("clear")
-#
-#    def open_tournois(self):
-#        self._set_menu_view("list", call=self.menu_model.menu_tournois)
-#        self._set_main_view("clear")
-#
-#    def open_tournois_select(self):
-#        self._set_main_view(
-#            "list", call=self.menu_model.menu_tournois_select, param=self.world_model
-#        )
-#
-#    def open_tournoi_actions(self):
-#        self._set_menu_view("list", call=self.menu_model.menu_tournoi_select_actions)
-#        self._set_main_view("clear")
-#
-#    def open_rapports(self):
-#        self._set_menu_view("list", call=self.menu_model.menu_rapports)
-#        self._set_main_view("clear")
-#
-#
-#    def open_new_tournament(self):
-#        inputs = self._set_full_view("input-lines", fields=Tournament.get_fields_new())
-#
-#        self.world_model.add_tournament(
-#            inputs["name"],
-#            inputs["place"],
-#            [inputs["start_date"], inputs["end_date"]],
-#            inputs["gtype"],
-#            inputs["desc"],
-#            inputs["rounds"],
-#        )
-#
-#        self.open_tournois_infos()  # TODO passer un id ??
-#
-#    def open_new_actor(self):
-#        # # self.curses_view.clear_menu()
-#        # self.curses_view.get_input("Nom")
-#        # self.curses_view.get_input("Prénom")
-#        # self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
-#        # self.curses_view.clear_main()
-#        self._set_full_view("print-line", text="TODO ACTOR INPUT")  # TODO
-#        curses.napms(2000)
-#        self.open_tournoi_actors()
-#
-#    def open_tournois_infos(self):
-#        tournaments = self.world_model.tournaments
-#        infos = tournaments[0].get_overall_infos()  # TODO rendre l'ID dynamique
-#        self._set_main_view("print-lines", rows=infos.values())
-#        self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
-#
-#    def tmp(self):
-#        return (("TODO ACTOR", "open_edit_actor"),)
-#
-#    def open_tournoi_actors(self):
-#        self._set_main_view("list", call=self.tmp)
-#        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_select)
-#
-#    def open_edit_actor(self):
-#        self._set_main_view("print-line", text="TODO ACTOR EDIT")  # TODO
-#        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_manager)
-#
-#    def open_tournoi_rapport(self):
-#        self._set_menu_view("list", call=self.menu_model.menu_tournoi_rapports)
-#
-#    # def open_tournoi_menu_base(self):
-#    #    self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
+    #    def open_menu_baseOld(self):
+    #        self._set_menu_view("list", call=self.menu_model.menu_base)
+    #        self._set_main_view("clear")
+    #
+    #    def open_tournois(self):
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournois)
+    #        self._set_main_view("clear")
+    #
+    #    def open_tournois_select(self):
+    #        self._set_main_view(
+    #            "list", call=self.menu_model.menu_tournois_select, param=self.world_model
+    #        )
+    #
+    #    def open_tournoi_actions(self):
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_select_actions)
+    #        self._set_main_view("clear")
+    #
+    #    def open_rapports(self):
+    #        self._set_menu_view("list", call=self.menu_model.menu_rapports)
+    #        self._set_main_view("clear")
+    #
+    #
+    #    def open_new_tournament(self):
+    #        inputs = self._set_full_view("input-lines", fields=Tournament.get_fields_new())
+    #
+    #        self.world_model.add_tournament(
+    #            inputs["name"],
+    #            inputs["place"],
+    #            [inputs["start_date"], inputs["end_date"]],
+    #            inputs["gtype"],
+    #            inputs["desc"],
+    #            inputs["rounds"],
+    #        )
+    #
+    #        self.open_tournois_infos()  # TODO passer un id ??
+    #
+    #    def open_new_actor(self):
+    #        # # self.curses_view.clear_menu()
+    #        # self.curses_view.get_input("Nom")
+    #        # self.curses_view.get_input("Prénom")
+    #        # self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
+    #        # self.curses_view.clear_main()
+    #        self._set_full_view("print-line", text="TODO ACTOR INPUT")  # TODO
+    #        curses.napms(2000)
+    #        self.open_tournoi_actors()
+    #
+    #    def open_tournois_infos(self):
+    #        tournaments = self.world_model.tournaments
+    #        infos = tournaments[0].get_overall_infos()  # TODO rendre l'ID dynamique
+    #        self._set_main_view("print-lines", rows=infos.values())
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
+    #
+    #    def tmp(self):
+    #        return (("TODO ACTOR", "open_edit_actor"),)
+    #
+    #    def open_tournoi_actors(self):
+    #        self._set_main_view("list", call=self.tmp)
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_select)
+    #
+    #    def open_edit_actor(self):
+    #        self._set_main_view("print-line", text="TODO ACTOR EDIT")  # TODO
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_manager)
+    #
+    #    def open_tournoi_rapport(self):
+    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_rapports)
+    #
+    #    # def open_tournoi_menu_base(self):
+    #    #    self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
 
     # === PRIVATE METHODS ===
 
@@ -392,6 +431,10 @@ class Controller:
                 logging.debug("KEY ENTER")
                 actions = sdata["actions"]
                 params = sdata["params"]
+                active_links = sdata["active_links"]
+
+                if active_links is False:
+                    return
 
                 if actions[current_row] is None:
                     labels = sdata["labels"]
@@ -412,19 +455,19 @@ class Controller:
 
             self.curses_view.display_list(screen, buttons, current_row)
 
-#    def _check_input(self, screen, label, placeholder=None, test=None, error=None):
-#
-#        errormsg = None
-#        if test is not None:
-#            test = test.replace("x", "value")
-#        while 1:
-#            value = self.curses_view.get_input(screen, label, placeholder, errormsg)
-#            if test is None or eval(test) is True:
-#                break
-#            else:
-#                errormsg = error
-#
-#        return value
+    #    def _check_input(self, screen, label, placeholder=None, test=None, error=None):
+    #
+    #        errormsg = None
+    #        if test is not None:
+    #            test = test.replace("x", "value")
+    #        while 1:
+    #            value = self.curses_view.get_input(screen, label, placeholder, errormsg)
+    #            if test is None or eval(test) is True:
+    #                break
+    #            else:
+    #                errormsg = error
+    #
+    #        return value
 
     # === View controls ===
 
@@ -477,12 +520,15 @@ class Controller:
             else:
                 options = kwargs["call"]()
 
-            if kwargs.get('autostart') is not False:
-                logging.debug('AUTOSTART FALSE')
+            if kwargs.get("autostart") is not False:
                 current_row = 0
             else:
-                logging.debug('AUTOSTART TRUE')
                 current_row = -1
+
+            if kwargs.get("active_links") is not False:
+                active_links = True
+            else:
+                active_links = False
 
             labels = [x[0] for x in options]
             actions = [x[1] for x in options]
@@ -497,6 +543,7 @@ class Controller:
                 "params": params,
                 "buttons": buttons,
                 "colors": colors,
+                "active_links": active_links,
             }
 
             self.curses_view.display_list(screen, buttons, current_row, colors)
@@ -517,32 +564,41 @@ class Controller:
             if screen == "menu":
                 return
 
-            self._form_setup(screen, kwargs.get("rows"), kwargs.get("exit_func"), kwargs.get('source'))
+            self._form_setup(
+                screen,
+                kwargs.get("rows"),
+                kwargs.get("exit_func"),
+                kwargs.get("source"),
+            )
 
-#        # --- Print a sequence of one-line inputs ---
-#        elif action == "input-lines":
-#
-#            if screen == "menu":
-#                return
-#
-#            inputs = {}
-#            for field in kwargs["fields"]:
-#                inputs[field["name"]] = self._check_input(
-#                    screen,
-#                    field["label"],
-#                    field["placeholder"],
-#                    field["test"],
-#                    field["errormsg"],
-#                )
-#            return inputs
+    #        # --- Print a sequence of one-line inputs ---
+    #        elif action == "input-lines":
+    #
+    #            if screen == "menu":
+    #                return
+    #
+    #            inputs = {}
+    #            for field in kwargs["fields"]:
+    #                inputs[field["name"]] = self._check_input(
+    #                    screen,
+    #                    field["label"],
+    #                    field["placeholder"],
+    #                    field["test"],
+    #                    field["errormsg"],
+    #                )
+    #            return inputs
 
     # === Form controls ===
 
     def _form_setup(self, screen, rows, exit_func, source=None):
-        text_boxes, text_wins, error_box = self.curses_view.init_form(screen, rows, source)
+        text_boxes, text_wins, error_box = self.curses_view.init_form(
+            screen, rows, source
+        )
 
         def swapfield(x):
-            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield, exit_func, source)
+            self._form_input_swap(
+                x, rows, text_boxes, text_wins, error_box, swapfield, exit_func, source
+            )
             return x
 
         try:
@@ -556,7 +612,16 @@ class Controller:
                 return
 
     def _form_input_swap(
-        self, x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, source, j_save=[0]
+        self,
+        x,
+        rows,
+        text_boxes,
+        text_wins,
+        error_box,
+        swap_func,
+        exit_func,
+        source,
+        j_save=[0],
     ):
 
         j = j_save[0]
@@ -577,7 +642,9 @@ class Controller:
                     j += 1
                     j_save[0] = j
 
-                    self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
+                    self.curses_view.set_input_focus(
+                        text_wins[j], text_boxes[j], swap_func
+                    )
                     return
 
                 elif j == len(rows) - 1:
@@ -677,11 +744,11 @@ class Controller:
     def _form_exit_edit_actor(self, inputs, source):
 
         logging.debug(f"EDIT ACTOR VALUES: {inputs}")
-        source.family_name = inputs['family_name']
-        source.first_name = inputs['first_name']
-        source.birthdate = inputs['birthdate']
-        source.sex = inputs['sex']
-        source.elo = inputs['elo']
+        source.family_name = inputs["family_name"]
+        source.first_name = inputs["first_name"]
+        source.birthdate = inputs["birthdate"]
+        source.sex = inputs["sex"]
+        source.elo = inputs["elo"]
 
         self.goback()
 

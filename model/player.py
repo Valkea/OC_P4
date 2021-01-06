@@ -112,7 +112,9 @@ class Player:
         """ Return the current age of the actor in years """
 
         now = datetime.datetime.now()
-        s = re.search("^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", self.birthdate).groups()
+        s = re.search(
+            "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", self.birthdate
+        ).groups()
         birth = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
         delta = now - birth
         return math.floor(delta.days / 365.2425)

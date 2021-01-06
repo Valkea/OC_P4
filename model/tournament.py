@@ -18,7 +18,9 @@ class World:
         self.tournaments = []
         self.active_tournament = None
 
-    def add_tournament(self, name, place, start_date, end_date, gtype, desc="", rounds=4):
+    def add_tournament(
+        self, name, place, start_date, end_date, gtype, desc="", rounds=4
+    ):
         """ D """
         tournament = Tournament(
             name,
@@ -107,7 +109,9 @@ class Tournament:
         "format_gtype": "[Bullet, Blitz, Coup rapide]",
     }
 
-    def __init__(self, name, place, start_date, end_date, game_type, description="", num_rounds=4):
+    def __init__(
+        self, name, place, start_date, end_date, game_type, description="", num_rounds=4
+    ):
         logging.debug(
             f"SELF:1>{name}< 2>{place}< 3>{start_date}/{end_date}< 4>{num_rounds}< 5>{game_type}< 6>{description}<"
         )
@@ -201,27 +205,27 @@ class Tournament:
 
     # --- Properties GET & SET ----------
 
-#    def set_date(self, date):
-#        """ D """
-#
-#        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
-#
-#    def set_dates(self, dates):
-#        """ D """
-#
-#        for date in dates:
-#            self.set_date(date)
-#
-#    def set_game_type(self, type):
-#        """ D """
-#
-#        if type == "bullet" or type == "blitz" or type == "coup rapide":
-#            self.game_type = type
-#        else:
-#            raise ValueError(
-#                "Les contrôles de temps doivent être 'bullet',"
-#                "'blitz' ou 'coup rapide'"
-#            )
+    #    def set_date(self, date):
+    #        """ D """
+    #
+    #        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
+    #
+    #    def set_dates(self, dates):
+    #        """ D """
+    #
+    #        for date in dates:
+    #            self.set_date(date)
+    #
+    #    def set_game_type(self, type):
+    #        """ D """
+    #
+    #        if type == "bullet" or type == "blitz" or type == "coup rapide":
+    #            self.game_type = type
+    #        else:
+    #            raise ValueError(
+    #                "Les contrôles de temps doivent être 'bullet',"
+    #                "'blitz' ou 'coup rapide'"
+    #            )
 
     def get_actors(self):
         """ D """
