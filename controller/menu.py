@@ -218,7 +218,13 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.reports_tournament)
 
-    @saveNav
+    def open_report_all_actors(self):
+        self._set_focus("menu")
+        self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
+        self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_main_view("list", call=self.menu_model.list_all_actors, param=self.world_model)
+
+    # @saveNav
     def open_save(self):
         self._set_focus("full")
         # self._set_menu_view("list", call=self.menu_model.only_back)

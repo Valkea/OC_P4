@@ -35,10 +35,21 @@ class World:
         return tournament
 
     def set_active_tournament(self, tournament):
+        """ D """
         self.active_tournament = tournament
 
     def get_active_tournament(self):
+        """ D """
         return self.active_tournament
+
+    def get_all_actors(self):
+        """ D """
+        all_actors = set()
+        for tournament in self.tournaments:
+            all_actors.union(tournament.get_actors())
+            all_actors = all_actors.union(tournament.get_actors())
+            logging.debug(f"ALL ACTORS: {list(all_actors)}")
+        return list(all_actors)
 
 
 class Tournament:

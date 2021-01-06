@@ -64,7 +64,7 @@ class Menu:
 
     def reports_base(self):
         return (
-            ("Tous les acteurs", None),  # R3
+            ("Tous les acteurs", 'open_report_all_actors'),  # R3
             ("Tous les tournois", None),  # R3
             ("Tous les joueurs d'un tournoi", None),
             ("Tous les tours d'un tournoi", None),
@@ -74,7 +74,7 @@ class Menu:
 
     def reports_tournament(self):
         return (
-            ("Tous les acteurs", None),  # R3
+            ("Tous les acteurs", 'open_report_all_actors'),  # R3
             ("Tous les tournois", None),  # R3
             ("Tous les joueurs de ce tournoi", None),
             ("Tous les tours de ce tournoi", None),
@@ -118,6 +118,17 @@ class Menu:
 
         tournament = world.get_active_tournament()
         actors = tournament.get_actors()
+        if len(actors) > 0:
+            retv = [(f" {actor.oneline(30)} ", "open_input_actor_edit", actor) for actor in actors]
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun acteur", "goback"),
+            )  # ("Créer un acteur", "open_input_actor_new"),)
+
+    def list_all_actors(self, world):
+
+        actors = world.get_all_actors()
         if len(actors) > 0:
             retv = [(f" {actor.oneline(30)} ", "open_input_actor_edit", actor) for actor in actors]
             return tuple(retv)
