@@ -4,8 +4,6 @@
 """ This module handles the menu model
 """
 
-import logging
-
 
 class Menu:
     """ TODO """
@@ -105,8 +103,6 @@ class Menu:
     # --- Dynamic menus ---
 
     def select_tournament_load(self, world):
-        # world.add_tournament("Tournoi 01", "Caen", ["20/12/2020", "21/12/2020"], "bullet")
-        logging.debug(f"menu_tournois_select: {world}")
 
         tournaments = world.tournaments
         if len(tournaments) > 0:
@@ -116,6 +112,18 @@ class Menu:
             return (
                 ("Aucun tournoi", "goback"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
+
+    def select_actor(self, world):
+
+        tournament = world.get_active_tournament()
+        actors = tournament.get_actors()
+        if len(actors) > 0:
+            retv = [(f" {actor.oneline(30)} ", "open_input_actor_edit", actor) for actor in actors]
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun acteur", "goback"),
+            )  # ("Créer un acteur", "open_input_actor_new"),)
 
     # ------------------------------------------------------------------------
 

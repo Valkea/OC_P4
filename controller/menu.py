@@ -74,13 +74,6 @@ class Controller:
         self._set_main_view("clear")
         self._set_menu_view("list", call=self.menu_model.base, colors=[2, 3])
 
-    def debug_tournoi(self):
-        return (
-            ("Tournoi 1", "open_tournament_initialize"),
-            ("Tournoi 2", "open_tournament_initialize"),
-            ("Tournoi 3", "open_tournament_initialize"),
-        )
-
     @saveNav
     def open_input_tournament_new(self):
 
@@ -151,7 +144,7 @@ class Controller:
         self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
         self._set_menu_view("list", call=self.menu_model.tournament_closed)
 
-    @saveNav
+    # @saveNav
     def open_input_actor_new(self):
 
         try:
@@ -165,20 +158,13 @@ class Controller:
             logging.debug(f"EXCEPTION: {e}")
             self.goback()
 
-    def debug_actors(self):
-        return (
-            ("Bob 1", "open_input_actor_edit"),
-            ("Bob 2", "open_input_actor_edit"),
-            ("Bob 3", "open_input_actor_edit"),
-        )
-
     @saveNav
     def open_select_actor(self):
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un acteur à modifier")
-        self._set_main_view("list", call=self.debug_actors)
         self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_main_view("list", call=self.menu_model.select_actor, param=self.world_model)
 
     def open_menu_actor_order(self, order):
         if order == "elo":
@@ -186,15 +172,21 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.actors_elo)
 
-    @saveNav
-    def open_input_actor_edit(self):
+    # @saveNav
+    def open_input_actor_edit(self, actor):
 
-        self._set_focus("main")
-        self._set_head_view("print-line", text="Modification d'un acteur")
-        self._set_main_view("print-line", text="Modification d'un acteur")
-        self._set_menu_view("list", call=self.menu_model.only_back)
-        curses.napms(3000)
-        self.open_tournament_initialize()
+        logging.debug(f"EDIT actor: {actor}")
+
+        try:
+            self._set_focus("main")
+            self._set_head_view("print-line", text=f"Modification de l'acteur <{actor.getFullname()}>")
+            self._set_menu_view("list", call=self.menu_model.only_back)
+            self._set_main_view("form", rows=Player.get_fields_new(),
+                                exit_func=self._form_exit_edit_actor, source=actor)
+
+        except Exception as e:
+            logging.debug(f"EXCEPTION: {e}")
+            self.goback()
 
     @saveNav
     def open_reports(self, source):
@@ -462,7 +454,7 @@ class Controller:
             if screen == "menu":
                 return
 
-            self._form_setup(screen, kwargs.get("rows"), kwargs.get("exit_func"))
+            self._form_setup(screen, kwargs.get("rows"), kwargs.get("exit_func"), kwargs.get('source'))
 
 #        # --- Print a sequence of one-line inputs ---
 #        elif action == "input-lines":
@@ -483,11 +475,11 @@ class Controller:
 
     # === Form controls ===
 
-    def _form_setup(self, screen, rows, exit_func):
-        text_boxes, text_wins, error_box = self.curses_view.init_form(screen, rows)
+    def _form_setup(self, screen, rows, exit_func, source=None):
+        text_boxes, text_wins, error_box = self.curses_view.init_form(screen, rows, source)
 
         def swapfield(x):
-            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield, exit_func)
+            self._form_input_swap(x, rows, text_boxes, text_wins, error_box, swapfield, exit_func, source)
             return x
 
         try:
@@ -501,7 +493,7 @@ class Controller:
                 return
 
     def _form_input_swap(
-        self, x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, j_save=[0]
+        self, x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, source, j_save=[0]
     ):
 
         j = j_save[0]
@@ -531,7 +523,7 @@ class Controller:
                     j = 0
                     j_save[0] = j
 
-                    self._form_gather_inputs(text_boxes, rows, exit_func)
+                    self._form_gather_inputs(text_boxes, rows, exit_func, source)
             else:
                 self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
 
@@ -566,19 +558,19 @@ class Controller:
             error_win.addstr(errormsg)
             error_win.refresh()
 
-    def _form_gather_inputs(self, text_boxes, rows, exit_func):
+    def _form_gather_inputs(self, text_boxes, rows, exit_func, source):
 
         inputs = {}
         for row, tb in zip(rows, text_boxes):
             inputs[row["name"]] = tb.gather().strip()
 
-        exit_func(inputs)
+        exit_func(inputs, source)
 
         raise UnstackAll("SUBMIT")
 
-    def _form_exit_new_tournament(self, inputs):
+    def _form_exit_new_tournament(self, inputs, source):
 
-        logging.debug(f"VALUES: {inputs}")
+        logging.debug(f"NEW TOURNAMENT VALUES: {inputs}")
         tournament = self.world_model.add_tournament(
             inputs["name"],
             inputs["place"],
@@ -590,9 +582,9 @@ class Controller:
         self.world_model.set_active_tournament(tournament)
         self.open_tournament_initialize()
 
-    def _form_exit_new_actor(self, inputs):
+    def _form_exit_new_actor(self, inputs, source):
 
-        logging.debug(f"VALUES: {inputs}")
+        logging.debug(f"NEW ACTOR VALUES: {inputs}")
         tournament = self.world_model.get_active_tournament()
         actor = Player(
             inputs["family_name"],
@@ -603,6 +595,18 @@ class Controller:
         )
         tournament.add_player(actor)
         self.open_tournament_initialize()
+
+    def _form_exit_edit_actor(self, inputs, source):
+
+        logging.debug(f"EDIT ACTOR VALUES: {inputs}")
+        source.family_name = inputs['family_name']
+        source.first_name = inputs['first_name']
+        source.birthdate = inputs['birthdate']
+        source.sex = inputs['sex']
+        source.elo = inputs['elo']
+
+        # self.open_tournament_initialize()  # TODO DYNAMIQUE selon page source
+        self.goback()
 
 
 class UnstackAll(Exception):

@@ -208,6 +208,10 @@ class Tournament:
                 "'blitz' ou 'coup rapide'"
             )
 
+    def get_actors(self):
+        """ D """
+        return self.players
+
     def get_overall_infos(self):
         """ D """
         infos = {

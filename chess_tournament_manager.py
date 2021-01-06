@@ -68,8 +68,8 @@ def main():
         # time.sleep(3)
         # ## INPUT Round 1 results ###
         for i, g in enumerate(games):
-            player_name1 = g[0][0].fullname()
-            player_name2 = g[1][0].fullname()
+            player_name1 = g[0][0].getFullname()
+            player_name2 = g[1][0].getFullname()
             print(
                 f"Veuillez saisir les scores pour le match {player_name1} vs {player_name2}"
             )

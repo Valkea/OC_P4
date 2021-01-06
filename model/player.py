@@ -5,6 +5,9 @@
 """
 
 import json
+import datetime
+import re
+import math
 
 
 class Player:
@@ -30,7 +33,7 @@ class Player:
     TODO !!!!!!!!!!!!!!!!!!!!!!!
     add_to_score(value)
         add to the current player's score
-    fullname()
+    getFullname()
         return a concatenation of the first and family names
     toJSON()
         convert the current instance to a JSON dictionnary
@@ -95,11 +98,29 @@ class Player:
 
         return player in [game[0] for game in self.games]
 
-    def fullname(self):
+    def getFullname(self):
         """ Return the concatenation of the fist and family names """
 
-        return self.first_name[0] + self.family_name[0]  # TODO TMP
-        return self.first_name + " " + self.family_name
+        return f"{self.first_name} {self.family_name}".title()
+
+    def oneline(self, ljustv=0):
+        """ Return a full resume of the actor in one line """
+
+        return f"{self.getFullname().ljust(ljustv)} | {self.getAge()} ans | {self.getSex()} | ELO:{self.elo}"
+
+    def getAge(self):
+        """ Return the current age of the actor in years """
+
+        now = datetime.datetime.now()
+        s = re.search("^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", self.birthdate).groups()
+        birth = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
+        delta = now - birth
+        return math.floor(delta.days / 365.2425)
+
+    def getSex(self):
+        """ Return the sex of the actor as F or H """
+
+        return self.sex[0:1].capitalize()
 
     def toJSON(self):
         """ Return a JSON representation of the Player instance """

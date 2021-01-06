@@ -129,7 +129,7 @@ class CurseView:
 
     # --- FORMS ---
 
-    def init_form(self, screen, rows):
+    def init_form(self, screen, rows, source=None):
 
         logging.debug("INIT FORM")
         # self._save_last_draw(screen, rows)
@@ -137,7 +137,7 @@ class CurseView:
         curses.curs_set(1)  # turn on cursor blinking
         self._set_background_color(screen)
 
-        text_boxes, text_wins, error_box = self._draw_them_all(screen, rows)
+        text_boxes, text_wins, error_box = self._draw_them_all(screen, rows, source)
         screen.border()
         screen.refresh()
         return text_boxes, text_wins, error_box
@@ -160,7 +160,7 @@ class CurseView:
         input_tb.edit(control_function)
         pass
 
-    def _draw_them_all(self, screen, rows):
+    def _draw_them_all(self, screen, rows, source=None):
         maxW = max([len(x["label"]) for x in rows])
 
         text_boxes = []
@@ -183,7 +183,9 @@ class CurseView:
             sub.border()
 
             sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
-            if row["placeholder"] is not None:
+            if source is not None:
+                sub2.addstr(eval('source.'+row['name']))
+            elif row["placeholder"] is not None:
                 sub2.addstr(row["placeholder"])
             tb = curses.textpad.Textbox(sub2)
 
