@@ -69,6 +69,8 @@ class Controller:
                 logging.warning("RESIZE")  # TODO ?
             elif key == 300:  # CTRL + F12
                 self._generate_fake_players()
+            elif key == 263:  # BACKSPACE
+                self.goback()
 
             self._move_selection(key)
 
