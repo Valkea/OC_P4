@@ -59,6 +59,21 @@ class Round:
         """ D """
         return self.games
 
+    def oneline(self, ljustv=0):
+        """ Return a full resume of the round in one line """
+
+        if self.close_time is not None:
+            return (
+                f"{self.name.ljust(ljustv)} | "
+                + f"Joué du {self.start_time.strftime('%d/%m/%Y %H:%M:%S')} "
+                + f"au {self.close_time.strftime('%d/%m/%Y %H:%M:%S')}"
+            )
+        else:
+            return (
+                f"{self.name.ljust(ljustv)} | "
+                + f"Commencé le {self.start_time.strftime('%d/%m/%Y %H:%M:%S')}"
+            )
+
     def _sort_players(self, players):
         """_Return a new list of the players sorted by score then by elo.
             It works for both the first and second part of the swiss rules,

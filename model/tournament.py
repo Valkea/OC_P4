@@ -174,18 +174,18 @@ class Tournament:
         if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
             raise IsNotReady()
 
-        if len(self.rounds) >= self._num_rounds:
-            self.status = Status.CLOSING
-            raise IsComplete()
-
         if self.has_player_pairs() is False:
             raise WrongPlayersNumber()
 
         if self.current_round() is not None:
             self.current_round().close()
 
+        if len(self.rounds) >= self._num_rounds:
+            self.status = Status.CLOSING
+            raise IsComplete()
+
         round_index = len(self.rounds)
-        new_round = Round(f"Round{round_index+1}", round_index, self.players)
+        new_round = Round(f"Round {round_index+1}", round_index, self.players)
         self.rounds.append(new_round)
 
     def current_round(self):

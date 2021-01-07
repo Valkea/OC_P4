@@ -13,7 +13,14 @@ import logging
 import traceback
 
 from view.main import CurseView
-from model.tournament import Tournament, World, IsComplete, IsNotReady, WrongPlayersNumber, Status
+from model.tournament import (
+    Tournament,
+    World,
+    IsComplete,
+    IsNotReady,
+    WrongPlayersNumber,
+    Status,
+)
 from model.player import Player
 from model.menu import Menu
 
@@ -178,7 +185,9 @@ class Controller:
         except WrongPlayersNumber:
             pass  # TODO display msg ?
         except IsNotReady as e:
-            logging.critical("Calling start_new_round on an uninitialized or closed tournament")
+            logging.critical(
+                "Calling start_new_round on an uninitialized or closed tournament"
+            )
             raise e
         except IsComplete:
             self.open_tournament_finalize(tournament)
@@ -383,7 +392,22 @@ class Controller:
 
     @saveNav
     def open_report_tournament_rounds(self, tournament=None):
-        pass
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        self._set_focus("menu")
+        self._set_head_view(
+            "print-line",
+            text=f"Liste des rounds du tournoi <{tournament.name}>",
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.list_rounds,
+            call_params={"tournament": tournament},
+            autostart=False,
+        )
 
     @saveNav
     def open_report_tournament_matchs(self, tournament=None):
