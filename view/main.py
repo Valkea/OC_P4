@@ -184,9 +184,9 @@ class CurseView:
 
             sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
             if source is not None:
-                sub2.addstr(eval("source." + row["name"]))
+                sub2.addstr(str(eval("source." + row["name"])))
             elif row["placeholder"] is not None:
-                sub2.addstr(row["placeholder"])
+                sub2.addstr(str(row["placeholder"]))
             tb = curses.textpad.Textbox(sub2)
 
             # save instances

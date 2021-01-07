@@ -122,12 +122,20 @@ class Tournament:
         self.place = place
         self.start_date = start_date
         self.end_date = end_date
-        self.num_rounds = int(num_rounds)
+        self.num_rounds = num_rounds
         self.rounds = []
         self.players = []
         self.game_type = game_type
         self.description = description
         self.status = Status.UNINITIALIZED
+
+    @property
+    def num_rounds(self):
+        return int(self._num_rounds)
+
+    @num_rounds.setter
+    def num_rounds(self, v):
+        self._num_rounds = int(v)
 
     # -----------------------------------
 
@@ -171,7 +179,7 @@ class Tournament:
         if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
             raise IsNotReady()
 
-        if len(self.rounds) >= self.num_rounds:
+        if len(self.rounds) >= self._num_rounds:
             self.status = Status.CLOSING
             raise IsComplete()
 

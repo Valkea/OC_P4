@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import logging
+import traceback
 
 from controller.menu import Controller  # , MenuController
 
@@ -12,4 +13,5 @@ try:
     control.open_menu_base()
     control.start()
 except Exception as e:
-    logging.error(e)
+    tb = traceback.format_exc()
+    logging.error(f"{e} {tb}")

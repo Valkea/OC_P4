@@ -10,6 +10,7 @@ import sys
 import atexit
 import re
 import logging
+import traceback
 
 from view.main import CurseView
 from model.tournament import Tournament, World, IsComplete, IsNotReady, WrongPlayersNumber, Status
@@ -108,7 +109,7 @@ class Controller:
             call_params={"world": self.world_model},
         )
 
-    # @saveNav
+    @saveNav
     def open_input_tournament_edit(self, tournament=None):
 
         logging.debug(f"EDIT tournament: {tournament}")
@@ -130,7 +131,8 @@ class Controller:
             )
 
         except Exception as e:
-            logging.debug(f"EXCEPTION: {e}")
+            tb = traceback.format_exc()
+            logging.debug(f"------------EXCEPTION: {e} {tb}")
             self.goback()
 
     def open_tournament_current(self, tournament=None):
@@ -852,7 +854,7 @@ class Controller:
         source.end_date = inputs["end_date"]
         source.game_type = inputs["game_type"]
         source.description = inputs["description"]
-        source.num_rounds = inputs["num_rounds"]
+        source.num_rounds = int(inputs["num_rounds"])
 
         # self.goback()
         self.open_tournament_initialize()
