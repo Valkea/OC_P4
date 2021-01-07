@@ -12,7 +12,7 @@ import re
 import logging
 
 from view.main import CurseView
-from model.tournament import Tournament, World
+from model.tournament import Tournament, World, IsComplete, IsNotReady, WrongPlayersNumber, Status
 from model.player import Player
 from model.menu import Menu
 
@@ -88,7 +88,7 @@ class Controller:
             self._set_menu_view("list", call=self.menu_model.only_back)
             self._set_main_view(
                 "form",
-                rows=Tournament.get_fields_new(),
+                rows=Tournament.get_fields(),
                 exit_func=self._form_exit_new_tournament,
             )
 
@@ -124,7 +124,7 @@ class Controller:
             self._set_menu_view("list", call=self.menu_model.only_back)
             self._set_main_view(
                 "form",
-                rows=Tournament.get_fields_new(),
+                rows=Tournament.get_fields(),
                 exit_func=self._form_exit_edit_tournament,
                 source=tournament,
             )
@@ -133,50 +133,137 @@ class Controller:
             logging.debug(f"EXCEPTION: {e}")
             self.goback()
 
-    @saveNav
-    def open_tournament_initialize(self, tournament=None):
+    def open_tournament_current(self, tournament=None):
 
         if tournament is not None:
             self.world_model.set_active_tournament(tournament)
 
         tournament = self.world_model.get_active_tournament()
-        logging.debug("OPEN_TOURNOI_INIT")
+
+        if (
+            tournament.status == Status.UNINITIALIZED
+            or tournament.status == Status.INITIALIZED
+        ):
+            logging.debug("SWITCH INIT")
+            self.open_tournament_initialize(tournament)
+        elif tournament.status == Status.PLAYING:
+            logging.debug("SWITCH PLAYING")
+            self.open_tournament_opened(tournament)
+        elif tournament.status == Status.CLOSING:
+            logging.debug("SWITCH CLOSING")
+            self.open_tournament_finalize(tournament)
+        elif tournament.status == Status.CLOSED:
+            logging.debug("SWITCH CLOSED")
+            self.open_tournament_closed(tournament)
+
+    @saveNav
+    def open_tournament_initialize(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        tournament.status = Status.INITIALIZED
+
         self._set_focus("menu")
         self._set_head_view(
             "print-line", text=f"Tournoi <{tournament.name}> en phase préparatoire"
         )
-        # self._set_main_view("print-line", text="Infos tournoi (initialize screen)")
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_initialize)
 
-    @saveNav
-    def open_tournament_opened(self):
+    def start_new_round(self, tournament=None):
 
-        self._set_focus("menu")
-        self._set_head_view("print-line", text="Tournoi [NAME] au round X/X")
-        self._set_main_view(
-            "print-line", text="Infos tournoi + tables du round (opened)"
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        try:
+            tournament.start_round()
+            self.open_tournament_opened(tournament)
+
+        except WrongPlayersNumber:
+            pass  # TODO display msg ?
+        except IsNotReady as e:
+            logging.critical("Calling start_new_round on an uninitialized or closed tournament")
+            raise e
+        except IsComplete:
+            self.open_tournament_finalize(tournament)
+
+    def input_round_results(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line",
+            text=f"Saisies de resultats pour <{tournament.current_round().name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.tournament_opened)
+        self._set_main_view("print-line", text="INPUTS")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        curses.napms(3000)
+        self.start_new_round()
+
+    def input_final_note(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line",
+            text=f"Saisie de la note finale du tournoi <{tournament.name}>",
+        )
+        self._set_main_view("print-line", text="INPUTS")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        curses.napms(3000)
+        self.open_tournament_closed()
 
     @saveNav
-    def open_tournament_finalize(self):
+    def open_tournament_opened(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        tournament.status = Status.PLAYING
 
         self._set_focus("menu")
         self._set_head_view(
-            "print-line", text="Tournoi [NAME] en phase de finalisation"
+            "print-line",
+            text=f"Tournoi <{tournament.name}> : {tournament.current_round().name}",
         )
-        self._set_main_view(
-            "print-line", text="Infos tournoi + classement (finialized)"
+        self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
+        self._set_menu_view("list", call=self.menu_model.tournament_opened)
+
+    @saveNav
+    def open_tournament_finalize(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        tournament.status = Status.CLOSING
+
+        self._set_focus("menu")
+        self._set_head_view(
+            "print-line", text=f"Tournoi <{tournament.name}> en phase finale"
         )
+        # self._set_main_view(
+        #     "print-line", text="Infos tournoi + classement (finialized)"
+        # )
+        self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_finalize)
 
     @saveNav
-    def open_tournament_closed(self):
+    def open_tournament_closed(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        tournament.status = Status.CLOSED
 
         self._set_focus("menu")
-        self._set_head_view("print-line", text="Tournoi clos [NAME]")
-        self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
+        self._set_head_view("print-line", text=f"Tournoi <{tournament.name}> clos")
+        # self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
+        self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_closed)
 
     # @saveNav
@@ -188,7 +275,7 @@ class Controller:
             self._set_menu_view("list", call=self.menu_model.only_back)
             self._set_main_view(
                 "form",
-                rows=Player.get_fields_new(),
+                rows=Player.get_fields(),
                 exit_func=self._form_exit_new_actor,
             )
 
@@ -227,7 +314,7 @@ class Controller:
             self._set_menu_view("list", call=self.menu_model.only_back)
             self._set_main_view(
                 "form",
-                rows=Player.get_fields_new(),
+                rows=Player.get_fields(),
                 exit_func=self._form_exit_edit_actor,
                 source=actor,
             )
@@ -384,7 +471,7 @@ class Controller:
     #
     #
     #    def open_new_tournament(self):
-    #        inputs = self._set_full_view("input-lines", fields=Tournament.get_fields_new())
+    #        inputs = self._set_full_view("input-lines", fields=Tournament.get_fields())
     #
     #        self.world_model.add_tournament(
     #            inputs["name"],

@@ -5,6 +5,7 @@
 """
 
 import datetime
+from enum import Enum
 import logging
 
 from model.player import Player
@@ -77,6 +78,8 @@ class Tournament:
         the game method used in the tournament
     description : str
         the tournament director's notes
+    status : str
+        the current tournament status
 
     Methods
     -------
@@ -119,11 +122,12 @@ class Tournament:
         self.place = place
         self.start_date = start_date
         self.end_date = end_date
-        self.num_rounds = num_rounds
+        self.num_rounds = int(num_rounds)
         self.rounds = []
         self.players = []
         self.game_type = game_type
         self.description = description
+        self.status = Status.UNINITIALIZED
 
     # -----------------------------------
 
@@ -159,17 +163,23 @@ class Tournament:
         player1.add_game(game[1])
         player2.add_game(game[0])
 
-    def is_complete(self):
-        """ Return True if self.rounds has been played """
-
-        if self.current_round().is_closed() is not True:
-            return False
-        return len(self.rounds) == self.num_rounds
-
     # --- Rounds --- #
 
     def start_round(self):
         """ Initialize and start a new round in the current tournament instance """
+
+        if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
+            raise IsNotReady()
+
+        if len(self.rounds) >= self.num_rounds:
+            self.status = Status.CLOSING
+            raise IsComplete()
+
+        if self.has_player_pairs() is False:
+            raise WrongPlayersNumber()
+
+        if self.current_round() is not None:
+            self.current_round().close()
 
         round_index = len(self.rounds)
         new_round = Round(f"Round{round_index+1}", round_index, self.players)
@@ -183,12 +193,26 @@ class Tournament:
         else:
             return self.rounds[-1]
 
-    def close_round(self):
-        """ Make all actions required to close the current round of the tournament """
+    # def current_round_index(self):
+    #    """ Return the index of the current round if any or -1 otherwise """
+    #
+    #    if len(self.rounds) == 0:
+    #        return -1
+    #    else:
+    #        return len(self.rounds)
 
-        self.current_round.close()
+    # def close_round(self):
+    #     """ Make all actions required to close the current round of the tournament """
 
-    # --- Players --- #
+    #     self.current_round.close()
+
+    def has_player_pairs(self):
+        """ Return True is the number of players is greater than 0 and multiple of 2 """
+
+        if len(self.players) == 0 or len(self.players) % 2 == 1:
+            return False
+        return True
+
     def add_player(self, player):
         """Add a player to the current tournament instance
 
@@ -204,28 +228,6 @@ class Tournament:
         self.players.append(player)
 
     # --- Properties GET & SET ----------
-
-    #    def set_date(self, date):
-    #        """ D """
-    #
-    #        self.dates.append(datetime.datetime.strptime(date, "%d/%m/%Y"))
-    #
-    #    def set_dates(self, dates):
-    #        """ D """
-    #
-    #        for date in dates:
-    #            self.set_date(date)
-    #
-    #    def set_game_type(self, type):
-    #        """ D """
-    #
-    #        if type == "bullet" or type == "blitz" or type == "coup rapide":
-    #            self.game_type = type
-    #        else:
-    #            raise ValueError(
-    #                "Les contrôles de temps doivent être 'bullet',"
-    #                "'blitz' ou 'coup rapide'"
-    #            )
 
     def get_actors(self):
         """ D """
@@ -252,17 +254,17 @@ class Tournament:
             infos["current_round"] = f"{self.labels['unstarted']}"
 
         if self.current_round() is not None:
-            logging.critical(f"Coucou {type(self.current_round())}")
             for i, game in enumerate(self.current_round().get_current_games()):
-                infos[f"game{i}"] = (
-                    f"Table {i+1} : {game[0][0].fullname()} "
-                    f"[{game[0][0].elo}] vs {game[1][0].fullname() [{game[1][0].elo}]}"
-                )
+                infos[f"game_space{i}"] = ""
+                infos[f"game{i}"] = f"Table {i+1} :"
+                infos[
+                    f"game_details{i}"
+                ] = f"{game[0][0].getFullname()} [{game[0][0].elo}] vs {game[1][0].getFullname()} [{game[1][0].elo}]"
 
         return infos
 
     @classmethod
-    def get_fields_new(cls):
+    def get_fields(cls):
         """ D """
 
         fields = [
@@ -318,3 +320,35 @@ class Tournament:
         ]
 
         return fields
+
+
+class WrongPlayersNumber(Exception):
+    """Tournament Exception relative to the number of players.
+
+    Should be returned when the tournament can't
+    be started because of the number of players.
+    """
+
+    pass
+
+
+class IsNotReady(Exception):
+    """Tournament Exception relative to the tournament status.
+
+    Should be returned when the tournament is either not initialized or closed."""
+
+
+class IsComplete(Exception):
+    """Tournament Exception relative to the tournament status.
+
+    Should be returned when the tournament has played of the rounds."""
+
+
+class Status(Enum):
+    """Enum reflecting the current tournament status"""
+
+    UNINITIALIZED = 0
+    INITIALIZED = 1
+    PLAYING = 2
+    CLOSING = 3
+    CLOSED = 4

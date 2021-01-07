@@ -136,7 +136,7 @@ class Player:
         )
 
     @classmethod
-    def get_fields_new(cls):
+    def get_fields(cls):
         """ D """
 
         fields = [

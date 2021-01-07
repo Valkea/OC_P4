@@ -7,7 +7,7 @@
 # import time
 from operator import attrgetter
 
-from model.tournament import Tournament
+from model.tournament import Tournament, Status
 from model.player import Player
 
 # from manager.round import Round
@@ -92,7 +92,7 @@ def main():
         print("Tous les scores de match ont été saisi")
         t01.current_round().close()
 
-        if t01.is_complete():
+        if t01.status == Status.CLOSED:
             desc = input("Veuillez saisir la note du directeur de tournoi : ")
             t01.description = desc
             break

@@ -26,7 +26,7 @@ class Menu:
             ("Ajouter un joueur au tournoi", "open_input_actor_new"),
             ("Modifier un acteur", "open_select_actor"),
             ("Modifier le tournoi", "open_input_tournament_edit"),
-            ("Commencer le tournoi", "open_tournament_opened"),
+            ("Commencer le tournoi", "start_new_round"),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Sauvegarder", "open_save"),  # R1
             ("Fermer le tournoi", "open_menu_base"),  # R1
@@ -34,7 +34,7 @@ class Menu:
 
     def tournament_opened(self):
         return (
-            ("Saisir les résultats du round", "open_tournament_finalize"),
+            ("Saisir les résultats du round", "input_round_results"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Sauvegarder", "open_save"),  # R1
@@ -45,7 +45,7 @@ class Menu:
         return (
             (
                 "Saisir la note de fin de tournoi / Clore le tournoi",
-                "open_tournament_closed",
+                "input_final_note",
             ),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
@@ -111,7 +111,7 @@ class Menu:
 
         tournaments = world.tournaments
         if len(tournaments) > 0:
-            retv = [(f"{t.name}", "open_tournament_initialize", t) for t in tournaments]
+            retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
             return tuple(retv)
         else:
             return (
