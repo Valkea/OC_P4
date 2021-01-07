@@ -102,12 +102,14 @@ class Tournament:
         "num_rounds": "Nombre de tours",
         "gtype": "Contrôle du temps",
         "list_rounds": "Tournées",  # TODO unused
+        "current_round": "Tournée actuelle",
         "desc": "Description",
         "num_players": "Nombre de joueurs",
         "list_players": "Joueurs",  # TODO unused
         "unstarted": "Pas commencé",
         "format_date": "[Jour/Mois/Année]",
         "format_gtype": "[Bullet, Blitz, Coup rapide]",
+        "final_note": "[remarques générales du directeur du tournoi]",
     }
 
     def __init__(
@@ -228,18 +230,20 @@ class Tournament:
         infos = {
             "name": f"{self.labels['name']}: {self.name}",
             "place": f"{self.labels['place_short']}: {self.place}",
-            "start_date": f"{self.labels['start_date']}: {self.start_date}",
-            "end_date": f"{self.labels['end_date']}: {self.end_date}",
+            # "start_date": f"{self.labels['start_date']}: {self.start_date}",
+            # "end_date": f"{self.labels['end_date']}: {self.end_date}",
+            "dates": f"{self.labels['dates']}: du {self.start_date} au {self.end_date}",
             "num_rounds": f"{self.labels['num_rounds']}: {self.num_rounds}",
             "game_type": f"{self.labels['gtype']}: {self.game_type}",
             "desc": f"{self.labels['desc']}: {self.description}",
+            "space": "",
             "num_players": f"{self.labels['num_players']}: {len(self.players)}",
         }
 
         if len(self.rounds) > 0:
             infos[
                 "current_round"
-            ] = f"{self.current_round().name}: {len(self.rounds)}/{self.num_rounds}"
+            ] = f"{self.labels['current_round']}: {len(self.rounds)}/{self.num_rounds}"
         else:
             infos["current_round"] = f"{self.labels['unstarted']}"
 
@@ -303,6 +307,22 @@ class Tournament:
             {
                 "name": "description",
                 "label": cls.labels["desc"],
+                "placeholder": None,
+                "test": None,
+                "errormsg": None,
+            },
+        ]
+
+        return fields
+
+    @classmethod
+    def get_fields_final_note(cls):
+        """ D """
+
+        fields = [
+            {
+                "name": "description",
+                "label": f"{cls.labels['desc']} {cls.labels['final_note']}",
                 "placeholder": None,
                 "test": None,
                 "errormsg": None,

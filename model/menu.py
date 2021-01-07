@@ -55,6 +55,7 @@ class Menu:
 
     def tournament_closed(self):
         return (
+            ("Modifier la note de fin de tournoi", "input_final_note"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Fermer le tournoi", "open_menu_base"),  # R1

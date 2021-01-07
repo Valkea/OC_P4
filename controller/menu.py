@@ -211,18 +211,29 @@ class Controller:
 
     def input_final_note(self, tournament=None):
 
-        if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+        logging.info(f"EDIT final note: {tournament}")
 
-        self._set_focus("main")
-        self._set_head_view(
-            "print-line",
-            text=f"Saisie de la note finale du tournoi <{tournament.name}>",
-        )
-        self._set_main_view("print-line", text="INPUTS")
-        self._set_menu_view("list", call=self.menu_model.only_back)
-        curses.napms(3000)
-        self.open_tournament_closed()
+        try:
+            if tournament is None:
+                tournament = self.world_model.get_active_tournament()
+
+            self._set_focus("main")
+            self._set_head_view(
+                "print-line",
+                text=f"Saisie de la note finale du tournoi <{tournament.name}>",
+            )
+            self._set_menu_view("list", call=self.menu_model.only_back)
+            self._set_main_view(
+                "form",
+                rows=Tournament.get_fields_final_note(),
+                exit_func=self._form_exit_edit_final_note,
+                source=tournament,
+            )
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            logging.error(f"EXCEPTION: {e} {tb}")
+            self.goback()
 
     @saveNav
     def open_tournament_opened(self, tournament=None):
@@ -235,7 +246,7 @@ class Controller:
         self._set_focus("menu")
         self._set_head_view(
             "print-line",
-            text=f"Tournoi <{tournament.name}> : {tournament.current_round().name}",
+            text=f"Tournoi <{tournament.name}> : <{tournament.current_round().name}>",
         )
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_opened)
@@ -802,6 +813,13 @@ class Controller:
         source.elo = inputs["elo"]
 
         self.goback()
+
+    def _form_exit_edit_final_note(self, inputs, source):
+
+        logging.info(f"EDIT FINAL NOTE: {inputs}")
+        source.description = inputs["description"]
+
+        self.open_tournament_closed()
 
 
 class UnstackAll(Exception):
