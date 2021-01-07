@@ -59,15 +59,11 @@ class Controller:
             if key == 147:  # TAB
                 self.curses_view.swap_focus()
             elif key == curses.KEY_RESIZE:
-                logging.debug("RESIZE")  # TODO ?
+                logging.warning("RESIZE")  # TODO ?
             elif key == 300:  # CTRL + F12
                 self._generate_fake_players()
 
             self._move_selection(key)
-            # self._input_text(key)
-
-    #    def _input_text(self, key):
-    #        logging.debug(f"_input_text: {key} --> {chr(key)}")
 
     # === PUBLIC NAVIGATION METHODS ===
 
@@ -94,7 +90,7 @@ class Controller:
             )
 
         except Exception as e:
-            logging.debug(f"EXCEPTION: {e}")
+            logging.error(f"EXCEPTION: {e}")
             self.goback()
 
     @saveNav
@@ -112,7 +108,7 @@ class Controller:
     @saveNav
     def open_input_tournament_edit(self, tournament=None):
 
-        logging.debug(f"EDIT tournament: {tournament}")
+        logging.info(f"EDIT tournament: {tournament}")
 
         try:
             if tournament is None:
@@ -132,7 +128,7 @@ class Controller:
 
         except Exception as e:
             tb = traceback.format_exc()
-            logging.debug(f"------------EXCEPTION: {e} {tb}")
+            logging.error(f"EXCEPTION: {e} {tb}")
             self.goback()
 
     def open_tournament_current(self, tournament=None):
@@ -146,16 +142,12 @@ class Controller:
             tournament.status == Status.UNINITIALIZED
             or tournament.status == Status.INITIALIZED
         ):
-            logging.debug("SWITCH INIT")
             self.open_tournament_initialize(tournament)
         elif tournament.status == Status.PLAYING:
-            logging.debug("SWITCH PLAYING")
             self.open_tournament_opened(tournament)
         elif tournament.status == Status.CLOSING:
-            logging.debug("SWITCH CLOSING")
             self.open_tournament_finalize(tournament)
         elif tournament.status == Status.CLOSED:
-            logging.debug("SWITCH CLOSED")
             self.open_tournament_closed(tournament)
 
     @saveNav
@@ -179,6 +171,7 @@ class Controller:
             tournament = self.world_model.get_active_tournament()
 
         try:
+            logging.info("START_NEW_ROUND try")
             tournament.start_round()
             self.open_tournament_opened(tournament)
 
@@ -248,9 +241,6 @@ class Controller:
         self._set_head_view(
             "print-line", text=f"Tournoi <{tournament.name}> en phase finale"
         )
-        # self._set_main_view(
-        #     "print-line", text="Infos tournoi + classement (finialized)"
-        # )
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_finalize)
 
@@ -264,11 +254,10 @@ class Controller:
 
         self._set_focus("menu")
         self._set_head_view("print-line", text=f"Tournoi <{tournament.name}> clos")
-        # self._set_main_view("print-line", text="Infos tournoi + classement (closed)")
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_closed)
 
-    # @saveNav
+    @saveNav
     def open_input_actor_new(self):
 
         try:
@@ -282,7 +271,7 @@ class Controller:
             )
 
         except Exception as e:
-            logging.debug(f"EXCEPTION: {e}")
+            logging.error(f"EXCEPTION: {e}")
             self.goback()
 
     @saveNav
@@ -303,10 +292,10 @@ class Controller:
         else:
             self._set_menu_view("list", call=self.menu_model.actors_elo)
 
-    # @saveNav
+    @saveNav
     def open_input_actor_edit(self, actor):
 
-        logging.debug(f"EDIT actor: {actor}")
+        logging.info(f"EDIT actor: {actor}")
 
         try:
             self._set_focus("main")
@@ -322,7 +311,7 @@ class Controller:
             )
 
         except Exception as e:
-            logging.debug(f"EXCEPTION: {e}")
+            logging.error(f"EXCEPTION: {e}")
             self.goback()
 
     @saveNav
@@ -426,7 +415,7 @@ class Controller:
     def _generate_fake_players(self):
 
         if self.world_model.get_active_tournament() is None:
-            logging.debug("GEN FAKE USERS: need an active tournament")
+            logging.warning("GEN FAKE USERS: need an active tournament")
             return
 
         num_players = 2
@@ -448,77 +437,6 @@ class Controller:
         # self.open_select_actor()
         # nav_history.pop()
 
-    # --- OLD ??
-
-    #    def open_menu_baseOld(self):
-    #        self._set_menu_view("list", call=self.menu_model.menu_base)
-    #        self._set_main_view("clear")
-    #
-    #    def open_tournois(self):
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournois)
-    #        self._set_main_view("clear")
-    #
-    #    def open_tournois_select(self):
-    #        self._set_main_view(
-    #            "list", call=self.menu_model.menu_tournois_select, param=self.world_model
-    #        )
-    #
-    #    def open_tournoi_actions(self):
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_select_actions)
-    #        self._set_main_view("clear")
-    #
-    #    def open_rapports(self):
-    #        self._set_menu_view("list", call=self.menu_model.menu_rapports)
-    #        self._set_main_view("clear")
-    #
-    #
-    #    def open_new_tournament(self):
-    #        inputs = self._set_full_view("input-lines", fields=Tournament.get_fields())
-    #
-    #        self.world_model.add_tournament(
-    #            inputs["name"],
-    #            inputs["place"],
-    #            [inputs["start_date"], inputs["end_date"]],
-    #            inputs["gtype"],
-    #            inputs["desc"],
-    #            inputs["rounds"],
-    #        )
-    #
-    #        self.open_tournois_infos()  # TODO passer un id ??
-    #
-    #    def open_new_actor(self):
-    #        # # self.curses_view.clear_menu()
-    #        # self.curses_view.get_input("Nom")
-    #        # self.curses_view.get_input("Prénom")
-    #        # self.curses_view.get_input("Date de naissance [JJ/MM/AAAA]")
-    #        # self.curses_view.clear_main()
-    #        self._set_full_view("print-line", text="TODO ACTOR INPUT")  # TODO
-    #        curses.napms(2000)
-    #        self.open_tournoi_actors()
-    #
-    #    def open_tournois_infos(self):
-    #        tournaments = self.world_model.tournaments
-    #        infos = tournaments[0].get_overall_infos()  # TODO rendre l'ID dynamique
-    #        self._set_main_view("print-lines", rows=infos.values())
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
-    #
-    #    def tmp(self):
-    #        return (("TODO ACTOR", "open_edit_actor"),)
-    #
-    #    def open_tournoi_actors(self):
-    #        self._set_main_view("list", call=self.tmp)
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_select)
-    #
-    #    def open_edit_actor(self):
-    #        self._set_main_view("print-line", text="TODO ACTOR EDIT")  # TODO
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_actor_manager)
-    #
-    #    def open_tournoi_rapport(self):
-    #        self._set_menu_view("list", call=self.menu_model.menu_tournoi_rapports)
-    #
-    #    # def open_tournoi_menu_base(self):
-    #    #    self._set_menu_view("list", call=self.menu_model.menu_tournoi_base)
-
     # === PRIVATE METHODS ===
 
     def _align_to_larger(self, options):
@@ -528,16 +446,12 @@ class Controller:
     def _move_selection(self, key):
 
         for screen in self.list_data.keys():
-            logging.debug(f"MOVE {screen}")
 
             sdata = self.list_data[screen]
             # screen = sdata["screen"]
             # screen = self.curses_view.focus
 
             if screen is not self.curses_view.focus:
-                logging.debug(
-                    f"MOVE SELECT disable -- : {screen} <--> {self.curses_view.focus}"
-                )
                 continue
 
             current_row = sdata["current_row"]
@@ -586,20 +500,6 @@ class Controller:
             # colorset = self.list_data["colorset"]
 
             self.curses_view.display_list(screen, buttons, current_row)
-
-    #    def _check_input(self, screen, label, placeholder=None, test=None, error=None):
-    #
-    #        errormsg = None
-    #        if test is not None:
-    #            test = test.replace("x", "value")
-    #        while 1:
-    #            value = self.curses_view.get_input(screen, label, placeholder, errormsg)
-    #            if test is None or eval(test) is True:
-    #                break
-    #            else:
-    #                errormsg = error
-    #
-    #        return value
 
     # === View controls ===
 
@@ -758,7 +658,6 @@ class Controller:
 
         j = j_save[0]
 
-        logging.debug(f"SWAP INIT j:{j}")
         if x == 9 or x == 10:
             test = self._form_test(
                 text_boxes[j].gather().strip(),
@@ -769,7 +668,6 @@ class Controller:
 
             if test is True:
                 if j < len(rows) - 1:
-                    logging.debug("A")
 
                     j += 1
                     j_save[0] = j
@@ -780,7 +678,6 @@ class Controller:
                     return
 
                 elif j == len(rows) - 1:
-                    logging.debug("B")
 
                     j = 0
                     j_save[0] = j
@@ -801,21 +698,17 @@ class Controller:
         elif x == 147:
             raise UnstackAll("TAB")
 
-        logging.debug(f"SWAP EXIT j:{j}\n")
         return x
 
     def _form_test(self, value, test, errormsg, error_win):
 
-        # if test is not None:
-        # test = test.replace("$", "value")
-
         if test is None or eval(test) is True:
-            logging.debug("TEST OK")
+            logging.debug(f"TEST {test} OK")
             error_win.clear()
             error_win.refresh()
             return True
         else:
-            logging.debug("TEST ERROR")
+            logging.debug(f"TEST {test} ERROR")
             error_win.clear()
             error_win.addstr(errormsg)
             error_win.refresh()
@@ -832,7 +725,7 @@ class Controller:
 
     def _form_exit_new_tournament(self, inputs, source):
 
-        logging.debug(f"NEW TOURNAMENT VALUES: {inputs}")
+        logging.info(f"NEW TOURNAMENT VALUES: {inputs}")
         tournament = self.world_model.add_tournament(
             inputs["name"],
             inputs["place"],
@@ -847,7 +740,7 @@ class Controller:
 
     def _form_exit_edit_tournament(self, inputs, source):
 
-        logging.debug(f"NEW TOURNAMENT VALUES: {inputs}")
+        logging.info(f"EDIT TOURNAMENT VALUES: {inputs}")
         source.name = inputs["name"]
         source.place = inputs["place"]
         source.start_date = inputs["start_date"]
@@ -861,7 +754,7 @@ class Controller:
 
     def _form_exit_new_actor(self, inputs, source):
 
-        logging.debug(f"NEW ACTOR VALUES: {inputs}")
+        logging.info(f"NEW ACTOR VALUES: {inputs}")
         tournament = self.world_model.get_active_tournament()
         actor = Player(
             inputs["family_name"],
@@ -875,7 +768,7 @@ class Controller:
 
     def _form_exit_edit_actor(self, inputs, source):
 
-        logging.debug(f"EDIT ACTOR VALUES: {inputs}")
+        logging.info(f"EDIT ACTOR VALUES: {inputs}")
         source.family_name = inputs["family_name"]
         source.first_name = inputs["first_name"]
         source.birthdate = inputs["birthdate"]

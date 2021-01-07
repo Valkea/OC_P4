@@ -6,7 +6,6 @@
 
 import datetime
 from enum import Enum
-import logging
 
 from model.player import Player
 from model.round import Round
@@ -51,7 +50,6 @@ class World:
         for tournament in self.tournaments:
             all_actors.union(tournament.get_actors())
             all_actors = all_actors.union(tournament.get_actors())
-            logging.debug(f"ALL ACTORS: {list(all_actors)}")
         return list(all_actors)
 
 
@@ -115,9 +113,6 @@ class Tournament:
     def __init__(
         self, name, place, start_date, end_date, game_type, description="", num_rounds=4
     ):
-        logging.debug(
-            f"SELF:1>{name}< 2>{place}< 3>{start_date}/{end_date}< 4>{num_rounds}< 5>{game_type}< 6>{description}<"
-        )
         self.name = name
         self.place = place
         self.start_date = start_date
@@ -200,19 +195,6 @@ class Tournament:
             return None
         else:
             return self.rounds[-1]
-
-    # def current_round_index(self):
-    #    """ Return the index of the current round if any or -1 otherwise """
-    #
-    #    if len(self.rounds) == 0:
-    #        return -1
-    #    else:
-    #        return len(self.rounds)
-
-    # def close_round(self):
-    #     """ Make all actions required to close the current round of the tournament """
-
-    #     self.current_round.close()
 
     def has_player_pairs(self):
         """ Return True is the number of players is greater than 0 and multiple of 2 """

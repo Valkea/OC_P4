@@ -131,7 +131,7 @@ class CurseView:
 
     def init_form(self, screen, rows, source=None):
 
-        logging.debug("INIT FORM")
+        logging.info("INIT FORM")
         # self._save_last_draw(screen, rows)
 
         curses.curs_set(1)  # turn on cursor blinking
@@ -143,7 +143,7 @@ class CurseView:
         return text_boxes, text_wins, error_box
 
     def close_form(self, screen):
-        logging.debug("CLOSE FORM")
+        logging.info("CLOSE FORM")
         # screen.clear()
         # screen.refresh()
         # textboxes = self._draw_them_all(screen, rows)
@@ -197,10 +197,6 @@ class CurseView:
 
         return text_boxes, text_wins, error_win
 
-    def place_input_field(self, screen, x, y, w, h, label, placeholder, colors):
-        logging.debug("PLACE_INPUT_FIELD")
-        pass
-
     # --- FOCUS ---
 
     def swap_focus(self):
@@ -223,10 +219,6 @@ class CurseView:
     def _set_focus_design(self):
         self.focus.border()
         self.focus.refresh()
-        # self.main.refresh()
-        # self.menu.refresh()
-        # self.head.refresh()
-        # self.screen.refresh()
 
     # --- GENERIC ---
 

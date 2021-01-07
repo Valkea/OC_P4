@@ -6,7 +6,7 @@ import traceback
 
 from controller.menu import Controller  # , MenuController
 
-logging.basicConfig(filename="debug.txt", filemode="w", level=logging.DEBUG)
+logging.basicConfig(filename="debug.txt", filemode="w", level=logging.INFO)
 
 try:
     control = Controller()
