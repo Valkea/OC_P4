@@ -103,7 +103,9 @@ class Controller:
         self._set_head_view("print-line", text="Chargement d'un tournoi")
         self._set_menu_view("list", call=self.menu_model.only_back)
         self._set_main_view(
-            "list", call=self.menu_model.select_tournament_load, param=self.world_model
+            "list",
+            call=self.menu_model.select_tournament_load,
+            call_params={"world": self.world_model},
         )
 
     # @saveNav
@@ -201,7 +203,9 @@ class Controller:
         self._set_head_view("print-line", text="Selection d'un acteur à modifier")
         self._set_menu_view("list", call=self.menu_model.actors_alpha)
         self._set_main_view(
-            "list", call=self.menu_model.select_actor, param=self.world_model
+            "list",
+            call=self.menu_model.select_actor,
+            call_params={"world": self.world_model},
         )
 
     def open_menu_actor_order(self, order):
@@ -251,7 +255,7 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.list_all_actors,
-            param=self.world_model,
+            call_params={"world": self.world_model},
             autostart=False,
         )
 
@@ -263,10 +267,49 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.select_tournament_load,
-            param=self.world_model,
+            call_params={"world": self.world_model},
             active_links=False,
             autostart=False,
         )
+
+    @saveNav
+    def open_select_tournament_report(self, route):
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Selection d'un tournoi")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.select_tournament_report,
+            call_params={"world": self.world_model, "route": route},
+        )
+
+    @saveNav
+    def open_report_tournament_actors(self, tournament=None):
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        self._set_focus("menu")
+        self._set_head_view(
+            "print-line",
+            text=f"Liste de l'ensemble des acteurs du tournoi <{tournament.name}>",
+        )
+        self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.list_actors,
+            call_params={"tournament": tournament},
+            autostart=False,
+        )
+
+    @saveNav
+    def open_report_tournament_rounds(self, tournament=None):
+        pass
+
+    @saveNav
+    def open_report_tournament_matchs(self, tournament=None):
+        pass
 
     @saveNav
     def open_save(self):
@@ -515,8 +558,8 @@ class Controller:
         # --- Print a menu list into the view ---
         elif action == "list":
 
-            if kwargs.get("param", False):
-                options = kwargs["call"](kwargs["param"])
+            if kwargs.get("call_params", False):
+                options = kwargs["call"](**kwargs["call_params"])
             else:
                 options = kwargs["call"]()
 

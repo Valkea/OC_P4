@@ -66,9 +66,13 @@ class Menu:
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
             ("Tous les tournois", "open_report_all_tournament"),  # R3
-            ("Tous les joueurs d'un tournoi", None),
-            ("Tous les tours d'un tournoi", None),
-            ("Tous les matchs d'un tournoi", None),
+            (
+                "Tous les joueurs d'un tournoi",
+                "open_select_tournament_report",
+                "actors",
+            ),
+            ("Tous les tours d'un tournoi", "open_select_tournament_report", "rounds"),
+            ("Tous les matchs d'un tournoi", "open_select_tournament_report", "matchs"),
             ("<< RETOUR", "goback"),
         )
 
@@ -76,9 +80,9 @@ class Menu:
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
             ("Tous les tournois", "open_report_all_tournament"),  # R3
-            ("Tous les joueurs de ce tournoi", None),
-            ("Tous les tours de ce tournoi", None),
-            ("Tous les matchs de ce tournoi", None),
+            ("Tous les joueurs de ce tournoi", "open_report_tournament_actors"),
+            ("Tous les tours de ce tournoi", "open_report_tournament_rounds"),
+            ("Tous les matchs de ce tournoi", "open_report_tournament_matchs"),
             ("<< RETOUR", "goback"),
         )
 
@@ -114,6 +118,24 @@ class Menu:
                 ("Aucun tournoi", "goback"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
+    def select_tournament_report(self, world, route):
+
+        if route == "actors":
+            link = "open_report_tournament_actors"
+        elif route == "rounds":
+            link = "open_report_tournament_rounds"
+        elif route == "matchs":
+            link = "open_report_tournament_matchs"
+
+        tournaments = world.tournaments
+        if len(tournaments) > 0:
+            retv = [(f"{t.name}", link, t) for t in tournaments]
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun tournoi", "goback"),
+            )  # ("Créer un tournoi", "open_input_tournament_new"),)
+
     def select_actor(self, world):
 
         tournament = world.get_active_tournament()
@@ -129,6 +151,15 @@ class Menu:
                 ("Aucun acteur", "goback"),
             )  # ("Créer un acteur", "open_input_actor_new"),)
 
+    def list_actors(self, tournament):
+
+        actors = tournament.get_actors()
+        if len(actors) > 0:
+            retv = [(f" {actor.oneline(30)} ", None, actor) for actor in actors]
+            return tuple(retv)
+        else:
+            return (("Aucun acteur", "goback"),)
+
     def list_all_actors(self, world):
 
         actors = world.get_all_actors()
@@ -136,9 +167,7 @@ class Menu:
             retv = [(f" {actor.oneline(30)} ", None, actor) for actor in actors]
             return tuple(retv)
         else:
-            return (
-                ("Aucun acteur", "goback"),
-            )  # ("Créer un acteur", "open_input_actor_new"),)
+            return (("Aucun acteur", "goback"),)
 
     # ------------------------------------------------------------------------
 
