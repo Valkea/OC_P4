@@ -143,7 +143,7 @@ class Menu:
         actors = tournament.get_actors()
         if len(actors) > 0:
             retv = [
-                (f" {actor.oneline(30)} ", "open_input_actor_edit", actor)
+                (f" {actor.oneline()} ", "open_input_actor_edit", actor)
                 for actor in actors
             ]
             return tuple(retv)
@@ -156,7 +156,7 @@ class Menu:
 
         actors = tournament.get_actors()
         if len(actors) > 0:
-            retv = [(f" {actor.oneline(30)} ", None) for actor in actors]
+            retv = [(f" {actor.oneline()} ", None) for actor in actors]
             return tuple(retv)
         else:
             return (("Aucun acteur", "goback"),)
@@ -165,7 +165,7 @@ class Menu:
 
         actors = world.get_all_actors()
         if len(actors) > 0:
-            retv = [(f" {actor.oneline(30)} ", None) for actor in actors]
+            retv = [(f" {actor.oneline()} ", None) for actor in actors]
             return tuple(retv)
         else:
             return (("Aucun acteur", "goback"),)
@@ -174,7 +174,7 @@ class Menu:
 
         rounds = tournament.rounds
         if len(rounds) > 0:
-            retv = [(f" {round.oneline(10)} ", None) for round in rounds]
+            retv = [(f" {round.oneline()} ", None) for round in rounds]
             return tuple(retv)
         else:
             return (("Le tournoi n'est pas commencé", "goback"),)

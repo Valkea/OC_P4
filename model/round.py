@@ -55,7 +55,7 @@ class Round:
         for p1, p2 in paired_players:
             self.games.append(([p1, 0], [p2, 0]))
 
-    def oneline(self, ljustv=0):
+    def oneline(self, ljustv=10):
         """ Return a full resume of the round in one line """
 
         if self.close_time is not None:

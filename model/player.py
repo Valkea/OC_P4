@@ -8,6 +8,7 @@ import json
 import datetime
 import re
 import math
+import logging
 
 
 class Player:
@@ -103,10 +104,25 @@ class Player:
 
         return f"{self.first_name} {self.family_name}".title()
 
-    def oneline(self, ljustv=0):
+    def oneline(self, ljustv=20, age=True, sex=True, elo=True, score=True, extra=False):
         """ Return a full resume of the actor in one line """
 
-        return f"{self.getFullname().ljust(ljustv)} | {self.getAge()} ans | {self.getSex()} | ELO:{self.elo}"
+        logging.debug(f"ONELINE PLAYER age:{age} sex:{sex} elo:{elo} score:{score}")
+
+        retv = []
+        retv.append(self.getFullname().ljust(ljustv)[:ljustv])
+        if age:
+            retv.append(f"{self.getAge():2} ans")
+        if sex:
+            retv.append(self.getSex())
+        if elo:
+            retv.append(f"ELO:{int(self.elo):4}")
+        if score:
+            retv.append(f"PTS:{self.score:3}")
+        if extra:
+            retv.append(extra)
+
+        return "|".join(retv)
 
     def getAge(self):
         """ Return the current age of the actor in years """

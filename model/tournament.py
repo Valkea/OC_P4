@@ -107,13 +107,13 @@ class Tournament:
         "desc": "Description",
         "num_players": "Nombre de joueurs",
         "list_players": "Joueurs",  # TODO unused
+        "table": "Table",
         "unstarted": "Pas commencé",
         "format_date": "[Jour/Mois/Année]",
         "format_gtype": "[Bullet, Blitz, Coup rapide]",
         "final_note": "[remarques générales du directeur du tournoi]",
         "input_score1": "Utilisez < ou > pour indiquer le gagnant",
         "input_score2": "         = en cas d'égalité",
-        "input_score3": "Résultat du match {p1} vs {p2}",
         "games": "Matchs de ce round",
         "classement": "Classement",
     }
@@ -259,22 +259,18 @@ class Tournament:
 
             infos["space2"] = ""
             infos["games"] = f"{self.labels['games']}:"
+            infos["space3"] = ""
 
             for i, game in enumerate(self.current_round().games):
 
                 player1 = game[0][0]
                 player2 = game[1][0]
 
-                pts1 = player1.score
-                pts1 = f"{pts1}pt" if pts1 <= 1 else f"{pts1}pts"
-                pts2 = player2.score
-                pts2 = f"{pts2}pt" if pts2 <= 1 else f"{pts2}pts"
-
-                infos[f"game_space{i}"] = ""
-                infos[f"game{i}"] = f"Table {i+1} :"
+                # infos[f"game_space{i}"] = ""
+                # infos[f"game{i}"] = f"{self.labels['table']} #{i+1}"
                 infos[f"game_details{i}"] = (
-                    f"{player1.getFullname()} [{player1.elo}][{pts1}] vs "
-                    + f"{player2.getFullname()} [{player2.elo}][{pts2}]"
+                    f"({player1.oneline(age=False, sex=False)}) vs "
+                    + f"({player2.oneline(age=False, sex=False)})"
                 )
 
         if self.status == Status.CLOSING or self.status == Status.CLOSED:
@@ -286,7 +282,7 @@ class Tournament:
             for i, player in enumerate(
                 sorted(self.players, key=attrgetter("score", "elo"), reverse=True)
             ):
-                infos[f"result{i}"] = f"{player.oneline(25)} | {player.score}pts"
+                infos[f"result{i}"] = player.oneline()
 
         return infos
 

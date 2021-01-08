@@ -40,7 +40,7 @@ class CurseView:
 
         self.head = curses.newwin(self.headH, maxW, 0, 0)
         self.main = curses.newwin(mainH, maxW, self.headH, 0)
-        self.error = curses.newwin(errorH, maxW, self.headH+mainH, 0)
+        self.error = curses.newwin(errorH, maxW, self.headH + mainH, 0)
         self.menu = curses.newwin(menuH, maxW, maxH - 10, 0)
 
         self.focus = self.menu
