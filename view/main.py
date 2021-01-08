@@ -34,9 +34,14 @@ class CurseView:
         # Init menu window & main window
         maxH, maxW = self.screen.getmaxyx()
         self.headH = 1
+        errorH = 1
+        mainH = maxH - 10 - self.headH - errorH
+        menuH = 10
+
         self.head = curses.newwin(self.headH, maxW, 0, 0)
-        self.main = curses.newwin(maxH - 10 - self.headH, maxW, self.headH, 0)
-        self.menu = curses.newwin(10, maxW, maxH - 10, 0)
+        self.main = curses.newwin(mainH, maxW, self.headH, 0)
+        self.error = curses.newwin(errorH, maxW, self.headH+mainH, 0)
+        self.menu = curses.newwin(menuH, maxW, maxH - 10, 0)
 
         self.focus = self.menu
         self.last_draws = {}
@@ -65,6 +70,19 @@ class CurseView:
         self.menu.refresh()
 
     # --------------------------------
+
+    def display_error(self, text):
+
+        # get screen size
+        h, w = self.error.getmaxyx()
+        x = w // 2 - len(text) // 2
+
+        # print msg
+        self.error.addstr(0, x, str(text))
+        self.error.refresh()
+        curses.napms(2500)  # TODO blocking
+        self.error.clear()
+        self.error.refresh()
 
     def display_list(self, screen, options, current_row, colors=[1, 2]):
         self._save_last_draw(screen, options, current_row, colors=colors)

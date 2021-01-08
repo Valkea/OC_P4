@@ -177,8 +177,14 @@ class Tournament:
         if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
             raise IsNotReady()
 
+        if len(self.players) <= self.num_rounds:
+            raise WrongPlayersNumber(
+                f"Il faut au moins {self.num_rounds+1} joueurs "
+                + f"pour faire un tournoi en {self.num_rounds} tours"
+            )
+
         if self.has_player_pairs() is False:
-            raise WrongPlayersNumber()
+            raise WrongPlayersNumber("Il faut un nombre pair de joueurs")
 
         if self.current_round() is not None:
             self.current_round().close()

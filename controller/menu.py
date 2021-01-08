@@ -185,8 +185,8 @@ class Controller:
             tournament.start_round()
             self.open_tournament_opened(tournament)
 
-        except WrongPlayersNumber:
-            pass  # TODO display msg ?
+        except WrongPlayersNumber as e:
+            self.curses_view.display_error(str(e))
         except IsNotReady as e:
             logging.critical(
                 "Calling start_new_round on an uninitialized or closed tournament"
