@@ -435,7 +435,22 @@ class Controller:
 
     @saveNav
     def open_report_tournament_matchs(self, tournament=None):
-        pass
+
+        if tournament is None:
+            tournament = self.world_model.get_active_tournament()
+
+        self._set_focus("menu")
+        self._set_head_view(
+            "print-line",
+            text=f"Liste des matchs du tournoi <{tournament.name}>",
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "list",
+            call=self.menu_model.list_games,
+            call_params={"tournament": tournament},
+            autostart=False,
+        )
 
     @saveNav
     def open_save(self):

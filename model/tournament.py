@@ -277,7 +277,9 @@ class Tournament:
             infos["classement"] = f"{self.labels['classement']}:"
             infos["space3"] = ""
 
-            for i, player in enumerate(sorted(self.players, key=attrgetter("score", "elo"), reverse=True)):
+            for i, player in enumerate(
+                sorted(self.players, key=attrgetter("score", "elo"), reverse=True)
+            ):
                 infos[f"result{i}"] = f"{player.oneline(25)} | {player.score}pts"
 
         return infos

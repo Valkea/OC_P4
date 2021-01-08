@@ -178,3 +178,36 @@ class Menu:
             return tuple(retv)
         else:
             return (("Le tournoi n'est pas commencé", "goback"),)
+
+    def list_games(self, tournament):
+
+        rounds = tournament.rounds
+        if len(rounds) > 0:
+
+            retv = []
+            for r in rounds:
+
+                retv.append(("", None))
+                retv.append((f" {r.name} ", None))
+
+                for i, game in enumerate(r.games):
+
+                    player1 = game[0][0]
+                    player2 = game[1][0]
+
+                    pts1 = game[0][1]
+                    pts1 = f"{pts1}pt" if pts1 <= 1 else f"{pts1}pts"
+                    pts2 = game[1][1]
+                    pts2 = f"{pts2}pt" if pts2 <= 1 else f"{pts2}pts"
+
+                    retv.append(
+                        (
+                            f"{player1.getFullname()} [{player1.elo}][{pts1}] vs "
+                            + f"{player2.getFullname()} [{player2.elo}][{pts2}]",
+                            None,
+                        )
+                    )
+
+            return tuple(retv)
+        else:
+            return (("Le tournoi n'est pas commencé", "goback"),)
