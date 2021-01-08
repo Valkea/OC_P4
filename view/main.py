@@ -35,12 +35,12 @@ class CurseView:
         maxH, maxW = self.screen.getmaxyx()
         self.headH = 1
         errorH = 1
-        mainH = maxH - 10 - self.headH - errorH
+        self.mainH = maxH - 10 - self.headH - errorH
         menuH = 10
 
         self.head = curses.newwin(self.headH, maxW, 0, 0)
-        self.main = curses.newwin(mainH, maxW, self.headH, 0)
-        self.error = curses.newwin(errorH, maxW, self.headH + mainH, 0)
+        self.main = curses.newwin(self.mainH, maxW, self.headH, 0)
+        self.error = curses.newwin(errorH, maxW, self.headH + self.mainH, 0)
         self.menu = curses.newwin(menuH, maxW, maxH - 10, 0)
 
         self.focus = self.menu
@@ -101,15 +101,16 @@ class CurseView:
 
         # display select list
         for i, option in enumerate(options):
-            x = w // 2 - len(option) // 2
-            y = h // 2 - len(options) // 2 + i
+            if i < self.mainH - 1:
+                x = w // 2 - len(option) // 2
+                y = h // 2 - min(len(options), self.mainH - 1) // 2 + i
 
-            if i == current_row:
-                screen.attron(curses.color_pair(colors[0]))
-                screen.addstr(y, x, option)
-                screen.attroff(curses.color_pair(colors[0]))
-            else:
-                screen.addstr(y, x, option)
+                if i == current_row:
+                    screen.attron(curses.color_pair(colors[0]))
+                    screen.addstr(y, x, option)
+                    screen.attroff(curses.color_pair(colors[0]))
+                else:
+                    screen.addstr(y, x, option)
 
         # update screen
         self._set_focus_design()
@@ -123,9 +124,10 @@ class CurseView:
         h, w = screen.getmaxyx()
         max_txt = max([len(x) for x in rows])
         x = w // 2 - max_txt // 2
-        y = (h - len(rows)) // 2
+        y = (h - min(len(rows), self.mainH - 1)) // 2
         for i, row in enumerate(rows):
-            screen.addstr(y + i, x, row)
+            if i < self.mainH - 1:
+                screen.addstr(y + i, x, row)
 
         # update screen
         self._set_focus_design()

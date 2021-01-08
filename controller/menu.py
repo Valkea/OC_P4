@@ -503,7 +503,6 @@ class Controller:
 
         self.open_tournament_initialize()
         # self.open_select_actor()
-        # nav_history.pop()
 
     # === PRIVATE METHODS ===
 
