@@ -55,10 +55,6 @@ class Round:
         for p1, p2 in paired_players:
             self.games.append(([p1, 0], [p2, 0]))
 
-    def get_current_games(self):
-        """ D """
-        return self.games
-
     def oneline(self, ljustv=0):
         """ Return a full resume of the round in one line """
 
@@ -73,6 +69,18 @@ class Round:
                 f"{self.name.ljust(ljustv)} | "
                 + f"Commencé le {self.start_time.strftime('%d/%m/%Y %H:%M:%S')}"
             )
+
+    @staticmethod
+    def getScores(symbol):
+
+        if symbol == ">":
+            return (0, 1)
+
+        elif symbol == "<":
+            return (1, 0)
+
+        elif symbol == "=":
+            return (0.5, 0.5)
 
     def _sort_players(self, players):
         """_Return a new list of the players sorted by score then by elo.

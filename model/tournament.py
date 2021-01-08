@@ -6,6 +6,7 @@
 
 import datetime
 from enum import Enum
+from operator import attrgetter
 
 from model.player import Player
 from model.round import Round
@@ -110,6 +111,11 @@ class Tournament:
         "format_date": "[Jour/Mois/Année]",
         "format_gtype": "[Bullet, Blitz, Coup rapide]",
         "final_note": "[remarques générales du directeur du tournoi]",
+        "input_score1": "Utilisez < ou > pour indiquer le gagnant",
+        "input_score2": "         = en cas d'égalité",
+        "input_score3": "Résultat du match {p1} vs {p2}",
+        "games": "Matchs de ce round",
+        "classement": "Classement",
     }
 
     def __init__(
@@ -136,7 +142,7 @@ class Tournament:
 
     # -----------------------------------
 
-    def set_result(self, game_index, score1, score2):
+    def set_results(self, game_index, score1, score2):
         """Set the game result to the appropriate Game in the current Round,
             And update the Player's score
 
@@ -153,19 +159,14 @@ class Tournament:
         if score1 + score2 != 1:
             raise ValueError("La somme des deux scores doit être de 1")
 
-        game = self.current_round().games[
-            game_index
-        ]  # TODO sont ils vraiment dans cet ordre ?
+        game = self.current_round().games[game_index]  # persistent order
         game[0][1] = score1
         game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
 
         player1 = game[0][0]
-        player2 = game[1][0]
-
-        # player1.add_to_score(score1)
-        # player2.add_to_score(score2)
-
         player1.add_game(game[1])
+
+        player2 = game[1][0]
         player2.add_game(game[0])
 
     # --- Rounds --- #
@@ -247,13 +248,37 @@ class Tournament:
         else:
             infos["current_round"] = f"{self.labels['unstarted']}"
 
-        if self.current_round() is not None:
-            for i, game in enumerate(self.current_round().get_current_games()):
+        # if self.current_round() is not None:
+        if self.status == Status.PLAYING:
+
+            infos["space2"] = ""
+            infos["games"] = f"{self.labels['games']}:"
+
+            for i, game in enumerate(self.current_round().games):
+
+                player1 = game[0][0]
+                player2 = game[1][0]
+
+                pts1 = player1.score
+                pts1 = f"{pts1}pt" if pts1 <= 1 else f"{pts1}pts"
+                pts2 = player2.score
+                pts2 = f"{pts2}pt" if pts2 <= 1 else f"{pts2}pts"
+
                 infos[f"game_space{i}"] = ""
                 infos[f"game{i}"] = f"Table {i+1} :"
-                infos[
-                    f"game_details{i}"
-                ] = f"{game[0][0].getFullname()} [{game[0][0].elo}] vs {game[1][0].getFullname()} [{game[1][0].elo}]"
+                infos[f"game_details{i}"] = (
+                    f"{player1.getFullname()} [{player1.elo}][{pts1}] vs "
+                    + f"{player2.getFullname()} [{player2.elo}][{pts2}]"
+                )
+
+        if self.status == Status.CLOSING or self.status == Status.CLOSED:
+
+            infos["space2"] = ""
+            infos["classement"] = f"{self.labels['classement']}:"
+            infos["space3"] = ""
+
+            for i, player in enumerate(sorted(self.players, key=attrgetter("score", "elo"), reverse=True)):
+                infos[f"result{i}"] = f"{player.oneline(25)} | {player.score}pts"
 
         return infos
 
@@ -328,6 +353,35 @@ class Tournament:
                 "errormsg": None,
             },
         ]
+
+        return fields
+
+    def get_fields_input_scores(self):
+        """ D """
+
+        fields = [
+            {"label": f"{self.labels['input_score1']}"},
+            {"label": f"{self.labels['input_score2']}"},
+            {"label": ""},
+        ]
+
+        for i, game in enumerate(self.current_round().games):
+            max_size = 30
+            label = (
+                f"{game[0][0].getFullname().ljust(max_size)[:max_size]}"
+                + f"{game[1][0].getFullname().rjust(max_size)[:max_size]}"
+            )
+            fields.append(
+                {
+                    "name": f"game{i}",
+                    "label": label,
+                    "placeholder": None,
+                    "test": "Validation.is_valid_score_symbol(value)",
+                    "errormsg": "Indiquez le résultat à l'aide des symboles <, > ou =",
+                    "size": 4,
+                    "same_row": True,
+                },
+            )
 
         return fields
 

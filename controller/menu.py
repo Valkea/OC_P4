@@ -22,6 +22,7 @@ from model.tournament import (
     Status,
 )
 from model.player import Player
+from model.round import Round
 from model.menu import Menu
 
 from utils import FakePlayer
@@ -196,18 +197,28 @@ class Controller:
 
     def input_round_results(self, tournament=None):
 
-        if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+        logging.info(f"EDIT final note: {tournament}")
 
-        self._set_focus("main")
-        self._set_head_view(
-            "print-line",
-            text=f"Saisies de resultats pour <{tournament.current_round().name}>",
-        )
-        self._set_main_view("print-line", text="INPUTS")
-        self._set_menu_view("list", call=self.menu_model.only_back)
-        curses.napms(3000)
-        self.start_new_round()
+        try:
+            if tournament is None:
+                tournament = self.world_model.get_active_tournament()
+
+            self._set_focus("main")
+            self._set_head_view(
+                "print-line",
+                text=f"Saisies de resultats pour <{tournament.current_round().name}>",
+            )
+            self._set_menu_view("list", call=self.menu_model.only_back)
+            self._set_main_view(
+                "form",
+                rows=tournament.get_fields_input_scores(),
+                exit_func=self._form_exit_input_scores,
+            )
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            logging.error(f"EXCEPTION: {e} {tb}")
+            self.goback()
 
     def input_final_note(self, tournament=None):
 
@@ -693,18 +704,22 @@ class Controller:
         j_save=[0],
     ):
 
+        logging.debug(f"FORM INPUT SWAP {x}")
+
+        swap_rows = [(x, i) for i, x in enumerate(rows) if x.get("name", False)]
+
         j = j_save[0]
 
         if x == 9 or x == 10:
             test = self._form_test(
                 text_boxes[j].gather().strip(),
-                rows[j]["test"],
-                rows[j]["errormsg"],
+                swap_rows[j][0]["test"],
+                swap_rows[j][0]["errormsg"],
                 error_box,
             )
 
             if test is True:
-                if j < len(rows) - 1:
+                if j < len(swap_rows) - 1:
 
                     j += 1
                     j_save[0] = j
@@ -714,7 +729,7 @@ class Controller:
                     )
                     return
 
-                elif j == len(rows) - 1:
+                elif j == len(swap_rows) - 1:
 
                     j = 0
                     j_save[0] = j
@@ -753,8 +768,11 @@ class Controller:
     def _form_gather_inputs(self, text_boxes, rows, exit_func, source):
 
         inputs = {}
-        for row, tb in zip(rows, text_boxes):
-            inputs[row["name"]] = tb.gather().strip()
+        valid_rows = [x for x in rows if x.get("name", False)]
+
+        for row, tb in zip(valid_rows, text_boxes):
+            if row.get("name", False):
+                inputs[row["name"]] = tb.gather().strip()
 
         exit_func(inputs, source)
 
@@ -821,6 +839,17 @@ class Controller:
 
         self.open_tournament_closed()
 
+    def _form_exit_input_scores(self, inputs, source):
+        logging.info(f"INPUT SCORES: {inputs}")
+
+        tournament = self.world_model.get_active_tournament()
+
+        for i, k in enumerate(inputs):
+            logging.info(f"--->{inputs[k]}")
+            tournament.set_results(i, *Round.getScores(inputs[k]))
+
+        self.start_new_round()
+
 
 class UnstackAll(Exception):
     """Exception used to exit nested curses edit calls.
@@ -868,5 +897,13 @@ class Validation:
         """ D """
         v = v.lower()[0:1]
         if v == "h" or v == "f":
+            return True
+        return False
+
+    @staticmethod
+    def is_valid_score_symbol(v):
+        """ D """
+        logging.info(f"is_valid_score_symbol: {v}")
+        if v == "<" or v == ">" or v == "=":
             return True
         return False

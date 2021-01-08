@@ -161,28 +161,51 @@ class CurseView:
         pass
 
     def _draw_them_all(self, screen, rows, source=None):
+
         maxW = max([len(x["label"]) for x in rows])
 
         text_boxes = []
         text_wins = []
 
-        for i, row in enumerate(rows):
-            logging.debug(f"------>{row['name']} / {row['label']}")
-            label = row["label"]
+        s = 4
+        h, w = screen.getmaxyx()
+        x = w // 2 - maxW // 2
+        y = (h - self.headH - len(rows) * s) // 2
 
-            h, w = screen.getmaxyx()
-            s = 4
-            x = w // 2 - maxW // 2
-            y = (h - self.headH - len(rows) * s) // 2 + i * s
+        for i, row in enumerate(rows):
+            y += s
 
             # label display
+            label = row["label"]
             screen.addstr(y - self.head.getmaxyx()[0], x, label)
 
-            # input box display
-            sub = screen.subwin(3, max(maxW, 35), y + 1, x)
+            # note display
+            has_name = row.get("name", False)
+            if has_name is False:
+                y -= s - 1
+                continue
+
+            # size option
+            input_size = row.get("size", False)
+            if input_size:
+                width = input_size
+            else:
+                width = max(maxW, 35)
+
+            # same_row option
+            x_off = x
+            y_off = y
+            same_row = row.get("same_row", False)
+            if same_row:
+                y_off = y - 2
+                x_off = x + maxW // 2 - input_size // 2
+                y -= 1
+
+            # input box
+            sub = screen.subwin(3, width, y_off + 1, x_off)
             sub.border()
 
-            sub2 = sub.subwin(1, max(maxW, 35) - 2, y + 2, x + 1)
+            sub2 = sub.subwin(1, width - 2, y_off + 2, x_off + 1)
             if source is not None:
                 sub2.addstr(str(eval("source." + row["name"])))
             elif row["placeholder"] is not None:
