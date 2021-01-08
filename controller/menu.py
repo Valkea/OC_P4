@@ -324,7 +324,9 @@ class Controller:
         target = nav_history[-1]
         target[2]["sortby"] = sortby
         target[0](*target[1], **target[2])
-        self._set_menu_view("list", call=self.menu_model.actors_sortby, call_params={'sortby': sortby})
+        self._set_menu_view(
+            "list", call=self.menu_model.actors_sortby, call_params={"sortby": sortby}
+        )
 
         logging.debug(f"TRI: {target}")
 

@@ -206,7 +206,7 @@ class Player:
     @staticmethod
     def sortKey(sortby):
         if sortby is None:
-            sortby = 'alpha'
+            sortby = "alpha"
 
         if sortby == "alpha":
             return (attrgetter("family_name", "first_name", "elo", "score"), False)

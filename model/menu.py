@@ -92,10 +92,12 @@ class Menu:
 
     # --- Actors ---
 
-    def actors_sortby(self, sortby='alpha'):
+    def actors_sortby(self, sortby="alpha"):
         retv = []
         if sortby != "alpha":
-            retv.append(("Tri par ordre alphabétique", "open_menu_actor_sortby", "alpha"))
+            retv.append(
+                ("Tri par ordre alphabétique", "open_menu_actor_sortby", "alpha")
+            )
 
         if sortby != "elo":
             retv.append(("Tri par classement ELO", "open_menu_actor_sortby", "elo"))
@@ -216,14 +218,12 @@ class Menu:
                     player2 = game[1][0]
 
                     pts1 = game[0][1]
-                    pts1 = f"{pts1}pt" if pts1 <= 1 else f"{pts1}pts"
                     pts2 = game[1][1]
-                    pts2 = f"{pts2}pt" if pts2 <= 1 else f"{pts2}pts"
 
                     retv.append(
                         (
-                            f"{player1.getFullname()} [{player1.elo}][{pts1}] vs "
-                            + f"{player2.getFullname()} [{player2.elo}][{pts2}]",
+                            f"({player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{pts1:3}')}) vs "
+                            + f"({player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{pts2:3}')})",
                             None,
                         )
                     )
