@@ -4,6 +4,9 @@
 """ This module handles the menu model
 """
 
+from model.player import Player
+import logging
+
 
 class Menu:
     """ TODO """
@@ -89,17 +92,26 @@ class Menu:
 
     # --- Actors ---
 
-    def actors_alpha(self):
-        return (
-            ("Tri par ordre alphabétique", "open_menu_actor_order", "alpha"),
-            ("<< RETOUR", "goback"),
-        )
+    def actors_sortby(self, sortby='alpha'):
+        retv = []
+        if sortby != "alpha":
+            retv.append(("Tri par ordre alphabétique", "open_menu_actor_sortby", "alpha"))
 
-    def actors_elo(self):
-        return (
-            ("Tri par classement ELO", "open_menu_actor_order", "elo"),
-            ("<< RETOUR", "goback"),
-        )
+        if sortby != "elo":
+            retv.append(("Tri par classement ELO", "open_menu_actor_sortby", "elo"))
+
+        if sortby != "age":
+            retv.append(("Tri par age", "open_menu_actor_sortby", "age"))
+
+        if sortby != "sex":
+            retv.append(("Tri par sexe", "open_menu_actor_sortby", "sex"))
+
+        if sortby != "score":
+            retv.append(("Tri par score", "open_menu_actor_sortby", "score"))
+
+        retv.append(("<< RETOUR", "goback"))
+
+        return tuple(retv)
 
     # --- Solo buttons ---
 
@@ -137,10 +149,14 @@ class Menu:
                 ("Aucun tournoi", "goback"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
-    def select_actor(self, world):
+    def select_actor(self, world, sortby):
 
         tournament = world.get_active_tournament()
-        actors = tournament.get_actors()
+
+        sortTuple = Player.sortKey(sortby)
+        logging.debug(f"DEBUG SORT {sortby} {sortTuple}")
+        actors = sorted(tournament.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
+
         if len(actors) > 0:
             retv = [
                 (f" {actor.oneline()} ", "open_input_actor_edit", actor)
@@ -152,18 +168,22 @@ class Menu:
                 ("Aucun acteur", "goback"),
             )  # ("Créer un acteur", "open_input_actor_new"),)
 
-    def list_actors(self, tournament):
+    def list_actors(self, tournament, sortby):
 
-        actors = tournament.get_actors()
+        sortTuple = Player.sortKey(sortby)
+        actors = sorted(tournament.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
+
         if len(actors) > 0:
             retv = [(f" {actor.oneline()} ", None) for actor in actors]
             return tuple(retv)
         else:
             return (("Aucun acteur", "goback"),)
 
-    def list_all_actors(self, world):
+    def list_all_actors(self, world, sortby):
 
-        actors = world.get_all_actors()
+        sortTuple = Player.sortKey(sortby)
+        actors = sorted(world.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
+
         if len(actors) > 0:
             retv = [(f" {actor.oneline()} ", None) for actor in actors]
             return tuple(retv)

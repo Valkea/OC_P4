@@ -308,22 +308,25 @@ class Controller:
             self.goback()
 
     @saveNav
-    def open_select_actor(self):
+    def open_select_actor(self, sortby=None):
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un acteur à modifier")
-        self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_menu_view("list", call=self.menu_model.actors_sortby)
         self._set_main_view(
             "list",
             call=self.menu_model.select_actor,
-            call_params={"world": self.world_model},
+            call_params={"world": self.world_model, "sortby": sortby},
         )
 
-    def open_menu_actor_order(self, order):
-        if order == "elo":
-            self._set_menu_view("list", call=self.menu_model.actors_alpha)
-        else:
-            self._set_menu_view("list", call=self.menu_model.actors_elo)
+    def open_menu_actor_sortby(self, sortby):
+
+        target = nav_history[-1]
+        target[2]["sortby"] = sortby
+        target[0](*target[1], **target[2])
+        self._set_menu_view("list", call=self.menu_model.actors_sortby, call_params={'sortby': sortby})
+
+        logging.debug(f"TRI: {target}")
 
     @saveNav
     def open_input_actor_edit(self, actor):
@@ -359,14 +362,14 @@ class Controller:
             self._set_menu_view("list", call=self.menu_model.reports_tournament)
 
     @saveNav
-    def open_report_all_actors(self):
+    def open_report_all_actors(self, sortby=None):
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
-        self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_menu_view("list", call=self.menu_model.actors_sortby)
         self._set_main_view(
             "list",
             call=self.menu_model.list_all_actors,
-            call_params={"world": self.world_model},
+            call_params={"world": self.world_model, "sortby": sortby},
             autostart=False,
         )
 
@@ -396,7 +399,7 @@ class Controller:
         )
 
     @saveNav
-    def open_report_tournament_actors(self, tournament=None):
+    def open_report_tournament_actors(self, tournament=None, sortby=None):
 
         if tournament is None:
             tournament = self.world_model.get_active_tournament()
@@ -406,11 +409,11 @@ class Controller:
             "print-line",
             text=f"Liste de l'ensemble des acteurs du tournoi <{tournament.name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.actors_alpha)
+        self._set_menu_view("list", call=self.menu_model.actors_sortby)
         self._set_main_view(
             "list",
             call=self.menu_model.list_actors,
-            call_params={"tournament": tournament},
+            call_params={"tournament": tournament, "sortby": sortby},
             autostart=False,
         )
 

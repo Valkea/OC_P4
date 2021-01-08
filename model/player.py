@@ -9,6 +9,7 @@ import datetime
 import re
 import math
 import logging
+from operator import attrgetter
 
 
 class Player:
@@ -59,6 +60,31 @@ class Player:
         self.score = 0
         self.games = []
 
+    @property
+    def birthdate(self):
+        return self._birthdate.strftime("%d/%m/%Y")
+
+    @birthdate.setter
+    def birthdate(self, v):
+        s = re.search("^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", v).groups()
+        self._birthdate = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
+
+    @property
+    def age(self):
+        """ Return the current age of the actor in years """
+        now = datetime.datetime.now()
+        delta = now - self._birthdate
+        return math.floor(delta.days / 365.2425)
+
+    @property
+    def sex(self):
+        """ Return the sex of the actor as F or H """
+        return self._sex
+
+    @sex.setter
+    def sex(self, v):
+        self._sex = v[0:1].capitalize()
+
     def add_game(self, opponent):
         """_Register a game in the player's history.
             We only register the opponent with its score,
@@ -102,19 +128,17 @@ class Player:
     def getFullname(self):
         """ Return the concatenation of the fist and family names """
 
-        return f"{self.first_name} {self.family_name}".title()
+        return f"{self.family_name} {self.first_name}".title()
 
     def oneline(self, ljustv=20, age=True, sex=True, elo=True, score=True, extra=False):
         """ Return a full resume of the actor in one line """
 
-        logging.debug(f"ONELINE PLAYER age:{age} sex:{sex} elo:{elo} score:{score}")
-
         retv = []
         retv.append(self.getFullname().ljust(ljustv)[:ljustv])
         if age:
-            retv.append(f"{self.getAge():2} ans")
+            retv.append(f"{self.age:2} ans")
         if sex:
-            retv.append(self.getSex())
+            retv.append(self.sex)
         if elo:
             retv.append(f"ELO:{int(self.elo):4}")
         if score:
@@ -124,22 +148,6 @@ class Player:
 
         return "|".join(retv)
 
-    def getAge(self):
-        """ Return the current age of the actor in years """
-
-        now = datetime.datetime.now()
-        s = re.search(
-            "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", self.birthdate
-        ).groups()
-        birth = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
-        delta = now - birth
-        return math.floor(delta.days / 365.2425)
-
-    def getSex(self):
-        """ Return the sex of the actor as F or H """
-
-        return self.sex[0:1].capitalize()
-
     def toJSON(self):
         """ Return a JSON representation of the Player instance """
 
@@ -148,7 +156,7 @@ class Player:
     def __repr__(self):
         return (
             f"Player('{self.family_name}', '{self.first_name}', "
-            f"'{self.birthdate}', '{self.sex}', {self.elo}, {self.score})"
+            f"'{self._birthdate}', '{self.sex}', {self.elo}, {self.score})"
         )
 
     @classmethod
@@ -194,3 +202,19 @@ class Player:
         ]
 
         return fields
+
+    @staticmethod
+    def sortKey(sortby):
+        if sortby is None:
+            sortby = 'alpha'
+
+        if sortby == "alpha":
+            return (attrgetter("family_name", "first_name", "elo", "score"), False)
+        elif sortby == "elo":
+            return (attrgetter("elo", "score", "family_name", "first_name"), True)
+        elif sortby == "score":
+            return (attrgetter("score", "elo", "family_name", "first_name"), True)
+        elif sortby == "age":
+            return (attrgetter("age", "family_name", "first_name"), True)
+        elif sortby == "sex":
+            return (attrgetter("sex", "family_name", "first_name"), False)
