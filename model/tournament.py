@@ -7,70 +7,9 @@
 import datetime
 from enum import Enum
 from operator import attrgetter
-import logging
 import json
 
-from model.player import Player
 from model.round import Round
-
-# from controller.iofiles import to_json, EnumEncoder
-# from controller.iofiles import EnumEncoder
-
-
-class World:
-    """ D """
-
-    def __init__(self):
-        self.tournaments = []
-        self.active_tournament = None
-
-    def add_tournament(
-        self, name, place, start_date, end_date, gtype, desc="", rounds=4
-    ):
-        """ D """
-        tournament = Tournament(
-            name,
-            place,
-            start_date,
-            end_date,
-            gtype,
-            desc,
-            rounds,
-        )
-
-        self.tournaments.append(tournament)
-
-        return tournament
-
-    def set_active_tournament(self, tournament):
-        """ D """
-        self.active_tournament = tournament
-
-    def get_active_tournament(self):
-        """ D """
-        return self.active_tournament
-
-    def get_all_actors(self):
-        """ D """
-        all_actors = set()
-        for tournament in self.tournaments:
-            # all_actors.union(tournament.get_actors())
-            all_actors = all_actors.union(tournament.get_actors())
-        return list(all_actors)
-
-    def get_all_actors_JSON(self):
-        """ D """
-
-        retv = []
-
-        all_actors = self.get_all_actors()
-        for actor in all_actors:
-            logging.debug(f"Boucle JSON: {actor.toJSON()}")
-            # retv = {**retv, **actor.toJSON()}
-            # retv.update(actor.toJSON())
-            retv.append(actor.toJSON())
-
-        return retv
 
 
 class Tournament:
@@ -90,8 +29,8 @@ class Tournament:
         the number of rounds in the tournament (defaut is 4)
     rounds : list(Round)
         the registered round instances of the tournament
-    players : list(Player)
-        the registered player instances of the tournament
+    players : list(int)
+        the registered player instances id of the tournament
     game_type : str
         the game method used in the tournament
     description : str
@@ -138,7 +77,15 @@ class Tournament:
     }
 
     def __init__(
-        self, name, place, start_date, end_date, game_type, description="", num_rounds=4
+        self,
+        world,
+        name,
+        place,
+        start_date,
+        end_date,
+        game_type,
+        description="",
+        num_rounds=4,
     ):
         self.name = name
         self.place = place
@@ -150,6 +97,7 @@ class Tournament:
         self.game_type = game_type
         self.description = description
         self.status = Status.UNINITIALIZED
+        self._world = world
 
     @property
     def num_rounds(self):
@@ -170,8 +118,8 @@ class Tournament:
             "start_date": self.start_date,
             "end_date": self.end_date,
             "num_rounds": self.num_rounds,
-            "rounds": [id(r) for r in self.rounds],
-            "players": [id(p) for p in self.players],
+            "rounds": self.rounds,
+            "players": self.players,
             "game_type": self.game_type,
             "description": self.description,
             "status": self.status,
@@ -198,17 +146,17 @@ class Tournament:
             raise ValueError("La somme des deux scores doit être de 1")
 
         game = self.current_round().games[game_index]  # persistent order
-        # game[0][1] = score1
-        # game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
-        game.setScore(score1, score2)
+        game[0][1] = score1
+        game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
+        # game.setScore(score1, score2)
 
-        # player1 = game[0][0]
-        # player1.add_game(game[1])
+        player1 = self._world.get_actor(game[0][0])
+        player1.set_played(game[1][0])
 
-        # player2 = game[1][0]
-        # player2.add_game(game[0])
+        player2 = self._world.get_actor(game[1][0])
+        player2.set_played(game[0][0])
 
-    # --- Rounds --- #
+    # --- Rounds ---
 
     def start_round(self):
         """ Initialize and start a new round in the current tournament instance """
@@ -233,7 +181,9 @@ class Tournament:
             raise IsComplete()
 
         round_index = len(self.rounds)
-        new_round = Round(f"Round {round_index+1}", round_index, self.players)
+        new_round = Round(
+            self._world, f"Round {round_index+1}", round_index, self.players
+        )  # TODO voir pour players id dans Round
         self.rounds.append(new_round)
 
     def current_round(self):
@@ -244,6 +194,26 @@ class Tournament:
         else:
             return self.rounds[-1]
 
+    # --- Players ---
+
+    def add_player(self, player_id):
+        """Add a player to the current tournament instance
+
+        Parameters
+        ----------
+        player_id : int
+            the Player instance id to register as a participant of the tournament
+        """
+
+        if type(player_id) is not int:
+            raise TypeError(f"int (instance id) expected, got {type(player_id)}")
+
+        self.players.append(player_id)
+
+    def get_players(self):
+        """ D """
+        return self.players
+
     def has_player_pairs(self):
         """ Return True is the number of players is greater than 0 and multiple of 2 """
 
@@ -251,33 +221,7 @@ class Tournament:
             return False
         return True
 
-    def add_player(self, player):
-        """Add a player to the current tournament instance
-
-        Parameters
-        ----------
-        player : Player
-            the Player instance to register as a participant of the tournament
-        """
-
-        if type(player) is not Player:
-            raise TypeError("Player instance expected")
-
-        self.players.append(player)
-
-    # --- Properties GET & SET ----------
-
-    def get_actors(self):
-        """ D """
-        return self.players
-
-    # def get_actors_JSON(self):
-    #     """ D """
-    #     retv = []
-    #     for player in self.players:
-    #         retv.append(player.toJSON())
-
-    #     return retv
+    # --- Tournament informations ---
 
     def get_overall_infos(self):
         """ D """
@@ -310,10 +254,13 @@ class Tournament:
 
             for i, game in enumerate(self.current_round().games):
 
-                # player1 = game[0][0]
-                # player2 = game[1][0]
-                player1 = game.player1
-                player2 = game.player2
+                player_id1 = game[0][0]
+                player_id2 = game[1][0]
+                # player1 = game.player1
+                # player2 = game.player2
+
+                player1 = self._world.get_actor(player_id1)
+                player2 = self._world.get_actor(player_id2)
 
                 # infos[f"game_space{i}"] = ""
                 # infos[f"game{i}"] = f"{self.labels['table']} #{i+1}"
@@ -329,7 +276,11 @@ class Tournament:
             infos["space3"] = ""
 
             for i, player in enumerate(
-                sorted(self.players, key=attrgetter("score", "elo"), reverse=True)
+                sorted(
+                    self._world.get_actors(self),
+                    key=attrgetter("score", "elo"),
+                    reverse=True,
+                )
             ):
                 infos[f"result{i}"] = player.oneline()
 
@@ -420,11 +371,11 @@ class Tournament:
 
         for i, game in enumerate(self.current_round().games):
             max_size = 30
+            player1 = self._world.get_actor(game[0][0])
+            player2 = self._world.get_actor(game[1][0])
             label = (
-                f"{game.player1.getFullname().ljust(max_size)[:max_size]}"
-                + f"{game.player2.getFullname().rjust(max_size)[:max_size]}"
-                # f"{game[0][0].getFullname().ljust(max_size)[:max_size]}"
-                # + f"{game[1][0].getFullname().rjust(max_size)[:max_size]}"
+                f"{player1.getFullname().ljust(max_size)[:max_size]}"
+                + f"{player2.getFullname().rjust(max_size)[:max_size]}"
             )
             fields.append(
                 {

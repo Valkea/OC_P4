@@ -10,13 +10,12 @@ import sys
 import atexit
 import re
 import logging
-import traceback
 
 from view.tiny import TinyDBView
 from view.main import CurseView
+from model.world import World
 from model.tournament import (
     Tournament,
-    World,
     IsComplete,
     IsNotReady,
     WrongPlayersNumber,
@@ -51,7 +50,6 @@ class Controller:
 
         self.tinyView = TinyDBView()
         self.curses_view = CurseView()
-        self.world_model = World()
         self.menu_model = Menu()
         self.list_data = {}
 
@@ -82,7 +80,7 @@ class Controller:
     @saveNav
     def open_menu_base(self):
 
-        self.world_model.set_active_tournament(None)
+        World.set_active_tournament(None)
         self._set_focus("menu")
         self._set_head_view("print-line", text="Menu général")
         self._set_main_view("clear")
@@ -91,19 +89,14 @@ class Controller:
     @saveNav
     def open_input_tournament_new(self):
 
-        try:
-            self._set_focus("main")
-            self._set_head_view("print-line", text="Nouveau tournoi")
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=Tournament.get_fields(),
-                exit_func=self._form_exit_new_tournament,
-            )
-
-        except Exception as e:
-            logging.error(f"EXCEPTION: {e}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Nouveau tournoi")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=Tournament.get_fields(),
+            exit_func=self._form_exit_new_tournament,
+        )
 
     @saveNav
     def open_select_tournament_load(self):
@@ -114,7 +107,6 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.select_tournament_load,
-            call_params={"world": self.world_model},
         )
 
     @saveNav
@@ -122,33 +114,27 @@ class Controller:
 
         logging.info(f"EDIT tournament: {tournament}")
 
-        try:
-            if tournament is None:
-                tournament = self.world_model.get_active_tournament()
+        if tournament is None:
+            tournament = World.get_active_tournament()
 
-            self._set_focus("main")
-            self._set_head_view(
-                "print-line", text=f"Modification du tournoi <{tournament.name}>"
-            )
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=Tournament.get_fields(),
-                exit_func=self._form_exit_edit_tournament,
-                source=tournament,
-            )
-
-        except Exception as e:
-            tb = traceback.format_exc()
-            logging.error(f"EXCEPTION: {e} {tb}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line", text=f"Modification du tournoi <{tournament.name}>"
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=Tournament.get_fields(),
+            exit_func=self._form_exit_edit_tournament,
+            source=tournament,
+        )
 
     def open_tournament_current(self, tournament=None):
 
         if tournament is not None:
-            self.world_model.set_active_tournament(tournament)
+            World.set_active_tournament(tournament)
 
-        tournament = self.world_model.get_active_tournament()
+        tournament = World.get_active_tournament()
 
         if (
             tournament.status == Status.UNINITIALIZED
@@ -166,7 +152,7 @@ class Controller:
     def open_tournament_initialize(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         tournament.status = Status.INITIALIZED
 
@@ -180,7 +166,7 @@ class Controller:
     def start_new_round(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         try:
             logging.info("START_NEW_ROUND try")
@@ -203,58 +189,46 @@ class Controller:
 
         logging.info(f"EDIT final note: {tournament}")
 
-        try:
-            if tournament is None:
-                tournament = self.world_model.get_active_tournament()
+        if tournament is None:
+            tournament = World.get_active_tournament()
 
-            self._set_focus("main")
-            self._set_head_view(
-                "print-line",
-                text=f"Saisies de resultats pour <{tournament.current_round().name}>",
-            )
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=tournament.get_fields_input_scores(),
-                exit_func=self._form_exit_input_scores,
-            )
-
-        except Exception as e:
-            tb = traceback.format_exc()
-            logging.error(f"EXCEPTION: {e} {tb}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line",
+            text=f"Saisies de resultats pour <{tournament.current_round().name}>",
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=tournament.get_fields_input_scores(),
+            exit_func=self._form_exit_input_scores,
+        )
 
     def input_final_note(self, tournament=None):
 
         logging.info(f"EDIT final note: {tournament}")
 
-        try:
-            if tournament is None:
-                tournament = self.world_model.get_active_tournament()
+        if tournament is None:
+            tournament = World.get_active_tournament()
 
-            self._set_focus("main")
-            self._set_head_view(
-                "print-line",
-                text=f"Saisie de la note finale du tournoi <{tournament.name}>",
-            )
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=Tournament.get_fields_final_note(),
-                exit_func=self._form_exit_edit_final_note,
-                source=tournament,
-            )
-
-        except Exception as e:
-            tb = traceback.format_exc()
-            logging.error(f"EXCEPTION: {e} {tb}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line",
+            text=f"Saisie de la note finale du tournoi <{tournament.name}>",
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=Tournament.get_fields_final_note(),
+            exit_func=self._form_exit_edit_final_note,
+            source=tournament,
+        )
 
     @saveNav
     def open_tournament_opened(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         tournament.status = Status.PLAYING
 
@@ -270,7 +244,7 @@ class Controller:
     def open_tournament_finalize(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         tournament.status = Status.CLOSING
 
@@ -285,7 +259,7 @@ class Controller:
     def open_tournament_closed(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         tournament.status = Status.CLOSED
 
@@ -297,19 +271,14 @@ class Controller:
     @saveNav
     def open_input_actor_new(self):
 
-        try:
-            self._set_focus("main")
-            self._set_head_view("print-line", text="Nouvel acteur")
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=Player.get_fields(),
-                exit_func=self._form_exit_new_actor,
-            )
-
-        except Exception as e:
-            logging.error(f"EXCEPTION: {e}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Nouvel acteur")
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=Player.get_fields(),
+            exit_func=self._form_exit_new_actor,
+        )
 
     @saveNav
     def open_select_actor(self, sortby=None):
@@ -320,7 +289,7 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.select_actor,
-            call_params={"world": self.world_model, "sortby": sortby},
+            call_params={"sortby": sortby},
         )
 
     def open_menu_actor_sortby(self, sortby):
@@ -339,22 +308,17 @@ class Controller:
 
         logging.info(f"EDIT actor: {actor}")
 
-        try:
-            self._set_focus("main")
-            self._set_head_view(
-                "print-line", text=f"Modification de l'acteur <{actor.getFullname()}>"
-            )
-            self._set_menu_view("list", call=self.menu_model.only_back)
-            self._set_main_view(
-                "form",
-                rows=Player.get_fields(),
-                exit_func=self._form_exit_edit_actor,
-                source=actor,
-            )
-
-        except Exception as e:
-            logging.error(f"EXCEPTION: {e}")
-            self.goback()
+        self._set_focus("main")
+        self._set_head_view(
+            "print-line", text=f"Modification de l'acteur <{actor.getFullname()}>"
+        )
+        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_main_view(
+            "form",
+            rows=Player.get_fields(),
+            exit_func=self._form_exit_edit_actor,
+            source=actor,
+        )
 
     @saveNav
     def open_reports(self, source):
@@ -375,7 +339,7 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.list_all_actors,
-            call_params={"world": self.world_model, "sortby": sortby},
+            call_params={"sortby": sortby},
             autostart=False,
         )
 
@@ -387,7 +351,6 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.select_tournament_load,
-            call_params={"world": self.world_model},
             active_links=False,
             autostart=False,
         )
@@ -401,14 +364,14 @@ class Controller:
         self._set_main_view(
             "list",
             call=self.menu_model.select_tournament_report,
-            call_params={"world": self.world_model, "route": route},
+            call_params={"route": route},
         )
 
     @saveNav
     def open_report_tournament_actors(self, tournament=None, sortby=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         self._set_focus("menu")
         self._set_head_view(
@@ -427,7 +390,7 @@ class Controller:
     def open_report_tournament_rounds(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         self._set_focus("menu")
         self._set_head_view(
@@ -446,7 +409,7 @@ class Controller:
     def open_report_tournament_matchs(self, tournament=None):
 
         if tournament is None:
-            tournament = self.world_model.get_active_tournament()
+            tournament = World.get_active_tournament()
 
         self._set_focus("menu")
         self._set_head_view(
@@ -465,8 +428,8 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Sauvegarde de tous les joueurs")
-        # self.tinyView.write_all_players(self.world_model.get_all_actors_JSON())
-        self.tinyView.save_all(self.world_model)
+        # self.tinyView.write_all_players(World.get_all_actors_JSON())
+        self.tinyView.save_all()
         logging.debug("SAVED")
         curses.napms(500)
 
@@ -505,7 +468,7 @@ class Controller:
 
     def _generate_fake_players(self):
 
-        if self.world_model.get_active_tournament() is None:
+        if World.get_active_tournament() is None:
             logging.warning("GEN FAKE USERS: need an active tournament")
             return
 
@@ -522,7 +485,7 @@ class Controller:
             elo = p["elo"]
 
             player = Player(family_name, first_name, birthdate, sex, elo)
-            self.world_model.get_active_tournament().add_player(player)
+            World.add_actor(player)
 
         self.open_tournament_initialize()
         # self.open_select_actor()
@@ -823,7 +786,7 @@ class Controller:
     def _form_exit_new_tournament(self, inputs, source):
 
         logging.info(f"NEW TOURNAMENT VALUES: {inputs}")
-        tournament = self.world_model.add_tournament(
+        tournament = World.add_tournament(
             inputs["name"],
             inputs["place"],
             inputs["start_date"],
@@ -832,7 +795,7 @@ class Controller:
             inputs["description"],
             inputs["num_rounds"],
         )
-        self.world_model.set_active_tournament(tournament)
+        World.set_active_tournament(tournament)
         self.open_tournament_initialize()
 
     def _form_exit_edit_tournament(self, inputs, source):
@@ -852,7 +815,7 @@ class Controller:
     def _form_exit_new_actor(self, inputs, source):
 
         logging.info(f"NEW ACTOR VALUES: {inputs}")
-        tournament = self.world_model.get_active_tournament()
+        tournament = World.get_active_tournament()
         actor = Player(
             inputs["family_name"],
             inputs["first_name"],
@@ -860,7 +823,8 @@ class Controller:
             inputs["sex"],
             inputs["elo"],
         )
-        tournament.add_player(actor)
+
+        World.add_actor(actor, tournament)
         self.open_tournament_initialize()
 
     def _form_exit_edit_actor(self, inputs, source):
@@ -884,7 +848,7 @@ class Controller:
     def _form_exit_input_scores(self, inputs, source):
         logging.info(f"INPUT SCORES: {inputs}")
 
-        tournament = self.world_model.get_active_tournament()
+        tournament = World.get_active_tournament()
 
         for i, k in enumerate(inputs):
             logging.info(f"--->{inputs[k]}")

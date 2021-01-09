@@ -7,7 +7,8 @@
 # import time
 from operator import attrgetter
 
-from model.tournament import Tournament, Status
+from model.world import World
+from model.tournament import Status, IsComplete
 from model.player import Player
 
 # from manager.round import Round
@@ -19,7 +20,8 @@ FAKE_INPUTS = True
 def main():
 
     # ## Initialize Tournament with INPUTS ###
-    t01 = Tournament("Tournoi 01", "Caen", ["20/12/2020", "21/12/2020"], "bullet")
+    t01 = World.add_tournament("Tournoi 01", "Caen", "20/12/2020", "21/12/2020", "bullet")
+    World.set_active_tournament(t01)
 
     # ## Initialize Players with INPUTS ###
     num_players = 8
@@ -54,50 +56,57 @@ def main():
             elo = input("Elo [>0] : ")
 
         p = Player(family_name, first_name, birthdate, sex, elo)
-        t01.add_player(p)
+        # t01.add_player(p)
+        World.add_actor(p)
 
-    while True:
-        # ## Get Round 1 Games ###
-        t01.start_round()
+        t01.status = Status.INITIALIZED
 
-        print(f"----{t01.current_round().name}----")
+    try:
+        while True:
+            # ## Get Round 1 Games ###
+            t01.start_round()
 
-        games = t01.current_round().games
+            print(f"----{t01.current_round().name}----")
 
-        # print("GAMES: ", games)
-        # time.sleep(3)
-        # ## INPUT Round 1 results ###
-        for i, g in enumerate(games):
-            player_name1 = g[0][0].getFullname()
-            player_name2 = g[1][0].getFullname()
-            print(
-                f"Veuillez saisir les scores pour le match {player_name1} vs {player_name2}"
-            )
+            games = t01.current_round().games
 
-            if FAKE_INPUTS:
-                fake_score = get_fake_score()
-                score1 = fake_score[0]
-                score2 = fake_score[1]
-            else:
-                score1 = input(f"Score pour {player_name1} :")
-                score2 = input(f"Score pour {player_name2} :")
+            # print("GAMES: ", games)
+            # time.sleep(3)
+            # ## INPUT Round 1 results ###
+            for i, g in enumerate(games):
+                player1 = World.get_actor(g[0][0])
+                player2 = World.get_actor(g[1][0])
 
-            if score1 + score2 != 1:
-                print("La somme des deux scores doit être de 1")
-                continue
+                player_name1 = player1.getFullname()
+                player_name2 = player2.getFullname()
 
-            t01.set_result(i, score1, score2)
-            print(f"{player_name1} +{score1} | {player_name2} +{score2}\n")
+                print(
+                    f"Veuillez saisir les scores pour le match {player_name1} vs {player_name2}"
+                )
 
-        print("Tous les scores de match ont été saisi")
-        t01.current_round().close()
+                if FAKE_INPUTS:
+                    fake_score = get_fake_score()
+                    score1 = fake_score[0]
+                    score2 = fake_score[1]
+                else:
+                    score1 = input(f"Score pour {player_name1} :")
+                    score2 = input(f"Score pour {player_name2} :")
 
-        if t01.status == Status.CLOSED:
-            desc = input("Veuillez saisir la note du directeur de tournoi : ")
-            t01.description = desc
-            break
+                if score1 + score2 != 1:
+                    print("La somme des deux scores doit être de 1")
+                    continue
 
-    for player in sorted(t01.players, key=attrgetter("score", "elo"), reverse=True):
+                t01.set_results(i, score1, score2)
+                print(f"{player_name1} +{score1} | {player_name2} +{score2}\n")
+
+            print("Tous les scores de match ont été saisi")
+            t01.current_round().close()
+
+    except IsComplete:
+        desc = input("Veuillez saisir la note du directeur de tournoi : ")
+        t01.description = desc
+
+    for player in sorted(World.get_actors(t01), key=attrgetter("score", "elo"), reverse=True):
         print(player)
 
 

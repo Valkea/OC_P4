@@ -8,6 +8,7 @@
 import datetime
 from operator import attrgetter
 
+
 class Round:
     """This class handles the chess players
 
@@ -29,14 +30,15 @@ class Round:
         convert the current instance to a JSON dictionnary
     """
 
-    def __init__(self, name, round_index, players):
+    def __init__(self, world, name, round_index, players_id):
         self.name = name
         self.start_time = self._get_time()
         self.close_time = None
         self.games = []
-        self.index = round_index
+        self.round_index = round_index
+        self._world = world
 
-        self.gen_games(players)
+        self.gen_games(players_id)
 
     @property
     def start_time(self):
@@ -65,14 +67,14 @@ class Round:
 
     # ----------------------
 
-    def gen_games(self, players):
+    def gen_games(self, players_id):
         """ D """
 
-        paired_players = self._get_pairs(players)
+        paired_players = self._get_pairs(players_id)
 
         for p1, p2 in paired_players:
-            # self.games.append(([p1, 0], [p2, 0]))
-            self.games.append(Game(p1, p2, 0, 0))
+            self.games.append(([p1, 0], [p2, 0]))
+            # self.games.append(Game(p1, p2, 0, 0))
 
     def oneline(self, ljustv=10):
         """ Return a full resume of the round in one line """
@@ -109,19 +111,21 @@ class Round:
             The list of the Players instances to sort
         """
 
-        return sorted(players, key=attrgetter("score", "elo"), reverse=True)
+        players = sorted(
+            self._world.get_actors(), key=attrgetter("score", "elo"), reverse=True
+        )
+        return [player for player in players]
 
-    def _get_pairs(self, players):
+    def _get_pairs(self, players_id):
         """ D """
 
-        sorted_players = self._sort_players(players)
+        sorted_players = self._sort_players(players_id)
 
-        # print("TEST PAIRS:", players)
         pairs = []
-        if self.index == 0:
-            half = len(players) // 2
-            part1 = sorted_players[:half]
-            part2 = sorted_players[half:]
+        if self.round_index == 0:
+            half = len(players_id) // 2
+            part1 = [id(p) for p in sorted_players[:half]]
+            part2 = [id(p) for p in sorted_players[half:]]
             for pair in zip(part1, part2):
                 pairs.append(pair)
         else:
@@ -129,12 +133,16 @@ class Round:
             for i, player1 in enumerate(sorted_players):
                 for player2 in sorted_players[i:]:
 
-                    if player1 == player2 or player1 in drafted or player2 in drafted:
+                    if (
+                        id(player1) == id(player2)
+                        or id(player1) in drafted
+                        or id(player2) in drafted
+                    ):
                         continue
 
-                    if player1.has_played(player2) is not True:
-                        pairs.append((player1, player2))
-                        drafted.extend([player1, player2])
+                    if player1.has_played(id(player2)) is not True:
+                        pairs.append((id(player1), id(player2)))
+                        drafted.extend([id(player1), id(player2)])
                         break
         return pairs
 
@@ -153,7 +161,7 @@ class Round:
             "start_time": self.start_time,
             "close_time": self.close_time,
             "games": [g.toJSON() for g in self.games],
-            "index": self.index,
+            "round_index": self.round_index,
         }
         # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
         # pass
@@ -166,39 +174,39 @@ class Round:
         return datetime.datetime.now()
 
 
-class Game:
-    """This class handles the games
-
-    Attributes
-    ----------
-    TODO
-
-    Methods
-    -------
-    get_tuple()
-        return the game as a tuple ([Player1, Score1],[Player2, Score2])
-    """
-
-    def __init__(self, player1, player2, score1=0, score2=0):
-        self.player1 = player1
-        self.player2 = player2
-
-        self.score1 = score1
-        self.score2 = score2
-
-    def setScore(self, score1, score2):
-        self.score1 = score1
-        self.score2 = score2
-
-    def __repr__(self):
-        return ([self.player1, self.score1], [self.player2, self.score2])
-
-    def toJSON(self):
-        """ Return a JSON representation of the Game instance """
-        return {
-            "id": id(self),
-            "player1": id(self.player1),
-            "score1": self.score1,
-            "player2": id(self.player1),
-            "score2": self.score2,
-        }
+# ## class Game:
+# ##     """This class handles the games
+# ##
+# ##     Attributes
+# ##     ----------
+# ##     TODO
+# ##
+# ##     Methods
+# ##     -------
+# ##     get_tuple()
+# ##         return the game as a tuple ([Player1, Score1],[Player2, Score2])
+# ##     """
+# ##
+# ##     def __init__(self, player1, player2, score1=0, score2=0):
+# ##         self.player1 = player1
+# ##         self.player2 = player2
+# ##
+# ##         self.score1 = score1
+# ##         self.score2 = score2
+# ##
+# ##     def setScore(self, score1, score2):
+# ##         self.score1 = score1
+# ##         self.score2 = score2
+# ##
+# ##     def __repr__(self):
+# ##         return ([self.player1, self.score1], [self.player2, self.score2])
+# ##
+# ##     def toJSON(self):
+# ##         """ Return a JSON representation of the Game instance """
+# ##         return {
+# ##             "id": id(self),
+# ##             "player1": id(self.player1),
+# ##             "score1": self.score1,
+# ##             "player2": id(self.player1),
+# ##             "score2": self.score2,
+# ##         }

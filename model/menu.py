@@ -4,6 +4,7 @@
 """ This module handles the menu model
 """
 
+from model.world import World
 from model.player import Player
 import logging
 
@@ -131,9 +132,9 @@ class Menu:
 
     # --- Dynamic menus ---
 
-    def select_tournament_load(self, world):
+    def select_tournament_load(self):
 
-        tournaments = world.tournaments
+        tournaments = World.tournaments
         if len(tournaments) > 0:
             retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
             return tuple(retv)
@@ -142,7 +143,7 @@ class Menu:
                 ("Aucun tournoi", "goback"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
-    def select_tournament_report(self, world, route):
+    def select_tournament_report(self, route):
 
         if route == "actors":
             link = "open_report_tournament_actors"
@@ -151,7 +152,7 @@ class Menu:
         elif route == "matchs":
             link = "open_report_tournament_matchs"
 
-        tournaments = world.tournaments
+        tournaments = World.tournaments
         if len(tournaments) > 0:
             retv = [(f"{t.name}", link, t) for t in tournaments]
             return tuple(retv)
@@ -160,13 +161,11 @@ class Menu:
                 ("Aucun tournoi", "goback"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
-    def select_actor(self, world, sortby):
-
-        tournament = world.get_active_tournament()
+    def select_actor(self, sortby):
 
         sortTuple = Player.sortKey(sortby)
         logging.debug(f"DEBUG SORT {sortby} {sortTuple}")
-        actors = sorted(tournament.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
+        actors = sorted(World.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
 
         if len(actors) > 0:
             retv = [
@@ -182,7 +181,9 @@ class Menu:
     def list_actors(self, tournament, sortby):
 
         sortTuple = Player.sortKey(sortby)
-        actors = sorted(tournament.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
+        actors = sorted(
+            World.get_actors(tournament), key=sortTuple[0], reverse=sortTuple[1]
+        )
 
         if len(actors) > 0:
             retv = [(f" {actor.oneline()} ", None) for actor in actors]
@@ -190,10 +191,10 @@ class Menu:
         else:
             return (("Aucun acteur", "goback"),)
 
-    def list_all_actors(self, world, sortby):
+    def list_all_actors(self, sortby):
 
         sortTuple = Player.sortKey(sortby)
-        actors = sorted(world.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
+        actors = sorted(World.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
 
         if len(actors) > 0:
             retv = [(f" {actor.oneline()} ", None) for actor in actors]
@@ -221,12 +222,18 @@ class Menu:
                 retv.append(("", None))
                 retv.append((f" {r.name} ", None))
 
-                for i, g in enumerate(r.games):
+                for i, game in enumerate(r.games):
+
+                    player1 = World.get_actor(game[0][0])
+                    player2 = World.get_actor(game[1][0])
+
+                    score1 = game[0][1]
+                    score2 = game[1][1]
 
                     retv.append(
                         (
-                            f"({g.player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{g.score1:3}')}) vs "
-                            + f"({g.player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{g.score2:3}')})",
+                            f"({player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
+                            + f"({player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
                             None,
                         )
                     )

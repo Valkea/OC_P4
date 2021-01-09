@@ -4,14 +4,11 @@
 """ This module handles the actors of the tournaments
 """
 
-import json
 import datetime
 import re
 import math
-import logging
-from operator import attrgetter
 
-# from controller.iofiles import to_json
+from operator import attrgetter
 
 
 class Player:
@@ -62,7 +59,8 @@ class Player:
         self.sex = sex
         self.elo = elo
         self.score = score
-        self.games = games if games is not None else []
+        # self.games = games if games is not None else []
+        self.played_actors = set()
 
     @property
     def birthdate(self):
@@ -124,10 +122,15 @@ class Player:
 
         self.score += value
 
-    def has_played(self, player):
+    def has_played(self, player_id):
         """ Return True if the given Player instance is in the games history """
 
-        return player in [game[0] for game in self.games]
+        return player_id in self.played_actors
+
+    def set_played(self, player_id):
+        """ D """
+
+        self.played_actors.add(player_id)
 
     def getFullname(self):
         """ Return the concatenation of the fist and family names """
