@@ -12,6 +12,7 @@ import re
 import logging
 import traceback
 
+from view.tiny import TinyDBView
 from view.main import CurseView
 from model.tournament import (
     Tournament,
@@ -48,6 +49,7 @@ class Controller:
     def __init__(self):
         logging.info("< Open Controller")
 
+        self.tinyView = TinyDBView()
         self.curses_view = CurseView()
         self.world_model = World()
         self.menu_model = Menu()
@@ -187,6 +189,8 @@ class Controller:
 
         except WrongPlayersNumber as e:
             self.curses_view.display_error(str(e))
+            curses.napms(3000)
+            self.curses_view.display_error("")
         except IsNotReady as e:
             logging.critical(
                 "Calling start_new_round on an uninitialized or closed tournament"
@@ -457,13 +461,32 @@ class Controller:
             autostart=False,
         )
 
-    @saveNav
     def open_save(self):
-        self._set_focus("full")
-        # self._set_menu_view("list", call=self.menu_model.only_back)
-        self._set_full_view("print-line", text="Sauvegarde du tournoi")
-        curses.napms(3000)
+        self._set_focus("menu")
+
+        self.curses_view.display_error("Sauvegarde de tous les joueurs")
+        # self.tinyView.write_all_players(self.world_model.get_all_actors_JSON())
+        self.tinyView.save_all(self.world_model)
+        logging.debug("SAVED")
+        curses.napms(500)
+
+        self.curses_view.display_error("")
         self.goback()
+
+    def open_load(self):
+        self._set_focus("menu")
+
+        self.curses_view.display_error("Chargement de tous les joueurs")
+        loaded = self.tinyView.load_all_players()
+        logging.debug(f"LOADED: {loaded}")
+        curses.napms(500)
+
+        self.curses_view.display_error("")
+        self.goback()
+
+    @saveNav
+    def open_load_save(self):
+        self._set_menu_view("list", call=self.menu_model.iofile)
 
     def goback(self):
         if len(nav_history) > 1:

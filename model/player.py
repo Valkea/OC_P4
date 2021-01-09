@@ -11,6 +11,8 @@ import math
 import logging
 from operator import attrgetter
 
+# from controller.iofiles import to_json
+
 
 class Player:
     """_This class handles the chess players
@@ -51,14 +53,16 @@ class Player:
         "format_sex": "[H, F]",
     }
 
-    def __init__(self, family_name, first_name, birthdate, sex, elo):
+    def __init__(
+        self, family_name, first_name, birthdate, sex, elo, score=0, games=None
+    ):
         self.family_name = family_name
         self.first_name = first_name
         self.birthdate = birthdate
         self.sex = sex
         self.elo = elo
-        self.score = 0
-        self.games = []
+        self.score = score
+        self.games = games if games is not None else []
 
     @property
     def birthdate(self):
@@ -150,14 +154,47 @@ class Player:
 
     def toJSON(self):
         """ Return a JSON representation of the Player instance """
+        return {
+            "id": id(self),
+            "family_name": self.family_name,
+            "first_name": self.first_name,
+            "birthdate": self.birthdate,
+            "sex": self.sex,
+            "elo": self.elo,
+            "score": self.score,
+            # "games": self.games,
+        }
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
+        # retv = {
+        #     "family_name": self.family_name,
+        #     "first_name": self.first_name,
+        #     "sex": self.sex,
+        #     "birthdate": self.birthdate,
+        #     "elo": self.elo,
+        #     "score": self.score,
+        #     "games": self.games,
+        # }
+        # return retv
+
+        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __repr__(self):
         return (
             f"Player('{self.family_name}', '{self.first_name}', "
             f"'{self._birthdate}', '{self.sex}', {self.elo}, {self.score})"
         )
+
+    def __dict__(self):
+        retv = {
+            "family_name": self.family_name,
+            "first_name": self.first_name,
+            "sex": self.sex,
+            "birthdate": self.birthdate,
+            "elo": self.elo,
+            "score": self.score,
+        }
+        return retv
 
     @classmethod
     def get_fields(cls):

@@ -6,9 +6,7 @@
 """
 
 import datetime
-import json
 from operator import attrgetter
-
 
 class Round:
     """This class handles the chess players
@@ -40,6 +38,26 @@ class Round:
 
         self.gen_games(players)
 
+    @property
+    def start_time(self):
+        if self._start_time is None:
+            return None
+        return self._start_time.strftime("%d/%m/%Y %H:%M:%S")
+
+    @start_time.setter
+    def start_time(self, v):
+        self._start_time = v
+
+    @property
+    def close_time(self):
+        if self._close_time is None:
+            return None
+        return self._close_time.strftime("%d/%m/%Y %H:%M:%S")
+
+    @close_time.setter
+    def close_time(self, v):
+        self._close_time = v
+
     def close(self):
         """ D """
 
@@ -53,7 +71,8 @@ class Round:
         paired_players = self._get_pairs(players)
 
         for p1, p2 in paired_players:
-            self.games.append(([p1, 0], [p2, 0]))
+            # self.games.append(([p1, 0], [p2, 0]))
+            self.games.append(Game(p1, p2, 0, 0))
 
     def oneline(self, ljustv=10):
         """ Return a full resume of the round in one line """
@@ -61,14 +80,11 @@ class Round:
         if self.close_time is not None:
             return (
                 f"{self.name.ljust(ljustv)} | "
-                + f"Joué du {self.start_time.strftime('%d/%m/%Y %H:%M:%S')} "
-                + f"au {self.close_time.strftime('%d/%m/%Y %H:%M:%S')}"
+                + f"Joué du {self.start_time} "
+                + f"au {self.close_time}"
             )
         else:
-            return (
-                f"{self.name.ljust(ljustv)} | "
-                + f"Commencé le {self.start_time.strftime('%d/%m/%Y %H:%M:%S')}"
-            )
+            return f"{self.name.ljust(ljustv)} | " + f"Commencé le {self.start_time}"
 
     @staticmethod
     def getScores(symbol):
@@ -131,8 +147,17 @@ class Round:
 
     def toJSON(self):
         """ Return a JSON representation of the Round instance """
-
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return {
+            "id": id(self),
+            "name": self.name,
+            "start_time": self.start_time,
+            "close_time": self.close_time,
+            "games": [g.toJSON() for g in self.games],
+            "index": self.index,
+        }
+        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
+        # pass
+        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __repr__(self):
         return f"Round('{self.name}', {self.start_time}, {self.close_time})"
@@ -141,25 +166,39 @@ class Round:
         return datetime.datetime.now()
 
 
-# class Game:
-#     """This class handles the games
-#
-#     Attributes
-#     ----------
-#     TODO
-#
-#     Methods
-#     -------
-#     get_tuple()
-#         return the game as a tuple ([Player1, Score1],[Player2, Score2])
-#     """
-#
-#     def __init__(self, player1, player2, score1=0, score2=0):
-#         self.player_info1 = [player1, score1]
-#         self.player_info2 = [player2, score2]
-#
-#     def get_tuple(self):
-#         return (self.player_info1, self.player_info2)
-#
-#     def __repr__(self):
-#         return str(self.get_tuple())
+class Game:
+    """This class handles the games
+
+    Attributes
+    ----------
+    TODO
+
+    Methods
+    -------
+    get_tuple()
+        return the game as a tuple ([Player1, Score1],[Player2, Score2])
+    """
+
+    def __init__(self, player1, player2, score1=0, score2=0):
+        self.player1 = player1
+        self.player2 = player2
+
+        self.score1 = score1
+        self.score2 = score2
+
+    def setScore(self, score1, score2):
+        self.score1 = score1
+        self.score2 = score2
+
+    def __repr__(self):
+        return ([self.player1, self.score1], [self.player2, self.score2])
+
+    def toJSON(self):
+        """ Return a JSON representation of the Game instance """
+        return {
+            "id": id(self),
+            "player1": id(self.player1),
+            "score1": self.score1,
+            "player2": id(self.player1),
+            "score2": self.score2,
+        }

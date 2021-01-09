@@ -7,9 +7,14 @@
 import datetime
 from enum import Enum
 from operator import attrgetter
+import logging
+import json
 
 from model.player import Player
 from model.round import Round
+
+# from controller.iofiles import to_json, EnumEncoder
+# from controller.iofiles import EnumEncoder
 
 
 class World:
@@ -49,9 +54,23 @@ class World:
         """ D """
         all_actors = set()
         for tournament in self.tournaments:
-            all_actors.union(tournament.get_actors())
+            # all_actors.union(tournament.get_actors())
             all_actors = all_actors.union(tournament.get_actors())
         return list(all_actors)
+
+    def get_all_actors_JSON(self):
+        """ D """
+
+        retv = []
+
+        all_actors = self.get_all_actors()
+        for actor in all_actors:
+            logging.debug(f"Boucle JSON: {actor.toJSON()}")
+            # retv = {**retv, **actor.toJSON()}
+            # retv.update(actor.toJSON())
+            retv.append(actor.toJSON())
+
+        return retv
 
 
 class Tournament:
@@ -140,6 +159,25 @@ class Tournament:
     def num_rounds(self, v):
         self._num_rounds = int(v)
 
+    def toJSON(self):
+        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
+        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        # return json.loads(json.dumps(self, cls=EnumEncoder, default=lambda o: o.__dict__))
+        data = {
+            "id": id(self),
+            "name": self.name,
+            "place": self.place,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "num_rounds": self.num_rounds,
+            "rounds": [id(r) for r in self.rounds],
+            "players": [id(p) for p in self.players],
+            "game_type": self.game_type,
+            "description": self.description,
+            "status": self.status,
+        }
+        return json.loads(json.dumps(data, cls=EnumEncoder))
+
     # -----------------------------------
 
     def set_results(self, game_index, score1, score2):
@@ -160,14 +198,15 @@ class Tournament:
             raise ValueError("La somme des deux scores doit être de 1")
 
         game = self.current_round().games[game_index]  # persistent order
-        game[0][1] = score1
-        game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
+        # game[0][1] = score1
+        # game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
+        game.setScore(score1, score2)
 
-        player1 = game[0][0]
-        player1.add_game(game[1])
+        # player1 = game[0][0]
+        # player1.add_game(game[1])
 
-        player2 = game[1][0]
-        player2.add_game(game[0])
+        # player2 = game[1][0]
+        # player2.add_game(game[0])
 
     # --- Rounds --- #
 
@@ -232,6 +271,14 @@ class Tournament:
         """ D """
         return self.players
 
+    # def get_actors_JSON(self):
+    #     """ D """
+    #     retv = []
+    #     for player in self.players:
+    #         retv.append(player.toJSON())
+
+    #     return retv
+
     def get_overall_infos(self):
         """ D """
         infos = {
@@ -263,8 +310,10 @@ class Tournament:
 
             for i, game in enumerate(self.current_round().games):
 
-                player1 = game[0][0]
-                player2 = game[1][0]
+                # player1 = game[0][0]
+                # player2 = game[1][0]
+                player1 = game.player1
+                player2 = game.player2
 
                 # infos[f"game_space{i}"] = ""
                 # infos[f"game{i}"] = f"{self.labels['table']} #{i+1}"
@@ -372,8 +421,10 @@ class Tournament:
         for i, game in enumerate(self.current_round().games):
             max_size = 30
             label = (
-                f"{game[0][0].getFullname().ljust(max_size)[:max_size]}"
-                + f"{game[1][0].getFullname().rjust(max_size)[:max_size]}"
+                f"{game.player1.getFullname().ljust(max_size)[:max_size]}"
+                + f"{game.player2.getFullname().rjust(max_size)[:max_size]}"
+                # f"{game[0][0].getFullname().ljust(max_size)[:max_size]}"
+                # + f"{game[1][0].getFullname().rjust(max_size)[:max_size]}"
             )
             fields.append(
                 {
@@ -420,3 +471,21 @@ class Status(Enum):
     PLAYING = 2
     CLOSING = 3
     CLOSED = 4
+
+
+PUBLIC_ENUMS = {"Status": Status}
+
+
+class EnumEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if type(obj) in PUBLIC_ENUMS.values():
+            return {"__enum__": str(obj)}
+        return json.JSONEncoder.default(self, obj)
+
+
+def as_enum(d):
+    if "__enum__" in d:
+        name, member = d["__enum__"].split(".")
+        return getattr(PUBLIC_ENUMS[name], member)
+    else:
+        return d

@@ -18,8 +18,16 @@ class Menu:
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
             ("Charger un tournoi", "open_select_tournament_load"),
+            ("Charger / Sauvegarder", "open_load_save"),
             ("Rapports", "open_reports", "base"),
             ("Quitter", "quit"),
+        )
+
+    def iofile(self):
+        return (
+            ("Sauvegarder", "open_save"),  # R1
+            ("Charger les données", "open_load"),
+            ("<< RETOUR", "goback"),
         )
 
     # --- Tournament ---
@@ -31,7 +39,7 @@ class Menu:
             ("Modifier le tournoi", "open_input_tournament_edit"),
             ("Commencer le tournoi", "start_new_round"),
             ("Rapports", "open_reports", "tournament"),  # R1
-            ("Sauvegarder", "open_save"),  # R1
+            ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
@@ -40,7 +48,7 @@ class Menu:
             ("Saisir les résultats du round", "input_round_results"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
-            ("Sauvegarder", "open_save"),  # R1
+            ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
@@ -52,7 +60,7 @@ class Menu:
             ),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
-            ("Sauvegarder", "open_save"),  # R1
+            ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
@@ -61,6 +69,7 @@ class Menu:
             ("Modifier la note de fin de tournoi", "input_final_note"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
+            ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
@@ -212,18 +221,12 @@ class Menu:
                 retv.append(("", None))
                 retv.append((f" {r.name} ", None))
 
-                for i, game in enumerate(r.games):
-
-                    player1 = game[0][0]
-                    player2 = game[1][0]
-
-                    pts1 = game[0][1]
-                    pts2 = game[1][1]
+                for i, g in enumerate(r.games):
 
                     retv.append(
                         (
-                            f"({player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{pts1:3}')}) vs "
-                            + f"({player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{pts2:3}')})",
+                            f"({g.player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{g.score1:3}')}) vs "
+                            + f"({g.player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{g.score2:3}')})",
                             None,
                         )
                     )

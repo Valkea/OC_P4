@@ -78,10 +78,11 @@ class CurseView:
         x = w // 2 - len(text) // 2
 
         # print msg
-        self.error.addstr(0, x, str(text))
-        self.error.refresh()
-        curses.napms(2500)  # TODO blocking
-        self.error.clear()
+        if text == "":
+            self.error.clear()
+        else:
+            self.error.addstr(0, x, str(text))
+
         self.error.refresh()
 
     def display_list(self, screen, options, current_row, colors=[1, 2]):
