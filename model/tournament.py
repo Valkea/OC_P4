@@ -109,12 +109,9 @@ class Tournament:
         self._num_rounds = int(v)
 
     def toJSON(self):
-        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
-        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        # return json.loads(json.dumps(self, cls=EnumEncoder, default=lambda o: o.__dict__))
-        logging.debug("FROM TOURNAMENT")
+
         data = {
-            "id": id(self),
+            # "id": self.uid,
             "name": self.name,
             "place": self.place,
             "start_date": self.start_date,
@@ -126,6 +123,7 @@ class Tournament:
             "description": self.description,
             "status": self.status,
         }
+
         return json.loads(json.dumps(data, cls=EnumEncoder))
 
     # -----------------------------------
@@ -149,13 +147,14 @@ class Tournament:
 
         game = self.current_round().games[game_index]  # persistent order
         game[0][1] = score1
-        game[1][1] = score2  # TODO class game pour game.set_score(score1, score2) ?
-        # game.setScore(score1, score2)
+        game[1][1] = score2
 
         player1 = self._world.get_actor(game[0][0])
+        player1.add_to_score(score1)
         player1.set_played(game[1][0])
 
         player2 = self._world.get_actor(game[1][0])
+        player2.add_to_score(score2)
         player2.set_played(game[0][0])
 
     # --- Rounds ---
@@ -207,9 +206,6 @@ class Tournament:
             the Player instance id to register as a participant of the tournament
         """
 
-        if type(player_id) is not int:
-            raise TypeError(f"int (instance id) expected, got {type(player_id)}")
-
         self.players.append(player_id)
 
     def get_players(self):
@@ -247,7 +243,6 @@ class Tournament:
         else:
             infos["current_round"] = f"{self.labels['unstarted']}"
 
-        # if self.current_round() is not None:
         if self.status == Status.PLAYING:
 
             infos["space2"] = ""
@@ -256,16 +251,9 @@ class Tournament:
 
             for i, game in enumerate(self.current_round().games):
 
-                player_id1 = game[0][0]
-                player_id2 = game[1][0]
-                # player1 = game.player1
-                # player2 = game.player2
+                player1 = self._world.get_actor(game[0][0])
+                player2 = self._world.get_actor(game[1][0])
 
-                player1 = self._world.get_actor(player_id1)
-                player2 = self._world.get_actor(player_id2)
-
-                # infos[f"game_space{i}"] = ""
-                # infos[f"game{i}"] = f"{self.labels['table']} #{i+1}"
                 infos[f"game_details{i}"] = (
                     f"({player1.oneline(age=False, sex=False)}) vs "
                     + f"({player2.oneline(age=False, sex=False)})"

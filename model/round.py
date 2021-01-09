@@ -125,8 +125,8 @@ class Round:
         pairs = []
         if self.round_index == 0:
             half = len(players_id) // 2
-            part1 = [id(p) for p in sorted_players[:half]]
-            part2 = [id(p) for p in sorted_players[half:]]
+            part1 = [p.uid for p in sorted_players[:half]]
+            part2 = [p.uid for p in sorted_players[half:]]
             for pair in zip(part1, part2):
                 pairs.append(pair)
         else:
@@ -135,15 +135,15 @@ class Round:
                 for player2 in sorted_players[i:]:
 
                     if (
-                        id(player1) == id(player2)
-                        or id(player1) in drafted
-                        or id(player2) in drafted
+                        player1.uid == player2.uid
+                        or player1.uid in drafted
+                        or player2.uid in drafted
                     ):
                         continue
 
-                    if player1.has_played(id(player2)) is not True:
-                        pairs.append((id(player1), id(player2)))
-                        drafted.extend([id(player1), id(player2)])
+                    if player1.has_played(player2.uid) is not True:
+                        pairs.append((player1.uid, player2.uid))
+                        drafted.extend([player1.uid, player2.uid])
                         break
         return pairs
 
@@ -158,7 +158,7 @@ class Round:
         """ Return a JSON representation of the Round instance """
         logging.debug("FROM ROUND")
         return {
-            "id": id(self),
+            # "id": id(self),
             "name": self.name,
             "start_time": self.start_time,
             "close_time": self.close_time,

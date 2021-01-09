@@ -15,6 +15,18 @@ class World:
     tournaments = []
     active_tournament = None
 
+    @classmethod
+    def load(cls, tournaments, actors):
+        cls.actors = {}
+        cls.tournaments = []
+        cls.active_tournament = None
+
+        for actor in actors:
+            cls.actors[actor['uid']] = Player(**actor)
+
+        # for tournament in tournaments:
+        # cls.tournaments.append(Tournamen(**tournament))
+
     # --- Tournament ---
 
     @classmethod
@@ -65,9 +77,8 @@ class World:
         if tournament is None:
             tournament = cls.get_active_tournament()
 
-        actor_id = id(actor)
-        cls.actors[actor_id] = actor
-        tournament.add_player(actor_id)
+        cls.actors[actor.uid] = actor
+        tournament.add_player(actor.uid)
 
         return id(actor)
 

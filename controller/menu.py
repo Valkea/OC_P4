@@ -427,10 +427,10 @@ class Controller:
     def open_save(self):
         self._set_focus("menu")
 
-        self.curses_view.display_error("Sauvegarde de tous les joueurs")
-        # self.tinyView.write_all_players(World.get_all_actors_JSON())
+        self.curses_view.display_error("Sauvegarde ...")
         self.tinyView.save_all()
-        logging.debug("SAVED")
+
+        logging.info("SAVED")
         curses.napms(500)
 
         self.curses_view.display_error("")
@@ -439,9 +439,10 @@ class Controller:
     def open_load(self):
         self._set_focus("menu")
 
-        self.curses_view.display_error("Chargement de tous les joueurs")
-        loaded = self.tinyView.load_all_players()
-        logging.debug(f"LOADED: {loaded}")
+        self.curses_view.display_error("Chargement ...")
+        World.load(*self.tinyView.load_all())
+
+        logging.info("LOADED")
         curses.napms(500)
 
         self.curses_view.display_error("")

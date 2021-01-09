@@ -7,6 +7,7 @@
 import datetime
 import re
 import math
+import uuid
 
 from operator import attrgetter
 
@@ -51,7 +52,15 @@ class Player:
     }
 
     def __init__(
-        self, family_name, first_name, birthdate, sex, elo, score=0, games=None
+        self,
+        family_name,
+        first_name,
+        birthdate,
+        sex,
+        elo,
+        score=0,
+        games=None,
+        uid=None,
     ):
         self.family_name = family_name
         self.first_name = first_name
@@ -61,6 +70,11 @@ class Player:
         self.score = score
         # self.games = games if games is not None else []
         self.played_actors = set()
+        self.uid = uid if uid is not None else self._genUID()
+
+    def _genUID(self):
+        # return id(self)
+        return uuid.uuid1().hex
 
     @property
     def birthdate(self):
@@ -87,27 +101,27 @@ class Player:
     def sex(self, v):
         self._sex = v[0:1].capitalize()
 
-    def add_game(self, opponent):
-        """_Register a game in the player's history.
-            We only register the opponent with its score,
-            but as the sum of the game worth 1pt we can deduce
-            the current player score.
+    # def add_game(self, opponent):
+    #     """_Register a game in the player's history.
+    #         We only register the opponent with its score,
+    #         but as the sum of the game worth 1pt we can deduce
+    #         the current player score.
 
-        Parameters
-        ----------
-        opponent : list(Player, int)
-            A list containing a Player instance and its game score
-        """
-        try:
+    #     Parameters
+    #     ----------
+    #     opponent : list(Player, int)
+    #         A list containing a Player instance and its game score
+    #     """
+    #     try:
 
-            score = 1 - opponent[1]
-            self._add_to_score(score)
-            self.games.append(opponent)
+    #         score = 1 - opponent[1]
+    #         self._add_to_score(score)
+    #         self.games.append(opponent)
 
-        except ValueError as e:
-            raise e
+    #     except ValueError as e:
+    #         raise e
 
-    def _add_to_score(self, value):
+    def add_to_score(self, value):
         """_Add the given value to the current player score
             if the value is 0>=value<=1
 
@@ -158,7 +172,7 @@ class Player:
     def toJSON(self):
         """ Return a JSON representation of the Player instance """
         return {
-            "id": id(self),
+            "uid": self.uid,
             "family_name": self.family_name,
             "first_name": self.first_name,
             "birthdate": self.birthdate,
