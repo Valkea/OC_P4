@@ -8,6 +8,7 @@ import datetime
 from enum import Enum
 from operator import attrgetter
 import json
+import logging
 
 from model.round import Round
 
@@ -111,6 +112,7 @@ class Tournament:
         # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
         # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
         # return json.loads(json.dumps(self, cls=EnumEncoder, default=lambda o: o.__dict__))
+        logging.debug("FROM TOURNAMENT")
         data = {
             "id": id(self),
             "name": self.name,
@@ -118,7 +120,7 @@ class Tournament:
             "start_date": self.start_date,
             "end_date": self.end_date,
             "num_rounds": self.num_rounds,
-            "rounds": self.rounds,
+            "rounds": [json.loads(json.dumps(x.toJSON())) for x in self.rounds],
             "players": self.players,
             "game_type": self.game_type,
             "description": self.description,

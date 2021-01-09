@@ -4,11 +4,10 @@
 """ The purpose of this module is to handle the TinyDB IO """
 
 from tinydb import TinyDB
-import logging
 import json
+import logging
 
-# from controller.iofiles import PUBLIC_ENUMS, EnumEncoder, as_enum, to_json, from_json
-# from controller.iofiles import to_json, from_json
+from model.world import World
 
 
 class TinyDBView:
@@ -20,36 +19,28 @@ class TinyDBView:
         self.db = TinyDB("tournoi.json")
         self.tournaments_table = self.db.table("tournaments")
         self.players_table = self.db.table("players")
-        self.rounds_table = self.db.table("rounds")
-        self.games_table = self.db.table("games")
 
-    def save_all(self, world):
+    def save_all(self):
         """ D """
 
         d_tournaments = []
         d_players = []
-        d_rounds = []
 
-        for i, _tournament in enumerate(world.tournaments):
-            # save tournaments avec des ID pour les players
-            d_tournaments.append(_tournament.toJSON())
+        for i, _tournament in enumerate(World.tournaments):
+            d_tournaments.append(json.loads(json.dumps(_tournament.toJSON())))
 
-            for _round in _tournament.rounds:
-                # save rounds
-                d_rounds.append(_round.toJSON())
-                for _game in _round.games:
-                    # save games
-                    pass
-            for _player in _tournament.players:
-                # save players
-                d_players.append(_player.toJSON())
-                for game in _player.games:
-                    # save games REF
-                    pass
+        for i, _actor in enumerate(World.get_all_actors()):
+            d_players.append(json.loads(json.dumps(_actor.toJSON())))
 
-            self.write_tournaments(d_tournaments)
-            self.write_players(d_players)
-            self.write_rounds(d_rounds)
+        self.write_tournaments(d_tournaments)
+        self.write_players(d_players)
+
+    def load_all(self):
+
+        tournaments = self.load_tournaments()
+        players = self.load_players()
+
+        return tournaments, players
 
     def write_tournaments(self, serialized_data):
         """ D """
@@ -74,15 +65,3 @@ class TinyDBView:
     def load_players(self):
         """ D """
         return self.players_table.all()
-
-    def write_rounds(self, serialized_data):
-        """ D """
-
-        logging.debug(f"WRITE_ROUNDS {serialized_data} {type(serialized_data)}")
-
-        self.rounds_table.truncate()  # clear the table
-        self.rounds_table.insert_multiple(serialized_data)
-
-    def load_rounds(self):
-        """ D """
-        return self.rounds_table.all()

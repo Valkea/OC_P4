@@ -7,6 +7,7 @@
 
 import datetime
 from operator import attrgetter
+import logging
 
 
 class Round:
@@ -155,17 +156,16 @@ class Round:
 
     def toJSON(self):
         """ Return a JSON representation of the Round instance """
+        logging.debug("FROM ROUND")
         return {
             "id": id(self),
             "name": self.name,
             "start_time": self.start_time,
             "close_time": self.close_time,
-            "games": [g.toJSON() for g in self.games],
+            # "games": [str(type(x)) for x in self.games],
+            "games": self.games,
             "round_index": self.round_index,
         }
-        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
-        # pass
-        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __repr__(self):
         return f"Round('{self.name}', {self.start_time}, {self.close_time})"
