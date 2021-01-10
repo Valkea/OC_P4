@@ -31,15 +31,25 @@ class Round:
         convert the current instance to a JSON dictionnary
     """
 
-    def __init__(self, world, name, round_index, players_id):
+    def __init__(
+        self,
+        world,
+        name,
+        round_index,
+        players_id,
+        games=None,
+        start_time=None,
+        close_time=None,
+    ):
         self.name = name
-        self.start_time = self._get_time()
-        self.close_time = None
-        self.games = []
+        self.start_time = start_time if start_time is not None else self._get_time()
+        self.close_time = close_time
+        self.games = games if games is not None else []
         self.round_index = round_index
         self._world = world
 
-        self.gen_games(players_id)
+        if start_time is None:
+            self.gen_games(players_id)
 
     @property
     def start_time(self):
@@ -49,7 +59,11 @@ class Round:
 
     @start_time.setter
     def start_time(self, v):
-        self._start_time = v
+        if type(v) is datetime.datetime or v is None:
+            self._start_time = v
+        else:
+            logging.debug(f"TYPE V {type(v)}")
+            self._start_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
 
     @property
     def close_time(self):
@@ -59,7 +73,10 @@ class Round:
 
     @close_time.setter
     def close_time(self, v):
-        self._close_time = v
+        if type(v) is datetime.datetime or v is None:
+            self._close_time = v
+        else:
+            self._close_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
 
     def close(self):
         """ D """

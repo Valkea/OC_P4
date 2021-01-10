@@ -42,13 +42,24 @@ def saveNav(f):
     return wrapper
 
 
+def resetNav(f):
+    """ Decorator used to clear the navigation history """
+
+    def wrapper(*args, **kwargs):
+        global nav_history
+        nav_history = []
+        nav_history.append([f, args, kwargs])
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 class Controller:
     """D """
 
     def __init__(self):
         logging.info("< Open Controller")
 
-        self.tinyView = TinyDBView()
         self.curses_view = CurseView()
         self.menu_model = Menu()
         self.list_data = {}
@@ -77,7 +88,7 @@ class Controller:
 
     # === PUBLIC NAVIGATION METHODS ===
 
-    @saveNav
+    @resetNav
     def open_menu_base(self):
 
         World.set_active_tournament(None)
@@ -148,7 +159,7 @@ class Controller:
         elif tournament.status == Status.CLOSED:
             self.open_tournament_closed(tournament)
 
-    @saveNav
+    @resetNav
     def open_tournament_initialize(self, tournament=None):
 
         if tournament is None:
@@ -185,6 +196,7 @@ class Controller:
         except IsComplete:
             self.open_tournament_finalize(tournament)
 
+    @saveNav
     def input_round_results(self, tournament=None):
 
         logging.info(f"EDIT final note: {tournament}")
@@ -204,6 +216,7 @@ class Controller:
             exit_func=self._form_exit_input_scores,
         )
 
+    @saveNav
     def input_final_note(self, tournament=None):
 
         logging.info(f"EDIT final note: {tournament}")
@@ -224,7 +237,7 @@ class Controller:
             source=tournament,
         )
 
-    @saveNav
+    @resetNav
     def open_tournament_opened(self, tournament=None):
 
         if tournament is None:
@@ -240,7 +253,7 @@ class Controller:
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_opened)
 
-    @saveNav
+    @resetNav
     def open_tournament_finalize(self, tournament=None):
 
         if tournament is None:
@@ -255,7 +268,7 @@ class Controller:
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=self.menu_model.tournament_finalize)
 
-    @saveNav
+    @resetNav
     def open_tournament_closed(self, tournament=None):
 
         if tournament is None:
@@ -428,7 +441,7 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Sauvegarde ...")
-        self.tinyView.save_all()
+        TinyDBView.save_all()
 
         logging.info("SAVED")
         curses.napms(500)
@@ -440,13 +453,14 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Chargement ...")
-        World.load(*self.tinyView.load_all())
+        World.load(*TinyDBView.load_all())
 
         logging.info("LOADED")
         curses.napms(500)
 
         self.curses_view.display_error("")
-        self.goback()
+        # self.goback()
+        self.open_select_tournament_load()
 
     @saveNav
     def open_load_save(self):
@@ -458,12 +472,21 @@ class Controller:
             target = nav_history[-1]
             target[0](*target[1], **target[2])
 
+    def quit_confirm(self):
+        self._set_menu_view("list", call=self.menu_model.quit_confirm)
+
     def quit(self):
         self._set_full_view("print-line", text="Closing...")
         curses.napms(500)
         self._set_full_view("print-line", text="Bye!")
         curses.napms(500)
         sys.exit(0)
+
+    def save_quit(self):
+        self._set_full_view("print-line", text="Sauvegarde...")
+        TinyDBView.save_all()
+        curses.napms(500)
+        self.quit()
 
     # --- DEMO methods ---
 

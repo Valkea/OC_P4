@@ -13,6 +13,16 @@ import logging
 from model.round import Round
 
 
+class Status(Enum):
+    """Enum reflecting the current tournament status"""
+
+    UNINITIALIZED = 0
+    INITIALIZED = 1
+    PLAYING = 2
+    CLOSING = 3
+    CLOSED = 4
+
+
 class Tournament:
     """This class handles the tournaments
 
@@ -87,18 +97,24 @@ class Tournament:
         game_type,
         description="",
         num_rounds=4,
+        rounds=None,
+        players=None,
+        status=Status.UNINITIALIZED,
     ):
         self.name = name
         self.place = place
         self.start_date = start_date
         self.end_date = end_date
         self.num_rounds = num_rounds
-        self.rounds = []
-        self.players = []
+        self.rounds = rounds if rounds is not None else []
+        self.players = players if players is not None else []
         self.game_type = game_type
         self.description = description
-        self.status = Status.UNINITIALIZED
+        self.status = status
         self._world = world
+
+        if self.status != Status.UNINITIALIZED:
+            self._reloadData()
 
     @property
     def num_rounds(self):
@@ -125,6 +141,15 @@ class Tournament:
         }
 
         return json.loads(json.dumps(data, cls=EnumEncoder))
+
+    def _reloadData(self):
+
+        self.rounds = [
+            Round(self._world, **x, players_id=self.players) for x in self.rounds
+        ]
+        logging.debug(f"RELOAD DATA: {self.status}")
+        name, member = self.status["__enum__"].split(".")
+        self.status = getattr(PUBLIC_ENUMS[name], member)
 
     # -----------------------------------
 
@@ -402,16 +427,6 @@ class IsComplete(Exception):
     """Tournament Exception relative to the tournament status.
 
     Should be returned when the tournament has played of the rounds."""
-
-
-class Status(Enum):
-    """Enum reflecting the current tournament status"""
-
-    UNINITIALIZED = 0
-    INITIALIZED = 1
-    PLAYING = 2
-    CLOSING = 3
-    CLOSED = 4
 
 
 PUBLIC_ENUMS = {"Status": Status}

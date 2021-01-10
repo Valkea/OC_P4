@@ -19,9 +19,15 @@ class Menu:
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
             ("Charger un tournoi", "open_select_tournament_load"),
-            ("Charger / Sauvegarder", "open_load_save"),
             ("Rapports", "open_reports", "base"),
-            ("Quitter", "quit"),
+            ("Charger / Sauvegarder", "open_load_save"),
+            ("Quitter", "quit_confirm"),
+        )
+
+    def quit_confirm(self):
+        return (
+            ("Sauvegarder & quitter", "save_quit"),
+            ("Quitter sans sauver", "quit"),
         )
 
     def iofile(self):
@@ -135,6 +141,9 @@ class Menu:
     def select_tournament_load(self):
 
         tournaments = World.tournaments
+        logging.debug(f"SELECT TOURNAMENT LOAD: {tournaments}")
+        for t in tournaments:
+            logging.debug(t.toJSON())
         if len(tournaments) > 0:
             retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
             return tuple(retv)

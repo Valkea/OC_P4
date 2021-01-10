@@ -5,7 +5,9 @@
 """
 
 from model.player import Player
-from model.tournament import Tournament
+from model.tournament import Tournament, as_enum
+import json
+import logging
 
 
 class World:
@@ -22,10 +24,13 @@ class World:
         cls.active_tournament = None
 
         for actor in actors:
-            cls.actors[actor['uid']] = Player(**actor)
+            cls.actors[actor["uid"]] = Player(**actor)
 
-        # for tournament in tournaments:
-        # cls.tournaments.append(Tournamen(**tournament))
+        for tournament in tournaments:
+            # tournament = json.loads(tournament, object_hook=as_enum)
+            new_tournament = Tournament(cls, **tournament)
+            cls.set_active_tournament(new_tournament)
+            cls.tournaments.append(new_tournament)
 
     # --- Tournament ---
 
@@ -94,6 +99,8 @@ class World:
 
         if tournament is None:
             tournament = cls.get_active_tournament()
+
+        logging.debug(f"GET_ACTORS: {tournament}")
 
         actors_id = tournament.get_players()
 
