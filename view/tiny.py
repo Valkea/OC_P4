@@ -3,18 +3,38 @@
 
 """ The purpose of this module is to handle the TinyDB IO """
 
-from tinydb import TinyDB
 import json
 import logging
+
+from tinydb import TinyDB
 
 from model.world import World
 
 
 class TinyDbView:
-    """ D """
+    """ This class provide various methods to save & load the app data.
+
+    Class Methods
+    -------------
+    open_file()
+        Open / Reload the tournament.json file
+    save_all()
+        Save the tournaments and players' data from the World instance
+    write_tournaments(, serialized_data)
+        Write the provided serialized data in the tournaments_table
+    write_players(, serialized_players)
+        Write the provided serialized data in the players_table
+    load_all()
+        Return the tournaments and players dictionaries from the file
+    load_tournaments()
+        Return the serialized content of the tournaments_table
+    load_players()
+        Return the serialized content of the players_table
+    """
 
     @classmethod
     def open_file(cls):
+        """ Open / Reload the tournament.json file. """
 
         cls.db = TinyDB("tournament.json")
         cls.tournaments_table = cls.db.table("tournaments")
@@ -22,7 +42,7 @@ class TinyDbView:
 
     @classmethod
     def save_all(cls):
-        """ D """
+        """ Save the tournaments and players' data from the World instance. """
 
         cls.open_file()
 
@@ -40,7 +60,7 @@ class TinyDbView:
 
     @classmethod
     def write_tournaments(cls, serialized_data):
-        """ D """
+        """ Write the provided serialized data in the tournaments_table. """
 
         logging.debug(f"WRITE_TOURNAMENTS: {serialized_data} {type(serialized_data)}")
 
@@ -49,7 +69,7 @@ class TinyDbView:
 
     @classmethod
     def write_players(cls, serialized_players):
-        """ D """
+        """ Write the provided serialized data in the players_table. """
 
         logging.debug(f"WRITE_ALL_PLAYERS: {serialized_players}")
 
@@ -58,23 +78,23 @@ class TinyDbView:
 
     @classmethod
     def load_all(cls):
+        """ Return the tournaments and players dictionaries from the file. """
 
         cls.open_file()
 
         tournaments = cls.load_tournaments()
         players = cls.load_players()
 
-        for t in tournaments:
-            logging.debug(f"LOAD ALL: {t}")
-
         return tournaments, players
 
     @classmethod
     def load_tournaments(cls):
-        """ D """
+        """ Return the serialized content of the tournaments_table. """
+
         return cls.tournaments_table.all()
 
     @classmethod
     def load_players(cls):
-        """ D """
+        """ Return the serialized content of the players_table. """
+
         return cls.players_table.all()
