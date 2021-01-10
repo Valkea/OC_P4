@@ -5,8 +5,7 @@
 """
 
 from model.player import Player
-from model.tournament import Tournament, as_enum
-import json
+from model.tournament import Tournament
 import logging
 
 

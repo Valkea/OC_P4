@@ -4,7 +4,7 @@
 import logging
 import traceback
 
-from controller.menu import Controller  # , MenuController
+from controller.main import Controller
 
 logging.basicConfig(filename="debug.txt", filemode="w", level=logging.DEBUG)
 
