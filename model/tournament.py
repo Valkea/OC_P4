@@ -1,8 +1,7 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-""" This module handles the tournaments
-"""
+""" This module handles the tournaments """
 
 import datetime
 from enum import Enum
@@ -24,42 +23,79 @@ class Status(Enum):
 
 
 class Tournament:
-    """This class handles the tournaments
+    """This class handles the tournament instances
 
     Attributes
     ----------
     name : str
-        the tournament's name
+        the tournament's name.
     place : str
-        the place where the tournament takes place
+        the place where the tournament takes place.
     start_date : str
-        the stating date of the tournament
+        the stating date of the tournament.
     end_date : str
-        the ending date of the tournament
+        the ending date of the tournament.
     num_rounds : int
-        the number of rounds in the tournament (defaut is 4)
+        the number of rounds in the tournament (defaut is 4).
     rounds : list(Round)
-        the registered round instances of the tournament
+        the registered round instances of the tournament.
     players : list(int)
-        the registered player instances id of the tournament
+        the registered player instances id of the tournament.
     game_type : str
-        the game method used in the tournament
+        the game method used in the tournament.
     description : str
-        the tournament director's notes
-    status : str
-        the current tournament status
+        the tournament director's notes.
+    status : Status
+        the current tournament status.
+    world : Wold
+        the world instance where the original players instances can be found.
 
-    Methods
-    -------
+    Getters & Setters
+    -----------------
+    num_rounds()
+        Return num_rounds as int for comparisons.
+    num_rounds(v)
+        Set num_rounds to int (because Curses return str from input fields).
+
+    Public Methods
+    --------------
     start_round()
-        TODO
-    current_round()
-        TODO
+        Start a new round.
+    set_results(game_index, score1, score2)
+        Set the given results in the appropriate game and players instances.
 
-    #set_date( str )
-        insert a date using 'DD/MM/YYYY' format 'into the dates list
-    #set_dates( list(str) )
-        insert several dates using 'DD/MM/YYYY' format 'into the dates list
+    add_player(player_id)
+        Reister the given player_id as a participant of the tournament.
+
+    current_round()
+        Return the current round instance.
+    serialize()
+        Serialize the content of this class for TinyDB exports.
+
+    Private Methods
+    ---------------
+    _reload_data()
+        Reshape exported ENUMS and exorted list of objects when the class is feed with JSON data.
+    _has_right_players_num()
+        Check if the tournament has the right number of players to start the tournament.
+
+    Static & Class Methods
+    ----------------------
+    get_overall_infos()
+        Return informations about this specific tournament instance.
+    get_fields(cls)
+        Return the fields requiered to input or edit any tournament instance.
+    get_fields_final_note(cls)
+        Return the field required to input or edit the 'final note' of any tournament instance.
+    get_fields_input_scores(self)
+        Return the fields required to input the round/games results.
+
+    select_tournament_load(world)
+        Return tuples containing the available tournaments
+        and the appropriate controller methods to call in order to 'open' it.
+    select_tournament_report(world, route)
+        Return tuples containing the available tournaments
+        and the appropriate controller methods to call to get the right report.
     """
 
     labels = {
@@ -71,11 +107,11 @@ class Tournament:
         "end_date": "Date de fin",
         "num_rounds": "Nombre de tours",
         "gtype": "Contrôle du temps",
-        "list_rounds": "Tournées",  # TODO unused
+        "list_rounds": "Tournées",  # unused
         "current_round": "Tournée actuelle",
         "desc": "Description",
         "num_players": "Nombre de joueurs",
-        "list_players": "Joueurs",  # TODO unused
+        "list_players": "Joueurs",  # unused
         "table": "Table",
         "unstarted": "Pas commencé",
         "format_date": "[Jour/Mois/Année]",
@@ -116,6 +152,8 @@ class Tournament:
         if self.status != Status.UNINITIALIZED:
             self._reload_data()
 
+    # --- GETTERS & SETTERS ---
+
     @property
     def num_rounds(self):
         return int(self._num_rounds)
@@ -124,68 +162,19 @@ class Tournament:
     def num_rounds(self, v):
         self._num_rounds = int(v)
 
-    def serialize(self):
-
-        data = {
-            # "id": self.uid,
-            "name": self.name,
-            "place": self.place,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
-            "num_rounds": self.num_rounds,
-            "rounds": [json.loads(json.dumps(x.serialize())) for x in self.rounds],
-            "players": self.players,
-            "game_type": self.game_type,
-            "description": self.description,
-            "status": self.status,
-        }
-
-        return json.loads(json.dumps(data, cls=EnumEncoder))
-
-    def _reload_data(self):
-
-        self.rounds = [
-            Round(self._world, **x, players_id=self.players) for x in self.rounds
-        ]
-        logging.debug(f"RELOAD DATA: {self.status}")
-        name, member = self.status["__enum__"].split(".")
-        self.status = getattr(PUBLIC_ENUMS[name], member)
-
-    # -----------------------------------
-
-    def set_results(self, game_index, score1, score2):
-        """Set the game result to the appropriate Game in the current Round,
-            And update the Player's score
-
-        Parameters
-        ----------
-        game_index : int
-            the index of the Game instance to update
-        score1 : int
-            the score of the first player (tuple order)
-        score2 : int
-            the score of the second player (tuple order)
-        """
-
-        if score1 + score2 != 1:
-            raise ValueError("La somme des deux scores doit être de 1")
-
-        game = self.current_round().games[game_index]  # persistent order
-        game[0][1] = score1
-        game[1][1] = score2
-
-        player1 = self._world.get_actor(game[0][0])
-        player1.add_to_score(score1)
-        player1.set_played(game[1][0])
-
-        player2 = self._world.get_actor(game[1][0])
-        player2.add_to_score(score2)
-        player2.set_played(game[0][0])
-
-    # --- Rounds ---
+    # --- PUBLIC METHODS ---
 
     def start_round(self):
-        """ Initialize and start a new round in the current tournament instance """
+        """Initialize and start a new round in the current tournament instance.
+
+        Raises
+        ------
+        WrongPlayersNumber
+            if the number of players is odd or if there is not enough players
+            to play all the tournament rounds with the swiss rules.
+        IsNotReady
+            if the tournament is not initialized yet or already closed.
+        """
 
         if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
             raise IsNotReady()
@@ -212,47 +201,103 @@ class Tournament:
         )  # TODO voir pour players id dans Round
         self.rounds.append(new_round)
 
+    def set_results(self, game_index, score1, score2):
+        """Set the game result to the appropriate game and players instances.
+
+        Parameters
+        ----------
+        game_index : int
+            the index of the games tuple entry to update.
+        score1 : int
+            the score of the first player (tuple order).
+        score2 : int
+            the score of the second player (tuple order).
+        """
+
+        if score1 + score2 != 1:
+            raise ValueError("La somme des deux scores doit être de 1")
+
+        game = self.current_round().games[game_index]  # persistent order
+        game[0][1] = score1
+        game[1][1] = score2
+
+        player1 = self._world.get_actor(game[0][0])
+        player1.add_to_score(score1)
+        player1.set_played(game[1][0])
+
+        player2 = self._world.get_actor(game[1][0])
+        player2.add_to_score(score2)
+        player2.set_played(game[0][0])
+
+    # --- players ---
+
+    def add_player(self, player_id):
+        """Register a player to the tounement.
+
+        Parameters
+        ----------
+        player_id : int
+            the Player's instance ID to register as a participant of the tournament
+        """
+
+        self.players.append(player_id)
+
+    # --- utils ---
+
     def current_round(self):
-        """ Return the instance of the current round if any or None otherwise """
+        """ Return the instance of the current round if any or None otherwise. """
 
         if len(self.rounds) == 0:
             return None
         else:
             return self.rounds[-1]
 
-    # --- Players ---
+    def serialize(self):
+        """ Serialize the content of the tournement instance for TinyDB exports. """
 
-    def add_player(self, player_id):
-        """Add a player to the current tournament instance
+        data = {
+            # "id": self.uid,
+            "name": self.name,
+            "place": self.place,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "num_rounds": self.num_rounds,
+            "rounds": [json.loads(json.dumps(x.serialize())) for x in self.rounds],
+            "players": self.players,
+            "game_type": self.game_type,
+            "description": self.description,
+            "status": self.status,
+        }
 
-        Parameters
-        ----------
-        player_id : int
-            the Player instance id to register as a participant of the tournament
-        """
+        return json.loads(json.dumps(data, cls=EnumEncoder))
 
-        self.players.append(player_id)
+    # --- PRIVATE METHODS ---
 
-    def get_players(self):
-        """ D """
-        return self.players
+    def _reload_data(self):
+        """ Reshape exported ENUMS and exorted list of objects when the class is feed with JSON data. """
+
+        self.rounds = [
+            Round(self._world, **x, players_id=self.players) for x in self.rounds
+        ]
+        logging.debug(f"RELOAD DATA: {self.status}")
+        name, member = self.status["__enum__"].split(".")
+        self.status = getattr(PUBLIC_ENUMS[name], member)
 
     def _has_right_players_num(self):
-        """ Return True is the number of players is greater than 0 and multiple of 2 """
+        """ Return True if the number of players is greater than 0 and multiple of 2 """
 
         if len(self.players) == 0 or len(self.players) % 2 == 1:
             return False
         return True
 
-    # --- Tournament informations ---
+    # --- STATIC & CLASS METHODS ---
 
     def get_overall_infos(self):
-        """ D """
+        """ Return informations about this specific tournament instance. """
+
         infos = {
             "name": f"{self.labels['name']}: {self.name}",
             "place": f"{self.labels['place_short']}: {self.place}",
-            # "start_date": f"{self.labels['start_date']}: {self.start_date}",
-            # "end_date": f"{self.labels['end_date']}: {self.end_date}",
             "dates": f"{self.labels['dates']}: du {self.start_date} au {self.end_date}",
             "num_rounds": f"{self.labels['num_rounds']}: {self.num_rounds}",
             "game_type": f"{self.labels['gtype']}: {self.game_type}",
@@ -305,7 +350,7 @@ class Tournament:
 
     @classmethod
     def get_fields(cls):
-        """ D """
+        """ Return the fields requiered to input or edit any tournament instance. """
 
         fields = [
             {
@@ -363,7 +408,7 @@ class Tournament:
 
     @classmethod
     def get_fields_final_note(cls):
-        """ D """
+        """ Return the field required to input or edit the 'final note' of any tournament instance. """
 
         fields = [
             {
@@ -378,7 +423,7 @@ class Tournament:
         return fields
 
     def get_fields_input_scores(self):
-        """ D """
+        """ Return the fields required to input the round/games results. """
 
         fields = [
             {"label": f"{self.labels['input_score1']}"},
@@ -412,21 +457,36 @@ class Tournament:
 
     @staticmethod
     def select_tournament_load(world):
+        """Return tuples containing the available tournaments and
+        the appropriate controller methods to call in order to 'open' it.
+
+        Parameters
+        ----------
+        world : World
+            the world instance containing all tournament's and player's instances.
+        """
 
         tournaments = world.tournaments
-        logging.debug(f"SELECT TOURNAMENT LOAD: {tournaments}")
         for t in tournaments:
             logging.debug(t.serialize())
         if len(tournaments) > 0:
             retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
             return tuple(retv)
         else:
-            return (
-                ("Aucun tournoi", "go_back"),
-            )  # ("Créer un tournoi", "open_input_tournament_new"),)
+            return (("Aucun tournoi", "go_back"),)
 
     @staticmethod
     def select_tournament_report(world, route):
+        """Return tuples containing the available tournaments and
+        the appropriate controller methods to call to get the right report.
+
+        Parameters
+        ----------
+        world : World
+            the world instance containing all tournament's and player's instances.
+        route : str
+            the controller's method to join to the tournament instances.
+        """
 
         if route == "actors":
             link = "open_report_tournament_actors"
@@ -440,9 +500,10 @@ class Tournament:
             retv = [(f"{t.name}", link, t) for t in tournaments]
             return tuple(retv)
         else:
-            return (
-                ("Aucun tournoi", "go_back"),
-            )  # ("Créer un tournoi", "open_input_tournament_new"),)
+            return (("Aucun tournoi", "go_back"),)
+
+
+# --- Tournament ERRORS ---
 
 
 class WrongPlayersNumber(Exception):
@@ -460,17 +521,25 @@ class IsNotReady(Exception):
 
     Should be returned when the tournament is either not initialized or closed."""
 
+    pass
+
 
 class IsComplete(Exception):
     """Tournament Exception relative to the tournament status.
 
     Should be returned when the tournament has played of the rounds."""
 
+    pass
+
+
+# --- ENUMS serialization ---
 
 PUBLIC_ENUMS = {"Status": Status}
 
 
 class EnumEncoder(json.JSONEncoder):
+    """ Convert the ENUMS to a serializable format """
+
     def default(self, obj):
         if type(obj) in PUBLIC_ENUMS.values():
             return {"__enum__": str(obj)}
@@ -478,6 +547,7 @@ class EnumEncoder(json.JSONEncoder):
 
 
 def as_enum(d):
+    """ Revert ENUMS back to their origina format """
     if "__enum__" in d:
         name, member = d["__enum__"].split(".")
         return getattr(PUBLIC_ENUMS[name], member)

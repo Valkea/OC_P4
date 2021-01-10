@@ -1,14 +1,43 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-""" This module handles the menu model """
+""" This module handles the menus """
 
 
 class Menu:
-    """ This class provides the content of the various menus used to navigate into the application. """
+    """This class provides the content of the various menus used to navigate into the application.
+
+    Static methods
+    --------------
+    base()
+        This is the main menu.
+    quit_menu()
+        This menu offers to save before quitting.
+    save_n_load()
+        This menu offers to load from or save to JSON file.
+    only_back()
+        Simple menu with a unique "back" button.
+
+    tournament_initialize()
+        Tournament main menu when the tournament is created but not started yet.
+    tournament_opened()
+        Tournament main menu when playing the rounds.
+    tournament_finalize()
+        Tournament main menu when all rounds are played but the final note is still to write.
+    tournament_closed()
+        Tournament main menu when the tournament is closed.
+
+    reports_base()
+        Reports menu when outside a tournament.
+    reports_tournament()
+        Reports menu when inside a tournament.
+
+    actors_sortby(sortby="alpha")
+        Menu used to sort users on various screens.
+    """
 
     @staticmethod
-    def base(self):
+    def base():
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
             ("Charger un tournoi", "open_select_tournament_load"),
@@ -18,24 +47,28 @@ class Menu:
         )
 
     @staticmethod
-    def quit_menu(self):
+    def quit():
         return (
             ("Sauvegarder & quitter", "save_n_quit"),
             ("Quitter sans sauver", "quit"),
         )
 
     @staticmethod
-    def save_n_load(self):
+    def save_n_load():
         return (
             ("Sauvegarder", "open_save"),  # R1
             ("Charger les données", "open_load"),
             ("<< RETOUR", "go_back"),
         )
 
-    # --- Tournament ---
+    @staticmethod
+    def only_back():
+        return (("<< RETOUR", "go_back"),)
+
+    # --- TOURNAMENT ---
 
     @staticmethod
-    def tournament_initialize(self):
+    def tournament_initialize():
         return (
             ("Ajouter un joueur au tournoi", "open_input_actor_new"),
             ("Modifier un acteur", "open_select_actor"),
@@ -47,7 +80,7 @@ class Menu:
         )
 
     @staticmethod
-    def tournament_opened(self):
+    def tournament_opened():
         return (
             ("Saisir les résultats du round", "input_round_results"),
             ("Modifier un acteur", "open_select_actor"),  # R1
@@ -57,7 +90,7 @@ class Menu:
         )
 
     @staticmethod
-    def tournament_finalize(self):
+    def tournament_finalize():
         return (
             (
                 "Saisir la note de fin de tournoi / Clore le tournoi",
@@ -70,7 +103,7 @@ class Menu:
         )
 
     @staticmethod
-    def tournament_closed(self):
+    def tournament_closed():
         return (
             ("Modifier la note de fin de tournoi", "input_final_note"),
             ("Modifier un acteur", "open_select_actor"),  # R1
@@ -79,10 +112,10 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
-    # --- Reports ---
+    # --- REPORTS ---
 
     @staticmethod
-    def reports_base(self):
+    def reports_base():
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
             ("Tous les tournois", "open_report_all_tournament"),  # R3
@@ -97,7 +130,7 @@ class Menu:
         )
 
     @staticmethod
-    def reports_tournament(self):
+    def reports_tournament():
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
             ("Tous les tournois", "open_report_all_tournament"),  # R3
@@ -107,10 +140,10 @@ class Menu:
             ("<< RETOUR", "go_back"),
         )
 
-    # --- Actors ---
+    # --- ACTORS ---
 
     @staticmethod
-    def actors_sortby(self, sortby="alpha"):
+    def actors_sortby(sortby="alpha"):
         retv = []
         if sortby != "alpha":
             retv.append(
@@ -132,9 +165,3 @@ class Menu:
         retv.append(("<< RETOUR", "go_back"))
 
         return tuple(retv)
-
-    # --- Solo buttons ---
-
-    @staticmethod
-    def only_back(self):
-        return (("<< RETOUR", "go_back"),)

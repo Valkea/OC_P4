@@ -476,7 +476,7 @@ class Controller:
             target[0](*target[1], **target[2])
 
     def quit_menu(self):
-        self._set_menu_view("list", call=Menu.quit_menu)
+        self._set_menu_view("list", call=Menu.quit)
 
     def quit(self):
         self._set_full_view("print-line", text="Closing...")

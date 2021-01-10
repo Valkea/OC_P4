@@ -101,7 +101,7 @@ class World:
 
         logging.debug(f"GET_ACTORS: {tournament}")
 
-        actors_id = tournament.get_players()
+        actors_id = tournament.players
 
         return [v for k, v in cls.actors.items() if k in actors_id]
 
