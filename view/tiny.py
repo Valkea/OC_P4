@@ -12,7 +12,7 @@ from model.world import World
 
 
 class TinyDbView:
-    """ This class provide various methods to save & load the app data.
+    """This class provide various methods to save & load the app data.
 
     Class Methods
     -------------

@@ -130,7 +130,7 @@ class Round:
             self.games.append(([p1, 0], [p2, 0]))
 
     def one_line(self, ljustv=10):
-        """ Return a complete presentation of the round in one line.
+        """Return a complete presentation of the round in one line.
 
         Parameters
         ----------
@@ -163,7 +163,7 @@ class Round:
     # --- PRIVATE METHODS ---
 
     def _get_games(self, players_id):
-        """ Actually the pairing process takes place in here not in gen_games().
+        """Actually the pairing process takes place in here not in gen_games().
 
         Parameters
         ----------
@@ -171,7 +171,9 @@ class Round:
             The list of the uid attribute of the participants
         """
 
-        sorted_players = Player.multisort(self.world.get_actors(), Player.get_sort_key("score"))
+        sorted_players = Player.multisort(
+            self.world.get_actors(), Player.get_sort_key("score")
+        )
 
         pairs = []
         if self.round_index == 0:

@@ -4,15 +4,30 @@
 """ This module handles the form imput validations """
 
 import re
-import logging
 
 
 class Validation:
-    """ D """
+    """This class offers variours methods prepared to validate the input fields.
+
+    Static Methods
+    --------------
+    is_valid_date(v)
+        Check if the provided value is compatible with JJ/MM/YYYY
+    is_valid_posint(v)
+        Check if the provided value is a positive integer
+    is_valid_gtype(v)
+        Check if the provided value is a value game type (blitz/bullet/coup rapide)
+    is_valid_sex(v)
+        Check if the provided value either starts with h or f (Homme or Femme)
+    is_valid_score_symbol(v)
+        Check if the provided value is <, > or =
+
+    """
 
     @staticmethod
     def is_valid_date(v):
-        """ D """
+        """ Check if the provided value is compatible with JJ/MM/YYYY. """
+
         try:
             s = re.search(
                 "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", v
@@ -25,7 +40,8 @@ class Validation:
 
     @staticmethod
     def is_valid_posint(v):
-        """ D """
+        """ Check if the provided value is a positive integer. """
+
         try:
             return int(v) > 0
         except ValueError:
@@ -33,7 +49,8 @@ class Validation:
 
     @staticmethod
     def is_valid_gtype(v):
-        """ D """
+        """ Check if the provided value is a value game type (blitz/bullet/coup rapide). """
+
         v = v.lower()
         if v == "bullet" or v == "blitz" or v == "coups rapides" or v == "coup rapide":
             return True
@@ -41,7 +58,8 @@ class Validation:
 
     @staticmethod
     def is_valid_sex(v):
-        """ D """
+        """ Check if the provided value either starts with h or f (Homme or Femme) """
+
         v = v.lower()[0:1]
         if v == "h" or v == "f":
             return True
@@ -49,8 +67,8 @@ class Validation:
 
     @staticmethod
     def is_valid_score_symbol(v):
-        """ D """
-        logging.info(f"is_valid_score_symbol: {v}")
+        """ Check if the provided value is <, > or =. """
+
         if v == "<" or v == ">" or v == "=":
             return True
         return False
