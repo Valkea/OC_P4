@@ -116,7 +116,7 @@ class Player:
         self.played_actors = set()
         self.uid = uid if uid is not None else self._gen_UID()
 
-    # --- GETTERS & SETTERS ---
+    # === GETTERS & SETTERS ===
 
     @property
     def birthdate(self):
@@ -151,7 +151,7 @@ class Player:
     def elo(self, v):
         self._elo = int(v)
 
-    # --- PUBLIC METHODS ---
+    # === PUBLIC METHODS ===
 
     def add_to_score(self, value):
         """Add the given value to the current player's total score.
@@ -251,7 +251,7 @@ class Player:
             # "games": self.games,
         }
 
-    # --- PRIVATE METHODS ---
+    # === PRIVATE METHODS ===
 
     def _gen_UID(self):
         """ Generate a unique universal identifier. """
@@ -276,7 +276,7 @@ class Player:
     #     }
     #     return retv
 
-    # --- STATIC & CLASS METHODS ---
+    # === STATIC & CLASS METHODS ===
 
     @classmethod
     def get_fields(cls):

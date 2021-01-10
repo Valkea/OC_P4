@@ -65,7 +65,7 @@ class Menu:
     def only_back():
         return (("<< RETOUR", "go_back"),)
 
-    # --- TOURNAMENT ---
+    # === TOURNAMENT ===
 
     @staticmethod
     def tournament_initialize():
@@ -112,7 +112,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
-    # --- REPORTS ---
+    # === REPORTS ===
 
     @staticmethod
     def reports_base():
@@ -140,7 +140,7 @@ class Menu:
             ("<< RETOUR", "go_back"),
         )
 
-    # --- ACTORS ---
+    # === ACTORS ===
 
     @staticmethod
     def actors_sortby(sortby="alpha"):

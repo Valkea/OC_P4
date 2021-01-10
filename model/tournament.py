@@ -162,7 +162,7 @@ class Tournament:
     def num_rounds(self, v):
         self._num_rounds = int(v)
 
-    # --- PUBLIC METHODS ---
+    # === PUBLIC METHODS ===
 
     def start_round(self):
         """Initialize and start a new round in the current tournament instance.
@@ -271,7 +271,7 @@ class Tournament:
 
         return json.loads(json.dumps(data, cls=EnumEncoder))
 
-    # --- PRIVATE METHODS ---
+    # === PRIVATE METHODS ===
 
     def _reload_data(self):
         """ Reshape exported ENUMS and exorted list of objects when the class is feed with JSON data. """
@@ -290,7 +290,7 @@ class Tournament:
             return False
         return True
 
-    # --- STATIC & CLASS METHODS ---
+    # === STATIC & CLASS METHODS ===
 
     def get_overall_infos(self):
         """ Return informations about this specific tournament instance. """
@@ -503,7 +503,7 @@ class Tournament:
             return (("Aucun tournoi", "go_back"),)
 
 
-# --- Tournament ERRORS ---
+# === Tournament ERRORS ===
 
 
 class WrongPlayersNumber(Exception):
@@ -532,7 +532,7 @@ class IsComplete(Exception):
     pass
 
 
-# --- ENUMS serialization ---
+# === ENUMS serialization ===
 
 PUBLIC_ENUMS = {"Status": Status}
 

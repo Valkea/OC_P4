@@ -105,6 +105,8 @@ class CurseView:
         self.focus = self.menu
         self._last_draws = {}
 
+    # === PUBLIC METHODS ===
+
     def close(self):
         """ Set the terminal back to its original settings. """
 
@@ -345,7 +347,7 @@ class CurseView:
         else:
             self.set_focus(self.menu)
 
-    # --- PRIVATE METHODS ---
+    # === PRIVATE METHODS ===
 
     def _draw_form(self, screen, rows, source=None):
         """Draw the form and return it to the init_form method

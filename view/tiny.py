@@ -58,6 +58,8 @@ class TinyDbView:
         cls.write_tournaments(d_tournaments)
         cls.write_players(d_players)
 
+    # === Save ===
+
     @classmethod
     def write_tournaments(cls, serialized_data):
         """ Write the provided serialized data in the tournaments_table. """
@@ -75,6 +77,8 @@ class TinyDbView:
 
         cls.players_table.truncate()  # clear the table
         cls.players_table.insert_multiple(serialized_players)
+
+    # === Load ===
 
     @classmethod
     def load_all(cls):

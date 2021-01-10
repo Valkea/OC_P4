@@ -86,7 +86,7 @@ class Round:
         if start_time is None:
             self.gen_games(players_id)
 
-    # --- GETTERS & SETTERS ---
+    # === GETTERS & SETTERS ===
 
     @property
     def start_time(self):
@@ -114,7 +114,7 @@ class Round:
         else:
             self._close_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
 
-    # --- PUBLIC METHODS ---
+    # === PUBLIC METHODS ===
 
     def close(self):
         """ Close the round by adding the current time to close_time. """
@@ -160,7 +160,7 @@ class Round:
             "round_index": self.round_index,
         }
 
-    # --- PRIVATE METHODS ---
+    # === PRIVATE METHODS ===
 
     def _get_games(self, players_id):
         """Actually the pairing process takes place in here not in gen_games().
@@ -208,7 +208,7 @@ class Round:
     # def __repr__(self):
     #    return f"Round('{self.name}', {self.start_time}, {self.close_time})"
 
-    # --- STATIC & CLASS METHODS ---
+    # === STATIC & CLASS METHODS ===
 
     @staticmethod
     def convert_score_symbol(symbol):
