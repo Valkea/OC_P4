@@ -23,79 +23,79 @@ class Status(Enum):
 
 
 class Tournament:
-    """This class handles the tournament instances
+    """This class handles the tournament instances.
 
     Attributes
     ----------
     name : str
-        the tournament's name.
+        The tournament's name
     place : str
-        the place where the tournament takes place.
+        The place where the tournament takes place
     start_date : str
-        the stating date of the tournament.
+        The stating date of the tournament
     end_date : str
-        the ending date of the tournament.
+        The ending date of the tournament
     num_rounds : int
-        the number of rounds in the tournament (defaut is 4).
+        The number of rounds in the tournament (defaut is 4)
     rounds : list(Round)
-        the registered round instances of the tournament.
+        The registered round instances of the tournament
     players : list(int)
-        the registered player instances id of the tournament.
+        The registered player instances id of the tournament
     game_type : str
-        the game method used in the tournament.
+        The game method used in the tournament
     description : str
-        the tournament director's notes.
+        The tournament director's notes
     status : Status
-        the current tournament status.
+        The current tournament status
     world : Wold
-        the world instance where the original players instances can be found.
+        The world instance where the original players instances can be found
 
     Getters & Setters
     -----------------
     num_rounds()
-        Return num_rounds as int for comparisons.
+        Return num_rounds as int for comparisons
     num_rounds(v)
-        Set num_rounds to int (because Curses return str from input fields).
+        Set num_rounds to int (because Curses return str from input fields)
 
     Public Methods
     --------------
     start_round()
-        Start a new round.
+        Start a new round
     set_results(game_index, score1, score2)
-        Set the given results in the appropriate game and players instances.
+        Set the given results in the appropriate game and players instances
 
     add_player(player_id)
-        Reister the given player_id as a participant of the tournament.
+        Register the given player_id as a participant of the tournament
 
     current_round()
-        Return the current round instance.
+        Return the current round instance
     serialize()
-        Serialize the content of this class for TinyDB exports.
+        Serialize the content of this class for TinyDB exports
 
     Private Methods
     ---------------
     _reload_data()
-        Reshape exported ENUMS and exorted list of objects when the class is feed with JSON data.
+        Reshape exported ENUMS and exorted list of objects when the class is feed with JSON data
     _has_right_players_num()
-        Check if the tournament has the right number of players to start the tournament.
+        Check if the tournament has the right number of players to start the tournament
 
     Static & Class Methods
     ----------------------
     get_overall_infos()
-        Return informations about this specific tournament instance.
+        Return informations about this specific tournament instance
     get_fields(cls)
-        Return the fields requiered to input or edit any tournament instance.
+        Return the fields requiered to input or edit any tournament instance
     get_fields_final_note(cls)
-        Return the field required to input or edit the 'final note' of any tournament instance.
+        Return the field required to input or edit the 'final note' of any tournament instance
     get_fields_input_scores(self)
-        Return the fields required to input the round/games results.
+        Return the fields required to input the round/games results
 
     select_tournament_load(world)
         Return tuples containing the available tournaments
-        and the appropriate controller methods to call in order to 'open' it.
+        and the appropriate controller methods to call in order to 'open' them
     select_tournament_report(world, route)
         Return tuples containing the available tournaments
-        and the appropriate controller methods to call to get the right report.
+        and the appropriate controller methods to call to get the right report
     """
 
     labels = {
@@ -463,7 +463,7 @@ class Tournament:
         Parameters
         ----------
         world : World
-            the world instance containing all tournament's and player's instances.
+            the world instance containing all tournament's and player's instances
         """
 
         tournaments = world.tournaments

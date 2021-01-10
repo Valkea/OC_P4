@@ -10,30 +10,30 @@ class Menu:
     Static methods
     --------------
     base()
-        This is the main menu.
+        This is the main menu
     quit_menu()
-        This menu offers to save before quitting.
+        This menu offers to save before quitting
     save_n_load()
-        This menu offers to load from or save to JSON file.
+        This menu offers to load from or save to JSON file
     only_back()
-        Simple menu with a unique "back" button.
+        Simple menu with a unique "back" button
 
     tournament_initialize()
-        Tournament main menu when the tournament is created but not started yet.
+        Tournament main menu when the tournament is created but not started yet
     tournament_opened()
-        Tournament main menu when playing the rounds.
+        Tournament main menu when playing the rounds
     tournament_finalize()
-        Tournament main menu when all rounds are played but the final note is still to write.
+        Tournament main menu when all rounds are played but the final note is still to write
     tournament_closed()
-        Tournament main menu when the tournament is closed.
+        Tournament main menu when the tournament is closed
 
     reports_base()
-        Reports menu when outside a tournament.
+        Reports menu when outside a tournament
     reports_tournament()
-        Reports menu when inside a tournament.
+        Reports menu when inside a tournament
 
     actors_sortby(sortby="alpha")
-        Menu used to sort users on various screens.
+        Menu used to sort users on various screens
     """
 
     @staticmethod
