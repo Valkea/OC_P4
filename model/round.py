@@ -27,7 +27,7 @@ class Round:
     -------
     close()
         close the current round
-    toJSON()
+    serialize()
         convert the current instance to a JSON dictionnary
     """
 
@@ -88,13 +88,12 @@ class Round:
     def gen_games(self, players_id):
         """ D """
 
-        paired_players = self._get_pairs(players_id)
+        paired_players = self._get_games(players_id)
 
         for p1, p2 in paired_players:
             self.games.append(([p1, 0], [p2, 0]))
-            # self.games.append(Game(p1, p2, 0, 0))
 
-    def oneline(self, ljustv=10):
+    def one_line(self, ljustv=10):
         """ Return a full resume of the round in one line """
 
         if self.close_time is not None:
@@ -107,7 +106,7 @@ class Round:
             return f"{self.name.ljust(ljustv)} | " + f"Commencé le {self.start_time}"
 
     @staticmethod
-    def getScores(symbol):
+    def convert_score_symbol(symbol):
 
         if symbol == ">":
             return (0, 1)
@@ -134,7 +133,7 @@ class Round:
         )
         return [player for player in players]
 
-    def _get_pairs(self, players_id):
+    def _get_games(self, players_id):
         """ D """
 
         sorted_players = self._sort_players(players_id)
@@ -164,14 +163,9 @@ class Round:
                         break
         return pairs
 
-    def is_closed(self):
-        """ D """
-
-        return self.close_time is not None
-
     # ----------------------
 
-    def toJSON(self):
+    def serialize(self):
         """ Return a JSON representation of the Round instance """
         logging.debug("FROM ROUND")
         return {
@@ -191,39 +185,39 @@ class Round:
         return datetime.datetime.now()
 
 
-# ## class Game:
-# ##     """This class handles the games
-# ##
-# ##     Attributes
-# ##     ----------
-# ##     TODO
-# ##
-# ##     Methods
-# ##     -------
-# ##     get_tuple()
-# ##         return the game as a tuple ([Player1, Score1],[Player2, Score2])
-# ##     """
-# ##
-# ##     def __init__(self, player1, player2, score1=0, score2=0):
-# ##         self.player1 = player1
-# ##         self.player2 = player2
-# ##
-# ##         self.score1 = score1
-# ##         self.score2 = score2
-# ##
-# ##     def setScore(self, score1, score2):
-# ##         self.score1 = score1
-# ##         self.score2 = score2
-# ##
-# ##     def __repr__(self):
-# ##         return ([self.player1, self.score1], [self.player2, self.score2])
-# ##
-# ##     def toJSON(self):
-# ##         """ Return a JSON representation of the Game instance """
-# ##         return {
-# ##             "id": id(self),
-# ##             "player1": id(self.player1),
-# ##             "score1": self.score1,
-# ##             "player2": id(self.player1),
-# ##             "score2": self.score2,
-# ##         }
+# class Game:
+#     """This class handles the games
+#
+#     Attributes
+#     ----------
+#     TODO
+#
+#     Methods
+#     -------
+#     get_tuple()
+#         return the game as a tuple ([Player1, Score1],[Player2, Score2])
+#     """
+#
+#     def __init__(self, player1, player2, score1=0, score2=0):
+#         self.player1 = player1
+#         self.player2 = player2
+#
+#         self.score1 = score1
+#         self.score2 = score2
+#
+#     def setScore(self, score1, score2):
+#         self.score1 = score1
+#         self.score2 = score2
+#
+#     def __repr__(self):
+#         return ([self.player1, self.score1], [self.player2, self.score2])
+#
+#     def serialize(self):
+#         """ Return a JSON representation of the Game instance """
+#         return {
+#             "id": id(self),
+#             "player1": id(self.player1),
+#             "score1": self.score1,
+#             "player2": id(self.player1),
+#             "score2": self.score2,
+#         }

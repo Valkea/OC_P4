@@ -11,7 +11,7 @@ import atexit
 import re
 import logging
 
-from view.tiny import TinyDBView
+from view.tiny import TinyDbView
 from view.main import CurseView
 from model.world import World
 from model.tournament import (
@@ -82,7 +82,7 @@ class Controller:
             elif key == 300:  # CTRL + F12
                 self._generate_fake_players()
             elif key == 263:  # BACKSPACE
-                self.goback()
+                self.go_back()
 
             self._move_selection(key)
 
@@ -323,7 +323,7 @@ class Controller:
 
         self._set_focus("main")
         self._set_head_view(
-            "print-line", text=f"Modification de l'acteur <{actor.getFullname()}>"
+            "print-line", text=f"Modification de l'acteur <{actor.get_fullname()}>"
         )
         self._set_menu_view("list", call=self.menu_model.only_back)
         self._set_main_view(
@@ -441,39 +441,39 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Sauvegarde ...")
-        TinyDBView.save_all()
+        TinyDbView.save_all()
 
         logging.info("SAVED")
         curses.napms(500)
 
         self.curses_view.display_error("")
-        self.goback()
+        self.go_back()
 
     def open_load(self):
         self._set_focus("menu")
 
         self.curses_view.display_error("Chargement ...")
-        World.load(*TinyDBView.load_all())
+        World.load(*TinyDbView.load_all())
 
         logging.info("LOADED")
         curses.napms(500)
 
         self.curses_view.display_error("")
-        # self.goback()
+        # self.go_back()
         self.open_select_tournament_load()
 
     @saveNav
     def open_load_save(self):
-        self._set_menu_view("list", call=self.menu_model.iofile)
+        self._set_menu_view("list", call=self.menu_model.save_n_load)
 
-    def goback(self):
+    def go_back(self):
         if len(nav_history) > 1:
             nav_history.pop()
             target = nav_history[-1]
             target[0](*target[1], **target[2])
 
-    def quit_confirm(self):
-        self._set_menu_view("list", call=self.menu_model.quit_confirm)
+    def quit_menu(self):
+        self._set_menu_view("list", call=self.menu_model.quit_menu)
 
     def quit(self):
         self._set_full_view("print-line", text="Closing...")
@@ -482,9 +482,9 @@ class Controller:
         curses.napms(500)
         sys.exit(0)
 
-    def save_quit(self):
+    def save_n_quit(self):
         self._set_full_view("print-line", text="Sauvegarde...")
-        TinyDBView.save_all()
+        TinyDbView.save_all()
         curses.napms(500)
         self.quit()
 
@@ -833,7 +833,7 @@ class Controller:
         source.description = inputs["description"]
         source.num_rounds = int(inputs["num_rounds"])
 
-        # self.goback()
+        # self.go_back()
         self.open_tournament_initialize()
 
     def _form_exit_new_actor(self, inputs, source):
@@ -860,7 +860,7 @@ class Controller:
         source.sex = inputs["sex"]
         source.elo = inputs["elo"]
 
-        self.goback()
+        self.go_back()
 
     def _form_exit_edit_final_note(self, inputs, source):
 
@@ -876,7 +876,7 @@ class Controller:
 
         for i, k in enumerate(inputs):
             logging.info(f"--->{inputs[k]}")
-            tournament.set_results(i, *Round.getScores(inputs[k]))
+            tournament.set_results(i, *Round.convert_score_symbol(inputs[k]))
 
         self.start_new_round()
 

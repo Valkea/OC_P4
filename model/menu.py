@@ -21,20 +21,20 @@ class Menu:
             ("Charger un tournoi", "open_select_tournament_load"),
             ("Rapports", "open_reports", "base"),
             ("Charger / Sauvegarder", "open_load_save"),
-            ("Quitter", "quit_confirm"),
+            ("Quitter", "quit_menu"),
         )
 
-    def quit_confirm(self):
+    def quit_menu(self):
         return (
-            ("Sauvegarder & quitter", "save_quit"),
+            ("Sauvegarder & quitter", "save_n_quit"),
             ("Quitter sans sauver", "quit"),
         )
 
-    def iofile(self):
+    def save_n_load(self):
         return (
             ("Sauvegarder", "open_save"),  # R1
             ("Charger les données", "open_load"),
-            ("<< RETOUR", "goback"),
+            ("<< RETOUR", "go_back"),
         )
 
     # --- Tournament ---
@@ -93,7 +93,7 @@ class Menu:
             ),
             ("Tous les tours d'un tournoi", "open_select_tournament_report", "rounds"),
             ("Tous les matchs d'un tournoi", "open_select_tournament_report", "matchs"),
-            ("<< RETOUR", "goback"),
+            ("<< RETOUR", "go_back"),
         )
 
     def reports_tournament(self):
@@ -103,7 +103,7 @@ class Menu:
             ("Tous les joueurs de ce tournoi", "open_report_tournament_actors"),
             ("Tous les tours de ce tournoi", "open_report_tournament_rounds"),
             ("Tous les matchs de ce tournoi", "open_report_tournament_matchs"),
-            ("<< RETOUR", "goback"),
+            ("<< RETOUR", "go_back"),
         )
 
     # --- Actors ---
@@ -127,14 +127,14 @@ class Menu:
         if sortby != "score":
             retv.append(("Tri par score", "open_menu_actor_sortby", "score"))
 
-        retv.append(("<< RETOUR", "goback"))
+        retv.append(("<< RETOUR", "go_back"))
 
         return tuple(retv)
 
     # --- Solo buttons ---
 
     def only_back(self):
-        return (("<< RETOUR", "goback"),)
+        return (("<< RETOUR", "go_back"),)
 
     # --- Dynamic menus ---
 
@@ -143,13 +143,13 @@ class Menu:
         tournaments = World.tournaments
         logging.debug(f"SELECT TOURNAMENT LOAD: {tournaments}")
         for t in tournaments:
-            logging.debug(t.toJSON())
+            logging.debug(t.serialize())
         if len(tournaments) > 0:
             retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
             return tuple(retv)
         else:
             return (
-                ("Aucun tournoi", "goback"),
+                ("Aucun tournoi", "go_back"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
     def select_tournament_report(self, route):
@@ -167,58 +167,58 @@ class Menu:
             return tuple(retv)
         else:
             return (
-                ("Aucun tournoi", "goback"),
+                ("Aucun tournoi", "go_back"),
             )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
     def select_actor(self, sortby):
 
-        sortTuple = Player.sortKey(sortby)
+        sortTuple = Player.get_sort_key(sortby)
         logging.debug(f"DEBUG SORT {sortby} {sortTuple}")
         actors = sorted(World.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
 
         if len(actors) > 0:
             retv = [
-                (f" {actor.oneline()} ", "open_input_actor_edit", actor)
+                (f" {actor.one_line()} ", "open_input_actor_edit", actor)
                 for actor in actors
             ]
             return tuple(retv)
         else:
             return (
-                ("Aucun acteur", "goback"),
+                ("Aucun acteur", "go_back"),
             )  # ("Créer un acteur", "open_input_actor_new"),)
 
     def list_actors(self, tournament, sortby):
 
-        sortTuple = Player.sortKey(sortby)
+        sortTuple = Player.get_sort_key(sortby)
         actors = sorted(
             World.get_actors(tournament), key=sortTuple[0], reverse=sortTuple[1]
         )
 
         if len(actors) > 0:
-            retv = [(f" {actor.oneline()} ", None) for actor in actors]
+            retv = [(f" {actor.one_line()} ", None) for actor in actors]
             return tuple(retv)
         else:
-            return (("Aucun acteur", "goback"),)
+            return (("Aucun acteur", "go_back"),)
 
     def list_all_actors(self, sortby):
 
-        sortTuple = Player.sortKey(sortby)
+        sortTuple = Player.get_sort_key(sortby)
         actors = sorted(World.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
 
         if len(actors) > 0:
-            retv = [(f" {actor.oneline()} ", None) for actor in actors]
+            retv = [(f" {actor.one_line()} ", None) for actor in actors]
             return tuple(retv)
         else:
-            return (("Aucun acteur", "goback"),)
+            return (("Aucun acteur", "go_back"),)
 
     def list_rounds(self, tournament):
 
         rounds = tournament.rounds
         if len(rounds) > 0:
-            retv = [(f" {round.oneline()} ", None) for round in rounds]
+            retv = [(f" {round.one_line()} ", None) for round in rounds]
             return tuple(retv)
         else:
-            return (("Le tournoi n'est pas commencé", "goback"),)
+            return (("Le tournoi n'est pas commencé", "go_back"),)
 
     def list_games(self, tournament):
 
@@ -241,12 +241,12 @@ class Menu:
 
                     retv.append(
                         (
-                            f"({player1.oneline(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
-                            + f"({player2.oneline(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
+                            f"({player1.one_line(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
+                            + f"({player2.one_line(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
                             None,
                         )
                     )
 
             return tuple(retv)
         else:
-            return (("Le tournoi n'est pas commencé", "goback"),)
+            return (("Le tournoi n'est pas commencé", "go_back"),)
