@@ -579,7 +579,7 @@ class Controller:
             self.list_data[screen]["current_row"] = current_row
             # colorset = self.list_data["colorset"]
 
-            self.curses_view.display_list(screen, buttons, current_row)
+            self.curses_view.display_select(screen, buttons, current_row)
 
     # === View controls ===
 
@@ -622,7 +622,7 @@ class Controller:
 
         # --- Clear the view ---
         if action == "clear":
-            self.curses_view.print_center(screen, "")
+            self.curses_view.display_text(screen, "")
 
         # --- Print a menu list into the view ---
         elif action == "list":
@@ -658,17 +658,15 @@ class Controller:
                 "active_links": active_links,
             }
 
-            self.curses_view.display_list(screen, buttons, current_row, colors)
+            self.curses_view.display_select(screen, buttons, current_row, colors)
 
         # --- Print one text line into the view ---
         elif action == "print-line":
-            self.curses_view.print_center(screen, kwargs.get("text", "Error"), colors)
+            self.curses_view.display_text(screen, kwargs.get("text", "Error"), colors)
 
         # --- Print several text lines into the view ---
         elif action == "print-lines":
-            self.curses_view.print_center_multi(
-                screen, kwargs.get("rows", ["Error"]), colors
-            )
+            self.curses_view.display_list(screen, kwargs.get("rows", ["Error"]), colors)
 
         # --- Print several inputs as a form ---
         elif action == "form":
