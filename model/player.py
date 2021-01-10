@@ -59,7 +59,7 @@ class Player:
         Check if the provided opponant has already played with the current Player
     get_fullname()
         Return a composition based on the family_name and the first_name
-    one_line()
+    one_line(ljustv=20, age=True, sex=True, elo=True, score=True, extra=False)
         Return a complete presentation of the player in one line
     serialize()
         Serialize the content of this class for TinyDB exports
@@ -405,7 +405,7 @@ class Player:
 
     @staticmethod
     def list_actors(tournament, world, sortby):
-        """Return a sorted tuples containing the available players in the provided tournament.
+        """Return sorted tuples containing the available players in the provided tournament.
 
         Parameters
         ----------

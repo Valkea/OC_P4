@@ -6,8 +6,8 @@
 """
 
 import datetime
-from operator import attrgetter
-import logging
+
+from model.player import Player
 
 
 class Round:
@@ -16,19 +16,54 @@ class Round:
     Attributes
     ----------
     name : str
-    start_time : DateTime
-        automatically added when creating the instance
-    close_time : DateTime
-        automatically added when calling the close method
+    start_time : datetime.datetime
+        Automatically added when creating the instance
+    close_time : datetime.datetime
+        Automatically added when calling the close method
     games : list
-        the game instances of this round
+        The game instances of this round
+    round_index : int
+        The current round number (used to determine the rules to pairs players)
+    world : Wold
+        The world instance where the original players instances can be found
 
-    Methods
-    -------
+    Getters & Setters
+    -----------------
+    start_time()
+        Return the starting time of the Round as a str
+    start_time(v)
+        Convert various date inputs to a datetime.datetime object stored in _start_time.
+    close_time()
+        Return the closing time of the Round as a str
+    close_time(v)
+        Convert various date inputs to a datetime.datetime object stored in _close_time.
+
+    Public Methods
+    --------------
     close()
-        close the current round
+        Close the round by adding the current time to close_time
+    gen_games(players_id)
+        Generate the games from the given player's list
+    one_line(ljustv=10)
+        Return a complete presentation of the round in one line
     serialize()
-        convert the current instance to a JSON dictionnary
+        Serialize the content of this class for TinyDB exports
+
+    Static & Class Methods
+    ----------------------
+    _get_games(players_id)
+        Actually the pairing process takes place in here not in gen_games()
+    _get_time()
+        Return the current date as a datetime.datetime
+
+    Static & Class Methods
+    ----------------------
+    convert_score_symbol(symbol)
+        Convert the symbols <, > and = to (1,0), (0,1) and (.5,.5)
+    list_rounds(tournament)
+        Return tuples containing the provided tournament Rounds
+    list_games(tournament, world)
+        Return tuples containing the provided tournament Round/games
     """
 
     def __init__(
@@ -46,10 +81,12 @@ class Round:
         self.close_time = close_time
         self.games = games if games is not None else []
         self.round_index = round_index
-        self._world = world
+        self.world = world
 
         if start_time is None:
             self.gen_games(players_id)
+
+    # --- GETTERS & SETTERS ---
 
     @property
     def start_time(self):
@@ -62,7 +99,6 @@ class Round:
         if type(v) is datetime.datetime or v is None:
             self._start_time = v
         else:
-            logging.debug(f"TYPE V {type(v)}")
             self._start_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
 
     @property
@@ -78,15 +114,15 @@ class Round:
         else:
             self._close_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
 
+    # --- PUBLIC METHODS ---
+
     def close(self):
-        """ D """
+        """ Close the round by adding the current time to close_time. """
 
         self.close_time = self._get_time()
 
-    # ----------------------
-
     def gen_games(self, players_id):
-        """ D """
+        """" Generate the games from the given player's list. """
 
         paired_players = self._get_games(players_id)
 
@@ -94,7 +130,13 @@ class Round:
             self.games.append(([p1, 0], [p2, 0]))
 
     def one_line(self, ljustv=10):
-        """ Return a full resume of the round in one line """
+        """ Return a complete presentation of the round in one line.
+
+        Parameters
+        ----------
+        ljustv : int(10)
+            The minimum of space taken by the round name (ensure alignement)
+        """
 
         if self.close_time is not None:
             return (
@@ -105,38 +147,31 @@ class Round:
         else:
             return f"{self.name.ljust(ljustv)} | " + f"Commencé le {self.start_time}"
 
-    @staticmethod
-    def convert_score_symbol(symbol):
+    def serialize(self):
+        """ Return a JSON representation of the Round instance """
 
-        if symbol == ">":
-            return (0, 1)
+        return {
+            # "id": id(self),
+            "name": self.name,
+            "start_time": self.start_time,
+            "close_time": self.close_time,
+            # "games": [str(type(x)) for x in self.games],
+            "games": self.games,
+            "round_index": self.round_index,
+        }
 
-        elif symbol == "<":
-            return (1, 0)
+    # --- PRIVATE METHODS ---
 
-        elif symbol == "=":
-            return (0.5, 0.5)
-
-    def _sort_players(self, players):
-        """_Return a new list of the players sorted by score then by elo.
-            It works for both the first and second part of the swiss rules,
-            because the scores starts at 0, so it sort by elo only at first.
+    def _get_games(self, players_id):
+        """ Actually the pairing process takes place in here not in gen_games().
 
         Parameters
         ----------
-        players : list
-            The list of the Players instances to sort
+        players_id : list(str)
+            The list of the uid attribute of the participants
         """
 
-        players = sorted(
-            self._world.get_actors(), key=attrgetter("score", "elo"), reverse=True
-        )
-        return [player for player in players]
-
-    def _get_games(self, players_id):
-        """ D """
-
-        sorted_players = self._sort_players(players_id)
+        sorted_players = Player.multisort(self.world.get_actors(), Player.get_sort_key("score"))
 
         pairs = []
         if self.round_index == 0:
@@ -163,31 +198,40 @@ class Round:
                         break
         return pairs
 
-    # ----------------------
-
-    def serialize(self):
-        """ Return a JSON representation of the Round instance """
-        logging.debug("FROM ROUND")
-        return {
-            # "id": id(self),
-            "name": self.name,
-            "start_time": self.start_time,
-            "close_time": self.close_time,
-            # "games": [str(type(x)) for x in self.games],
-            "games": self.games,
-            "round_index": self.round_index,
-        }
-
-    def __repr__(self):
-        return f"Round('{self.name}', {self.start_time}, {self.close_time})"
-
     def _get_time(self):
+        """ Return the current date as a datetime.datetime. """
+
         return datetime.datetime.now()
+
+    # def __repr__(self):
+    #    return f"Round('{self.name}', {self.start_time}, {self.close_time})"
+
+    # --- STATIC & CLASS METHODS ---
+
+    @staticmethod
+    def convert_score_symbol(symbol):
+        """ Convert the symbols <, > and = to (1,0), (0,1) and (.5,.5) """
+
+        if symbol == ">":
+            return (0, 1)
+
+        elif symbol == "<":
+            return (1, 0)
+
+        elif symbol == "=":
+            return (0.5, 0.5)
 
     # --- Generate list for Curses views ---
 
     @staticmethod
     def list_rounds(tournament):
+        """Return tuples containing the provided tournament Rounds.
+
+        Parameters
+        ----------
+        tournament: Tournament
+            The instance of the tournament
+        """
 
         rounds = tournament.rounds
         if len(rounds) > 0:
@@ -198,6 +242,15 @@ class Round:
 
     @staticmethod
     def list_games(tournament, world):
+        """Return tuples containing the provided tournament Round/games.
+
+        Parameters
+        ----------
+        tournament: Tournament
+            The instance of the tournament
+        world : World
+            the world instance containing all tournament's and player's instances
+        """
 
         rounds = tournament.rounds
         if len(rounds) > 0:
