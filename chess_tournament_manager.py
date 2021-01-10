@@ -20,7 +20,9 @@ FAKE_INPUTS = True
 def main():
 
     # ## Initialize Tournament with INPUTS ###
-    t01 = World.add_tournament("Tournoi 01", "Caen", "20/12/2020", "21/12/2020", "bullet")
+    t01 = World.add_tournament(
+        "Tournoi 01", "Caen", "20/12/2020", "21/12/2020", "bullet"
+    )
     World.set_active_tournament(t01)
 
     # ## Initialize Players with INPUTS ###
@@ -77,8 +79,8 @@ def main():
                 player1 = World.get_actor(g[0][0])
                 player2 = World.get_actor(g[1][0])
 
-                player_name1 = player1.getFullname()
-                player_name2 = player2.getFullname()
+                player_name1 = player1.get_fullname()
+                player_name2 = player2.get_fullname()
 
                 print(
                     f"Veuillez saisir les scores pour le match {player_name1} vs {player_name2}"
@@ -106,7 +108,9 @@ def main():
         desc = input("Veuillez saisir la note du directeur de tournoi : ")
         t01.description = desc
 
-    for player in sorted(World.get_actors(t01), key=attrgetter("score", "elo"), reverse=True):
+    for player in sorted(
+        World.get_actors(t01), key=attrgetter("score", "elo"), reverse=True
+    ):
         print(player)
 
 

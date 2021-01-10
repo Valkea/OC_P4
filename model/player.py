@@ -35,9 +35,9 @@ class Player:
     TODO !!!!!!!!!!!!!!!!!!!!!!!
     add_to_score(value)
         add to the current player's score
-    getFullname()
+    get_fullname()
         return a concatenation of the first and family names
-    toJSON()
+    serialize()
         convert the current instance to a JSON dictionnary
     """
 
@@ -70,9 +70,9 @@ class Player:
         self.score = score
         # self.games = games if games is not None else []
         self.played_actors = set()
-        self.uid = uid if uid is not None else self._genUID()
+        self.uid = uid if uid is not None else self._gen_UID()
 
-    def _genUID(self):
+    def _gen_UID(self):
         # return id(self)
         return uuid.uuid1().hex
 
@@ -101,26 +101,6 @@ class Player:
     def sex(self, v):
         self._sex = v[0:1].capitalize()
 
-    # def add_game(self, opponent):
-    #     """_Register a game in the player's history.
-    #         We only register the opponent with its score,
-    #         but as the sum of the game worth 1pt we can deduce
-    #         the current player score.
-
-    #     Parameters
-    #     ----------
-    #     opponent : list(Player, int)
-    #         A list containing a Player instance and its game score
-    #     """
-    #     try:
-
-    #         score = 1 - opponent[1]
-    #         self._add_to_score(score)
-    #         self.games.append(opponent)
-
-    #     except ValueError as e:
-    #         raise e
-
     def add_to_score(self, value):
         """_Add the given value to the current player score
             if the value is 0>=value<=1
@@ -146,16 +126,18 @@ class Player:
 
         self.played_actors.add(player_id)
 
-    def getFullname(self):
+    def get_fullname(self):
         """ Return the concatenation of the fist and family names """
 
         return f"{self.family_name} {self.first_name}".title()
 
-    def oneline(self, ljustv=20, age=True, sex=True, elo=True, score=True, extra=False):
+    def one_line(
+        self, ljustv=20, age=True, sex=True, elo=True, score=True, extra=False
+    ):
         """ Return a full resume of the actor in one line """
 
         retv = []
-        retv.append(self.getFullname().ljust(ljustv)[:ljustv])
+        retv.append(self.get_fullname().ljust(ljustv)[:ljustv])
         if age:
             retv.append(f"{self.age:2} ans")
         if sex:
@@ -169,7 +151,7 @@ class Player:
 
         return "|".join(retv)
 
-    def toJSON(self):
+    def serialize(self):
         """ Return a JSON representation of the Player instance """
         return {
             "uid": self.uid,
@@ -181,20 +163,6 @@ class Player:
             "score": self.score,
             # "games": self.games,
         }
-
-        # return json.dumps(self, default=to_json, sort_keys=True, indent=4)
-        # retv = {
-        #     "family_name": self.family_name,
-        #     "first_name": self.first_name,
-        #     "sex": self.sex,
-        #     "birthdate": self.birthdate,
-        #     "elo": self.elo,
-        #     "score": self.score,
-        #     "games": self.games,
-        # }
-        # return retv
-
-        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __repr__(self):
         return (
@@ -258,7 +226,7 @@ class Player:
         return fields
 
     @staticmethod
-    def sortKey(sortby):
+    def get_sort_key(sortby):
         if sortby is None:
             sortby = "alpha"
 

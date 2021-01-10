@@ -114,7 +114,7 @@ class Tournament:
         self._world = world
 
         if self.status != Status.UNINITIALIZED:
-            self._reloadData()
+            self._reload_data()
 
     @property
     def num_rounds(self):
@@ -124,7 +124,7 @@ class Tournament:
     def num_rounds(self, v):
         self._num_rounds = int(v)
 
-    def toJSON(self):
+    def serialize(self):
 
         data = {
             # "id": self.uid,
@@ -133,7 +133,7 @@ class Tournament:
             "start_date": self.start_date,
             "end_date": self.end_date,
             "num_rounds": self.num_rounds,
-            "rounds": [json.loads(json.dumps(x.toJSON())) for x in self.rounds],
+            "rounds": [json.loads(json.dumps(x.serialize())) for x in self.rounds],
             "players": self.players,
             "game_type": self.game_type,
             "description": self.description,
@@ -142,7 +142,7 @@ class Tournament:
 
         return json.loads(json.dumps(data, cls=EnumEncoder))
 
-    def _reloadData(self):
+    def _reload_data(self):
 
         self.rounds = [
             Round(self._world, **x, players_id=self.players) for x in self.rounds
@@ -196,7 +196,7 @@ class Tournament:
                 + f"pour faire un tournoi en {self.num_rounds} tours"
             )
 
-        if self.has_player_pairs() is False:
+        if self._has_right_players_num() is False:
             raise WrongPlayersNumber("Il faut un nombre pair de joueurs")
 
         if self.current_round() is not None:
@@ -237,7 +237,7 @@ class Tournament:
         """ D """
         return self.players
 
-    def has_player_pairs(self):
+    def _has_right_players_num(self):
         """ Return True is the number of players is greater than 0 and multiple of 2 """
 
         if len(self.players) == 0 or len(self.players) % 2 == 1:
@@ -280,8 +280,8 @@ class Tournament:
                 player2 = self._world.get_actor(game[1][0])
 
                 infos[f"game_details{i}"] = (
-                    f"({player1.oneline(age=False, sex=False)}) vs "
-                    + f"({player2.oneline(age=False, sex=False)})"
+                    f"({player1.one_line(age=False, sex=False)}) vs "
+                    + f"({player2.one_line(age=False, sex=False)})"
                 )
 
         if self.status == Status.CLOSING or self.status == Status.CLOSED:
@@ -297,7 +297,7 @@ class Tournament:
                     reverse=True,
                 )
             ):
-                infos[f"result{i}"] = player.oneline()
+                infos[f"result{i}"] = player.one_line()
 
         return infos
 
@@ -389,8 +389,8 @@ class Tournament:
             player1 = self._world.get_actor(game[0][0])
             player2 = self._world.get_actor(game[1][0])
             label = (
-                f"{player1.getFullname().ljust(max_size)[:max_size]}"
-                + f"{player2.getFullname().rjust(max_size)[:max_size]}"
+                f"{player1.get_fullname().ljust(max_size)[:max_size]}"
+                + f"{player2.get_fullname().rjust(max_size)[:max_size]}"
             )
             fields.append(
                 {

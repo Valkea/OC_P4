@@ -10,7 +10,7 @@ import logging
 from model.world import World
 
 
-class TinyDBView:
+class TinyDbView:
     """ D """
 
     @classmethod
@@ -30,10 +30,10 @@ class TinyDBView:
         d_players = []
 
         for i, _tournament in enumerate(World.tournaments):
-            d_tournaments.append(json.loads(json.dumps(_tournament.toJSON())))
+            d_tournaments.append(json.loads(json.dumps(_tournament.serialize())))
 
         for i, _actor in enumerate(World.get_all_actors()):
-            d_players.append(json.loads(json.dumps(_actor.toJSON())))
+            d_players.append(json.loads(json.dumps(_actor.serialize())))
 
         cls.write_tournaments(d_tournaments)
         cls.write_players(d_players)
