@@ -301,6 +301,8 @@ class Tournament:
 
         return infos
 
+    # --- Generate list for Curses forms ---
+
     @classmethod
     def get_fields(cls):
         """ D """
@@ -405,6 +407,42 @@ class Tournament:
             )
 
         return fields
+
+    # --- Generate list for Curses views ---
+
+    @staticmethod
+    def select_tournament_load(world):
+
+        tournaments = world.tournaments
+        logging.debug(f"SELECT TOURNAMENT LOAD: {tournaments}")
+        for t in tournaments:
+            logging.debug(t.serialize())
+        if len(tournaments) > 0:
+            retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun tournoi", "go_back"),
+            )  # ("Créer un tournoi", "open_input_tournament_new"),)
+
+    @staticmethod
+    def select_tournament_report(world, route):
+
+        if route == "actors":
+            link = "open_report_tournament_actors"
+        elif route == "rounds":
+            link = "open_report_tournament_rounds"
+        elif route == "matchs":
+            link = "open_report_tournament_matchs"
+
+        tournaments = world.tournaments
+        if len(tournaments) > 0:
+            retv = [(f"{t.name}", link, t) for t in tournaments]
+            return tuple(retv)
+        else:
+            return (
+                ("Aucun tournoi", "go_back"),
+            )  # ("Créer un tournoi", "open_input_tournament_new"),)
 
 
 class WrongPlayersNumber(Exception):

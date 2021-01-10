@@ -63,7 +63,6 @@ class Controller:
         logging.info("< Open Controller")
 
         self.curses_view = CurseView()
-        self.menu_model = Menu()
         self.list_data = {}
 
         atexit.register(self._close)
@@ -97,14 +96,14 @@ class Controller:
         self._set_focus("menu")
         self._set_head_view("print-line", text="Menu général")
         self._set_main_view("clear")
-        self._set_menu_view("list", call=self.menu_model.base, colors=[2, 3])
+        self._set_menu_view("list", call=Menu.base, colors=[2, 3])
 
     @saveNav
     def open_input_tournament_new(self):
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouveau tournoi")
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=Tournament.get_fields(),
@@ -116,10 +115,11 @@ class Controller:
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Chargement d'un tournoi")
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "list",
-            call=self.menu_model.select_tournament_load,
+            call=Tournament.select_tournament_load,
+            call_params={"world": World},
         )
 
     @saveNav
@@ -134,7 +134,7 @@ class Controller:
         self._set_head_view(
             "print-line", text=f"Modification du tournoi <{tournament.name}>"
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=Tournament.get_fields(),
@@ -174,7 +174,7 @@ class Controller:
             "print-line", text=f"Tournoi <{tournament.name}> en phase préparatoire"
         )
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
-        self._set_menu_view("list", call=self.menu_model.tournament_initialize)
+        self._set_menu_view("list", call=Menu.tournament_initialize)
 
     def start_new_round(self, tournament=None):
 
@@ -211,7 +211,7 @@ class Controller:
             "print-line",
             text=f"Saisies de resultats pour <{tournament.current_round().name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=tournament.get_fields_input_scores(),
@@ -231,7 +231,7 @@ class Controller:
             "print-line",
             text=f"Saisie de la note finale du tournoi <{tournament.name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=Tournament.get_fields_final_note(),
@@ -253,7 +253,7 @@ class Controller:
             text=f"Tournoi <{tournament.name}> : <{tournament.current_round().name}>",
         )
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
-        self._set_menu_view("list", call=self.menu_model.tournament_opened)
+        self._set_menu_view("list", call=Menu.tournament_opened)
 
     @resetNav
     def open_tournament_finalize(self, tournament=None):
@@ -268,7 +268,7 @@ class Controller:
             "print-line", text=f"Tournoi <{tournament.name}> en phase finale"
         )
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
-        self._set_menu_view("list", call=self.menu_model.tournament_finalize)
+        self._set_menu_view("list", call=Menu.tournament_finalize)
 
     @resetNav
     def open_tournament_closed(self, tournament=None):
@@ -281,14 +281,14 @@ class Controller:
         self._set_focus("menu")
         self._set_head_view("print-line", text=f"Tournoi <{tournament.name}> clos")
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
-        self._set_menu_view("list", call=self.menu_model.tournament_closed)
+        self._set_menu_view("list", call=Menu.tournament_closed)
 
     @saveNav
     def open_input_actor_new(self):
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouvel acteur")
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=Player.get_fields(),
@@ -300,11 +300,11 @@ class Controller:
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un acteur à modifier")
-        self._set_menu_view("list", call=self.menu_model.actors_sortby)
+        self._set_menu_view("list", call=Menu.actors_sortby)
         self._set_main_view(
             "list",
-            call=self.menu_model.select_actor,
-            call_params={"sortby": sortby},
+            call=Player.select_actor,
+            call_params={"sortby": sortby, "world": World},
         )
 
     def open_menu_actor_sortby(self, sortby):
@@ -313,7 +313,7 @@ class Controller:
         target[2]["sortby"] = sortby
         target[0](*target[1], **target[2])
         self._set_menu_view(
-            "list", call=self.menu_model.actors_sortby, call_params={"sortby": sortby}
+            "list", call=Menu.actors_sortby, call_params={"sortby": sortby}
         )
 
         logging.debug(f"TRI: {target}")
@@ -327,7 +327,7 @@ class Controller:
         self._set_head_view(
             "print-line", text=f"Modification de l'acteur <{actor.get_fullname()}>"
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "form",
             rows=Player.get_fields(),
@@ -342,19 +342,19 @@ class Controller:
         self._set_head_view("print-line", text="Rapports")
         self._set_main_view("clear")
         if source == "base":
-            self._set_menu_view("list", call=self.menu_model.reports_base)
+            self._set_menu_view("list", call=Menu.reports_base)
         else:
-            self._set_menu_view("list", call=self.menu_model.reports_tournament)
+            self._set_menu_view("list", call=Menu.reports_tournament)
 
     @saveNav
     def open_report_all_actors(self, sortby=None):
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
-        self._set_menu_view("list", call=self.menu_model.actors_sortby)
+        self._set_menu_view("list", call=Menu.actors_sortby)
         self._set_main_view(
             "list",
-            call=self.menu_model.list_all_actors,
-            call_params={"sortby": sortby},
+            call=Player.list_all_actors,
+            call_params={"sortby": sortby, "world": World},
             autostart=False,
         )
 
@@ -362,10 +362,11 @@ class Controller:
     def open_report_all_tournament(self):
         self._set_focus("menu")
         self._set_head_view("print-line", text="Chargement d'un tournoi")
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "list",
-            call=self.menu_model.select_tournament_load,
+            call=Tournament.select_tournament_load,
+            call_params={"world": World},
             active_links=False,
             autostart=False,
         )
@@ -375,11 +376,11 @@ class Controller:
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un tournoi")
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "list",
-            call=self.menu_model.select_tournament_report,
-            call_params={"route": route},
+            call=Tournament.select_tournament_report,
+            call_params={"route": route, "world": World},
         )
 
     @saveNav
@@ -393,11 +394,11 @@ class Controller:
             "print-line",
             text=f"Liste de l'ensemble des acteurs du tournoi <{tournament.name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.actors_sortby)
+        self._set_menu_view("list", call=Menu.actors_sortby)
         self._set_main_view(
             "list",
-            call=self.menu_model.list_actors,
-            call_params={"tournament": tournament, "sortby": sortby},
+            call=Player.list_actors,
+            call_params={"tournament": tournament, "world": World, "sortby": sortby},
             autostart=False,
         )
 
@@ -412,10 +413,10 @@ class Controller:
             "print-line",
             text=f"Liste des rounds du tournoi <{tournament.name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "list",
-            call=self.menu_model.list_rounds,
+            call=Round.list_rounds,
             call_params={"tournament": tournament},
             autostart=False,
         )
@@ -431,11 +432,11 @@ class Controller:
             "print-line",
             text=f"Liste des matchs du tournoi <{tournament.name}>",
         )
-        self._set_menu_view("list", call=self.menu_model.only_back)
+        self._set_menu_view("list", call=Menu.only_back)
         self._set_main_view(
             "list",
-            call=self.menu_model.list_games,
-            call_params={"tournament": tournament},
+            call=Round.list_games,
+            call_params={"tournament": tournament, "world": World},
             autostart=False,
         )
 
@@ -466,7 +467,7 @@ class Controller:
 
     @saveNav
     def open_load_save(self):
-        self._set_menu_view("list", call=self.menu_model.save_n_load)
+        self._set_menu_view("list", call=Menu.save_n_load)
 
     def go_back(self):
         if len(nav_history) > 1:
@@ -475,7 +476,7 @@ class Controller:
             target[0](*target[1], **target[2])
 
     def quit_menu(self):
-        self._set_menu_view("list", call=self.menu_model.quit_menu)
+        self._set_menu_view("list", call=Menu.quit_menu)
 
     def quit(self):
         self._set_full_view("print-line", text="Closing...")

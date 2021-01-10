@@ -240,3 +240,46 @@ class Player:
             return (attrgetter("age", "family_name", "first_name"), True)
         elif sortby == "sex":
             return (attrgetter("sex", "family_name", "first_name"), False)
+
+    # --- Generate list for Curses views ---
+
+    @staticmethod
+    def select_actor(sortby, world):
+
+        sortTuple = Player.get_sort_key(sortby)
+        actors = sorted(world.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
+
+        if len(actors) > 0:
+            retv = [
+                (f" {actor.one_line()} ", "open_input_actor_edit", actor)
+                for actor in actors
+            ]
+            return tuple(retv)
+        else:
+            return (("Aucun acteur", "go_back"),)
+
+    @staticmethod
+    def list_actors(tournament, world, sortby):
+
+        sortTuple = Player.get_sort_key(sortby)
+        actors = sorted(
+            world.get_actors(tournament), key=sortTuple[0], reverse=sortTuple[1]
+        )
+
+        if len(actors) > 0:
+            retv = [(f" {actor.one_line()} ", None) for actor in actors]
+            return tuple(retv)
+        else:
+            return (("Aucun acteur", "go_back"),)
+
+    @staticmethod
+    def list_all_actors(world, sortby):
+
+        sortTuple = Player.get_sort_key(sortby)
+        actors = sorted(world.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
+
+        if len(actors) > 0:
+            retv = [(f" {actor.one_line()} ", None) for actor in actors]
+            return tuple(retv)
+        else:
+            return (("Aucun acteur", "go_back"),)

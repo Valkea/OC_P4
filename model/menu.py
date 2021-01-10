@@ -1,20 +1,13 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-""" This module handles the menu model
-"""
-
-from model.world import World
-from model.player import Player
-import logging
+""" This module handles the menu model """
 
 
 class Menu:
-    """ TODO """
+    """ This class provides the content of the various menus used to navigate into the application. """
 
-    def __init__(self):
-        pass
-
+    @staticmethod
     def base(self):
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
@@ -24,12 +17,14 @@ class Menu:
             ("Quitter", "quit_menu"),
         )
 
+    @staticmethod
     def quit_menu(self):
         return (
             ("Sauvegarder & quitter", "save_n_quit"),
             ("Quitter sans sauver", "quit"),
         )
 
+    @staticmethod
     def save_n_load(self):
         return (
             ("Sauvegarder", "open_save"),  # R1
@@ -39,6 +34,7 @@ class Menu:
 
     # --- Tournament ---
 
+    @staticmethod
     def tournament_initialize(self):
         return (
             ("Ajouter un joueur au tournoi", "open_input_actor_new"),
@@ -50,6 +46,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
+    @staticmethod
     def tournament_opened(self):
         return (
             ("Saisir les résultats du round", "input_round_results"),
@@ -59,6 +56,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
+    @staticmethod
     def tournament_finalize(self):
         return (
             (
@@ -71,6 +69,7 @@ class Menu:
             ("Fermer le tournoi", "open_menu_base"),  # R1
         )
 
+    @staticmethod
     def tournament_closed(self):
         return (
             ("Modifier la note de fin de tournoi", "input_final_note"),
@@ -82,6 +81,7 @@ class Menu:
 
     # --- Reports ---
 
+    @staticmethod
     def reports_base(self):
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
@@ -96,6 +96,7 @@ class Menu:
             ("<< RETOUR", "go_back"),
         )
 
+    @staticmethod
     def reports_tournament(self):
         return (
             ("Tous les acteurs", "open_report_all_actors"),  # R3
@@ -108,6 +109,7 @@ class Menu:
 
     # --- Actors ---
 
+    @staticmethod
     def actors_sortby(self, sortby="alpha"):
         retv = []
         if sortby != "alpha":
@@ -133,120 +135,6 @@ class Menu:
 
     # --- Solo buttons ---
 
+    @staticmethod
     def only_back(self):
         return (("<< RETOUR", "go_back"),)
-
-    # --- Dynamic menus ---
-
-    def select_tournament_load(self):
-
-        tournaments = World.tournaments
-        logging.debug(f"SELECT TOURNAMENT LOAD: {tournaments}")
-        for t in tournaments:
-            logging.debug(t.serialize())
-        if len(tournaments) > 0:
-            retv = [(f"{t.name}", "open_tournament_current", t) for t in tournaments]
-            return tuple(retv)
-        else:
-            return (
-                ("Aucun tournoi", "go_back"),
-            )  # ("Créer un tournoi", "open_input_tournament_new"),)
-
-    def select_tournament_report(self, route):
-
-        if route == "actors":
-            link = "open_report_tournament_actors"
-        elif route == "rounds":
-            link = "open_report_tournament_rounds"
-        elif route == "matchs":
-            link = "open_report_tournament_matchs"
-
-        tournaments = World.tournaments
-        if len(tournaments) > 0:
-            retv = [(f"{t.name}", link, t) for t in tournaments]
-            return tuple(retv)
-        else:
-            return (
-                ("Aucun tournoi", "go_back"),
-            )  # ("Créer un tournoi", "open_input_tournament_new"),)
-
-    def select_actor(self, sortby):
-
-        sortTuple = Player.get_sort_key(sortby)
-        logging.debug(f"DEBUG SORT {sortby} {sortTuple}")
-        actors = sorted(World.get_actors(), key=sortTuple[0], reverse=sortTuple[1])
-
-        if len(actors) > 0:
-            retv = [
-                (f" {actor.one_line()} ", "open_input_actor_edit", actor)
-                for actor in actors
-            ]
-            return tuple(retv)
-        else:
-            return (
-                ("Aucun acteur", "go_back"),
-            )  # ("Créer un acteur", "open_input_actor_new"),)
-
-    def list_actors(self, tournament, sortby):
-
-        sortTuple = Player.get_sort_key(sortby)
-        actors = sorted(
-            World.get_actors(tournament), key=sortTuple[0], reverse=sortTuple[1]
-        )
-
-        if len(actors) > 0:
-            retv = [(f" {actor.one_line()} ", None) for actor in actors]
-            return tuple(retv)
-        else:
-            return (("Aucun acteur", "go_back"),)
-
-    def list_all_actors(self, sortby):
-
-        sortTuple = Player.get_sort_key(sortby)
-        actors = sorted(World.get_all_actors(), key=sortTuple[0], reverse=sortTuple[1])
-
-        if len(actors) > 0:
-            retv = [(f" {actor.one_line()} ", None) for actor in actors]
-            return tuple(retv)
-        else:
-            return (("Aucun acteur", "go_back"),)
-
-    def list_rounds(self, tournament):
-
-        rounds = tournament.rounds
-        if len(rounds) > 0:
-            retv = [(f" {round.one_line()} ", None) for round in rounds]
-            return tuple(retv)
-        else:
-            return (("Le tournoi n'est pas commencé", "go_back"),)
-
-    def list_games(self, tournament):
-
-        rounds = tournament.rounds
-        if len(rounds) > 0:
-
-            retv = []
-            for r in rounds:
-
-                retv.append(("", None))
-                retv.append((f" {r.name} ", None))
-
-                for i, game in enumerate(r.games):
-
-                    player1 = World.get_actor(game[0][0])
-                    player2 = World.get_actor(game[1][0])
-
-                    score1 = game[0][1]
-                    score2 = game[1][1]
-
-                    retv.append(
-                        (
-                            f"({player1.one_line(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
-                            + f"({player2.one_line(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
-                            None,
-                        )
-                    )
-
-            return tuple(retv)
-        else:
-            return (("Le tournoi n'est pas commencé", "go_back"),)

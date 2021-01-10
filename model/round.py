@@ -184,6 +184,50 @@ class Round:
     def _get_time(self):
         return datetime.datetime.now()
 
+    # --- Generate list for Curses views ---
+
+    @staticmethod
+    def list_rounds(tournament):
+
+        rounds = tournament.rounds
+        if len(rounds) > 0:
+            retv = [(f" {round.one_line()} ", None) for round in rounds]
+            return tuple(retv)
+        else:
+            return (("Le tournoi n'est pas commencé", "go_back"),)
+
+    @staticmethod
+    def list_games(tournament, world):
+
+        rounds = tournament.rounds
+        if len(rounds) > 0:
+
+            retv = []
+            for r in rounds:
+
+                retv.append(("", None))
+                retv.append((f" {r.name} ", None))
+
+                for i, game in enumerate(r.games):
+
+                    player1 = world.get_actor(game[0][0])
+                    player2 = world.get_actor(game[1][0])
+
+                    score1 = game[0][1]
+                    score2 = game[1][1]
+
+                    retv.append(
+                        (
+                            f"({player1.one_line(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
+                            + f"({player2.one_line(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
+                            None,
+                        )
+                    )
+
+            return tuple(retv)
+        else:
+            return (("Le tournoi n'est pas commencé", "go_back"),)
+
 
 # class Game:
 #     """This class handles the games
