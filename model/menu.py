@@ -11,7 +11,7 @@ class Menu:
     --------------
     base()
         This is the main menu
-    quit_menu()
+    open_open_quit_menu()
         This menu offers to save before quitting
     save_n_load()
         This menu offers to load from or save to JSON file
@@ -43,7 +43,7 @@ class Menu:
             ("Charger un tournoi", "open_select_tournament_load"),
             ("Rapports", "open_reports", "base"),
             ("Charger / Sauvegarder", "open_load_save"),
-            ("Quitter", "quit_menu"),
+            ("Quitter", "open_open_quit_menu"),
         )
 
     @staticmethod
@@ -82,7 +82,7 @@ class Menu:
     @staticmethod
     def tournament_opened():
         return (
-            ("Saisir les résultats du round", "input_round_results"),
+            ("Saisir les résultats du round", "open_input_round_results"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),
@@ -94,7 +94,7 @@ class Menu:
         return (
             (
                 "Saisir la note de fin de tournoi / Clore le tournoi",
-                "input_final_note",
+                "open_input_final_note",
             ),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
@@ -105,7 +105,7 @@ class Menu:
     @staticmethod
     def tournament_closed():
         return (
-            ("Modifier la note de fin de tournoi", "input_final_note"),
+            ("Modifier la note de fin de tournoi", "open_input_final_note"),
             ("Modifier un acteur", "open_select_actor"),  # R1
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),

@@ -31,7 +31,7 @@ from utils import FakePlayer
 
 
 def saveNav(f):
-    """ Decorator used to track the navigation history """
+    """ Decorator used to track the navigation history. """
 
     global nav_history
     nav_history = []
@@ -45,7 +45,7 @@ def saveNav(f):
 
 
 def resetNav(f):
-    """ Decorator used to clear the navigation history """
+    """ Decorator used to clear the navigation history. """
 
     def wrapper(*args, **kwargs):
         global nav_history
@@ -57,21 +57,154 @@ def resetNav(f):
 
 
 class Controller:
-    """D """
+    """ This Class offers various methods to control the overall app.
+
+        By using this controller, you can collect data from models,
+        display them with views  (CurseView & TinyDbView) and
+        control the overall tournament process.
+
+    Attributes
+    ----------
+    curses_view : CurseView
+        one instance of the CurseView Class, so we can draw stuffs coming from controlers
+
+
+    Public Methods
+    --------------
+
+    start()
+        Start the 'infinite' loop than runs the app
+    close()
+        Clean-up at exit
+    start_new_round(tournament=None)
+        Start a new round in the active tournament
+
+    open_menu_base()
+        Open the root page with the main menu
+
+    open_input_tournament_new()
+        Open the page used to input a new tournament
+    open_input_tournament_edit(tournament=None)
+        Open the page used to edit an existing tournament
+    open_select_tournament_load()
+        Open the page that offers to select an existing tournament then load it
+
+    open_tournament_current(tournament=None)
+        Call the appropriate opening method depending on the tournament current Status
+    open_tournament_initialize(tournament=None)
+        Open the tournament page that corresponds to the Status.INITIALIZED status
+    open_input_round_results(tournament=None)
+        Open the page for the round results inputs
+    open_input_final_note(tournament=None)
+        Open the page for the final note input
+    open_tournament_opened(tournament=None)
+        Open the tournament page that corresponds to the Status.PLAYING status
+    open_tournament_finalize(tournament=None)
+        Open the tournament page that corresponds to the Status.CLOSING status
+    open_tournament_closed(tournament=None)
+        Open the tournament page that corresponds to the Status.CLOSED status
+
+    open_input_actor_new()
+        Open the page used to input a new actor
+    open_input_actor_edit(actor)
+        Open the page used to edit an existing actor
+    open_select_actor(sortby=None)
+        Open the page used to select an actor (for editing it)
+    open_menu_actor_sortby(sortby)
+        Open the menu used to sort the user-lists
+
+    open_reports(source)
+        Open the base menu used to acces the various reports from the root menu
+    open_report_all_actors(sortby=None)
+        Open the page displaying all the actors of all the tournaments
+    open_report_all_tournament()
+        Open the page displaying all the existing tournaments
+    open_select_tournament_report(route)
+        Open the page that offers to select an existing tournament then dislay the corresponding report
+    open_report_tournament_actors(tournament=None, sortby=None)
+        Open the page displaying the actors of the selected tournament (or current one)
+    open_report_tournament_rounds(tournament=None)
+        Open the page displaying the rounds of the selected tournament (or current one)
+    open_report_tournament_matchs(tournament=None)
+        Open the page displaying the games (matchs) of the selected tournament (or current one)
+
+    open_save()
+        Save the content of the app and display a message
+    open_load()
+        Load the content of the app and display a message
+    open_load_save()
+        Open the menu offering to load or save data
+
+    open_quit_menu()
+        Open the menu offering to quit with or without saving data
+    quit()
+        Display an exit message and close the application
+    save_n_quit()
+        Save the data and display a message, then call quit()
+
+    go_back()
+        Open the last page (minus the current one) registerd with the @saveNav decorator
+
+    Private Methods
+    ---------------
+
+    _generate_fake_players()
+        Demo method used to quickly generate fake players (bind to CTRL+F12)
+    _align_to_larger(options)
+        Align the size of the provided list to the size of the larger item (filling with space)
+    _move_selection(key)
+        Control the mouvement of the selection when displaying a menu or a  list of selectable items
+
+    _set_focus(focus)
+        Control the CurseView focus
+    _set_head_view(action, **kwargs)
+        _set_view shortcut to control the content of the head window of the CurseView
+    _set_menu_view(action, **kwargs)
+        _set_view shortcut to control the content of the menu window of the CurseView
+    _set_main_view(action, **kwargs)
+        _set_view shortcut to control the content of the main window of the CurseView
+    _set_full_view(action, **kwargs)
+        _set_view shortcut to control the content of the base window (full screen) of the CurseView
+    _set_view(view, action, **kwargs)
+        Control the content of the given window of the CurseView
+
+    _form_setup(screen, rows, exit_func, source=None)
+        Initialize a new form
+    _form_input_swap(x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, source)
+        Control the form navigation (TAB & SHIFT + TAB)
+    _form_test(value, test, errormsg, error_win)
+        Control the form tests
+    _form_gather_inputs(text_boxes, rows, exit_func, source)
+        Gather form inputs and transmit to callback functions
+
+    _form_exit_new_tournament(inputs, source)
+        Process the new tournament informations and transmit to the model
+    _form_exit_edit_tournament(inputs, source)
+        Process the tournament modified informations and transmit to the model
+    _form_exit_new_actor(inputs, source)
+        Process the new actor informations and transmit to the model
+    _form_exit_edit_actor(inputs, source)
+        Process the actor modified informations and transmit to the model
+    _form_exit_edit_final_note(inputs, source)
+        Process the final note input and transmit to the model
+    _form_exit_input_scores(inputs, source)
+        Process the round score inputs and transmit to the model
+
+    """
 
     def __init__(self):
         logging.info("< Open Controller")
 
         self.curses_view = CurseView()
-        self.list_data = {}
+        self._list_data = {}
 
-        atexit.register(self._close)
+        atexit.register(self.close)
 
-    def _close(self):
-        logging.info("> Close Controller")
-        self.curses_view.close()
+    # === PUBLIC METHODS ===
 
     def start(self):
+        """ Start the 'infinite' loop than runs the app. """
+
         while 1:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
@@ -87,10 +220,47 @@ class Controller:
 
             self._move_selection(key)
 
+    def close(self):
+        """ Clean-up at exit. """
+
+        logging.info("> Close Controller")
+        self.curses_view.close()
+
+    def start_new_round(self, tournament=None):
+        """ Start a new round in the active tournament.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
+
+        if tournament is None:
+            tournament = World.get_active_tournament()
+
+        try:
+            logging.info("START_NEW_ROUND")
+            tournament.start_round()
+            self.open_tournament_opened(tournament)
+
+        except WrongPlayersNumber as e:
+            self.curses_view.display_error(str(e))
+            curses.napms(3000)
+            self.curses_view.display_error("")
+        except IsNotReady as e:
+            logging.critical(
+                "Calling start_new_round on an uninitialized or closed tournament"
+            )
+            raise e
+        except IsComplete:
+            self.open_tournament_finalize(tournament)
+
     # === PUBLIC NAVIGATION METHODS ===
 
     @resetNav
     def open_menu_base(self):
+        """ Open the root page with the main menu. """
 
         World.set_active_tournament(None)
         self._set_focus("menu")
@@ -98,8 +268,11 @@ class Controller:
         self._set_main_view("clear")
         self._set_menu_view("list", call=Menu.base, colors=[2, 3])
 
+    # --- Tournament pages ---
+
     @saveNav
     def open_input_tournament_new(self):
+        """ Open the page used to input a new tournament. """
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouveau tournoi")
@@ -111,19 +284,15 @@ class Controller:
         )
 
     @saveNav
-    def open_select_tournament_load(self):
-
-        self._set_focus("main")
-        self._set_head_view("print-line", text="Chargement d'un tournoi")
-        self._set_menu_view("list", call=Menu.only_back)
-        self._set_main_view(
-            "list",
-            call=Tournament.select_tournament_load,
-            call_params={"world": World},
-        )
-
-    @saveNav
     def open_input_tournament_edit(self, tournament=None):
+        """ Open the page used to edit an existing tournament.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         logging.info(f"EDIT tournament: {tournament}")
 
@@ -142,7 +311,28 @@ class Controller:
             source=tournament,
         )
 
+    @saveNav
+    def open_select_tournament_load(self):
+        """ Open the page that offers to select an existing tournament then load it. """
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Chargement d'un tournoi")
+        self._set_menu_view("list", call=Menu.only_back)
+        self._set_main_view(
+            "list",
+            call=Tournament.select_tournament_load,
+            call_params={"world": World},
+        )
+
     def open_tournament_current(self, tournament=None):
+        """ Call the appropriate opening method depending on the tournament current Status.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         if tournament is not None:
             World.set_active_tournament(tournament)
@@ -163,6 +353,14 @@ class Controller:
 
     @resetNav
     def open_tournament_initialize(self, tournament=None):
+        """ Open the tournament page that corresponds to the Status.INITIALIZED status.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -176,30 +374,16 @@ class Controller:
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=Menu.tournament_initialize)
 
-    def start_new_round(self, tournament=None):
-
-        if tournament is None:
-            tournament = World.get_active_tournament()
-
-        try:
-            logging.info("START_NEW_ROUND try")
-            tournament.start_round()
-            self.open_tournament_opened(tournament)
-
-        except WrongPlayersNumber as e:
-            self.curses_view.display_error(str(e))
-            curses.napms(3000)
-            self.curses_view.display_error("")
-        except IsNotReady as e:
-            logging.critical(
-                "Calling start_new_round on an uninitialized or closed tournament"
-            )
-            raise e
-        except IsComplete:
-            self.open_tournament_finalize(tournament)
-
     @saveNav
-    def input_round_results(self, tournament=None):
+    def open_input_round_results(self, tournament=None):
+        """ Open the page for the round results inputs.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         logging.info(f"EDIT final note: {tournament}")
 
@@ -219,7 +403,15 @@ class Controller:
         )
 
     @saveNav
-    def input_final_note(self, tournament=None):
+    def open_input_final_note(self, tournament=None):
+        """ Open the page for the final note input.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         logging.info(f"EDIT final note: {tournament}")
 
@@ -241,6 +433,14 @@ class Controller:
 
     @resetNav
     def open_tournament_opened(self, tournament=None):
+        """ Open the tournament page that corresponds to the Status.PLAYING status.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -257,6 +457,14 @@ class Controller:
 
     @resetNav
     def open_tournament_finalize(self, tournament=None):
+        """ Open the tournament page that corresponds to the Status.CLOSING status.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -272,6 +480,14 @@ class Controller:
 
     @resetNav
     def open_tournament_closed(self, tournament=None):
+        """ Open the tournament page that corresponds to the Status.CLOSED status.
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Will use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -283,8 +499,11 @@ class Controller:
         self._set_main_view("print-lines", rows=tournament.get_overall_infos().values())
         self._set_menu_view("list", call=Menu.tournament_closed)
 
+    # --- Actor' pages ---
+
     @saveNav
     def open_input_actor_new(self):
+        """ Open the page used to input a new actor. """
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouvel acteur")
@@ -296,30 +515,14 @@ class Controller:
         )
 
     @saveNav
-    def open_select_actor(self, sortby=None):
-
-        self._set_focus("main")
-        self._set_head_view("print-line", text="Selection d'un acteur à modifier")
-        self._set_menu_view("list", call=Menu.actors_sortby)
-        self._set_main_view(
-            "list",
-            call=Player.select_actor,
-            call_params={"sortby": sortby, "world": World},
-        )
-
-    def open_menu_actor_sortby(self, sortby):
-
-        target = nav_history[-1]
-        target[2]["sortby"] = sortby
-        target[0](*target[1], **target[2])
-        self._set_menu_view(
-            "list", call=Menu.actors_sortby, call_params={"sortby": sortby}
-        )
-
-        logging.debug(f"TRI: {target}")
-
-    @saveNav
     def open_input_actor_edit(self, actor):
+        """ Open the page used to edit an existing actor.
+
+        Parameters
+        ----------
+        actor : Player
+            The Player instance to modifiy
+        """
 
         logging.info(f"EDIT actor: {actor}")
 
@@ -336,7 +539,51 @@ class Controller:
         )
 
     @saveNav
+    def open_select_actor(self, sortby=None):
+        """ Open the page used to select an actor (for editing it).
+
+        Parameters
+        ----------
+        sortby : str
+            The optional sorting sequence name to apply on the result.
+        """
+
+        self._set_focus("main")
+        self._set_head_view("print-line", text="Selection d'un acteur à modifier")
+        self._set_menu_view("list", call=Menu.actors_sortby)
+        self._set_main_view(
+            "list",
+            call=Player.select_actor,
+            call_params={"sortby": sortby, "world": World},
+        )
+
+    def open_menu_actor_sortby(self, sortby):
+        """ Open the menu used to sort the user-lists.
+
+        Parameters
+        ----------
+        sortby : str
+            The sorting sequence name  used to know which version of the menu must be opened
+        """
+
+        target = nav_history[-1]
+        target[2]["sortby"] = sortby
+        target[0](*target[1], **target[2])
+        self._set_menu_view(
+            "list", call=Menu.actors_sortby, call_params={"sortby": sortby}
+        )
+
+    # --- Report' pages---
+
+    @saveNav
     def open_reports(self, source):
+        """ Open the base menu used to acces the various reports from the root menu.
+
+        Parameters
+        ----------
+        source : str
+            Indicate the source menu (base or tournament) in order to adapt the content
+        """
 
         self._set_focus("menu")
         self._set_head_view("print-line", text="Rapports")
@@ -348,6 +595,13 @@ class Controller:
 
     @saveNav
     def open_report_all_actors(self, sortby=None):
+        """ Open the page displaying all the actors of all the tournaments.
+
+        Parameters
+        ----------
+        sortby : str
+            The optional sorting sequence name to apply on the result.
+        """
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
         self._set_menu_view("list", call=Menu.actors_sortby)
@@ -360,6 +614,8 @@ class Controller:
 
     @saveNav
     def open_report_all_tournament(self):
+        """ Open the page displaying all the existing tournaments. """
+
         self._set_focus("menu")
         self._set_head_view("print-line", text="Chargement d'un tournoi")
         self._set_menu_view("list", call=Menu.only_back)
@@ -373,6 +629,14 @@ class Controller:
 
     @saveNav
     def open_select_tournament_report(self, route):
+        """ Open the page that offers to select an existing
+            tournament then dislay the corresponding report.
+
+        Parameters
+        ----------
+        route : str
+            The name of the function to call once the tournament is selected
+        """
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Selection d'un tournoi")
@@ -385,6 +649,17 @@ class Controller:
 
     @saveNav
     def open_report_tournament_actors(self, tournament=None, sortby=None):
+        """ Open the page displaying the actors of
+            the selected tournament (or current one).
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Use the current open tournament otherwise.
+        sortby : str
+            The optional sorting sequence name to apply on the result.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -404,6 +679,15 @@ class Controller:
 
     @saveNav
     def open_report_tournament_rounds(self, tournament=None):
+        """ Open the page displaying the rounds of
+            the selected tournament (or current one).
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -423,6 +707,15 @@ class Controller:
 
     @saveNav
     def open_report_tournament_matchs(self, tournament=None):
+        """ Open the page displaying the games (matchs) of
+            the selected tournament (or current one).
+
+        Parameters
+        ----------
+        tournament : Tournament
+            The optional tournament instance to target.
+            Use the current open tournament otherwise.
+        """
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -440,7 +733,11 @@ class Controller:
             autostart=False,
         )
 
+    # --- Save & Load pages ---
+
     def open_save(self):
+        """ Save the content of the app and display a message. """
+
         self._set_focus("menu")
 
         self.curses_view.display_error("Sauvegarde ...")
@@ -453,6 +750,8 @@ class Controller:
         self.go_back()
 
     def open_load(self):
+        """ Load the content of the app and display a message. """
+
         self._set_focus("menu")
 
         self.curses_view.display_error("Chargement ...")
@@ -467,18 +766,20 @@ class Controller:
 
     @saveNav
     def open_load_save(self):
+        """ Open the menu offering to load or save data. """
+
         self._set_menu_view("list", call=Menu.save_n_load)
 
-    def go_back(self):
-        if len(nav_history) > 1:
-            nav_history.pop()
-            target = nav_history[-1]
-            target[0](*target[1], **target[2])
+    # --- Quit menu ---
 
-    def quit_menu(self):
+    def open_quit_menu(self):
+        """ Open the menu offering to quit with or without saving data. """
+
         self._set_menu_view("list", call=Menu.quit)
 
     def quit(self):
+        """ Display an exit message and close the application. """
+
         self._set_full_view("print-line", text="Closing...")
         curses.napms(500)
         self._set_full_view("print-line", text="Bye!")
@@ -486,14 +787,27 @@ class Controller:
         sys.exit(0)
 
     def save_n_quit(self):
+        """ Save the data and display a message, then call quit()."""
+
         self._set_full_view("print-line", text="Sauvegarde...")
         TinyDbView.save_all()
         curses.napms(500)
         self.quit()
 
-    # --- DEMO methods ---
+    # --- Back menu ---
+
+    def go_back(self):
+        """ Open the last page (minus the current one) registerd with the @saveNav decorator. """
+
+        if len(nav_history) > 1:
+            nav_history.pop()
+            target = nav_history[-1]
+            target[0](*target[1], **target[2])
+
+    # === DEMO methods ===
 
     def _generate_fake_players(self):
+        """ Demo method used to quickly generate fake players (bind to CTRL+F12). """
 
         if World.get_active_tournament() is None:
             logging.warning("GEN FAKE USERS: need an active tournament")
@@ -520,14 +834,31 @@ class Controller:
     # === PRIVATE METHODS ===
 
     def _align_to_larger(self, options):
+        """ Align the size of the provided list to the size
+            of the larger item (filling with space).
+
+        Parameters
+        ----------
+        options : list
+            The list to adjust to its larger element
+        """
+
         max_size = max([len(option) for option in options])
         return [option.ljust(max_size) for option in options]
 
     def _move_selection(self, key):
+        """ Control the mouvement of the selection when
+            displaying a menu or a  list of selectable items.
 
-        for screen in self.list_data.keys():
+        Parameters
+        ----------
+        key : int
+            A key number
+        """
 
-            sdata = self.list_data[screen]
+        for screen in self._list_data.keys():
+
+            sdata = self._list_data[screen]
             # screen = sdata["screen"]
             # screen = self.curses_view.focus
 
@@ -576,14 +907,22 @@ class Controller:
                         eval(f"self.{actions[current_row]}")(params[current_row])
                     return
 
-            self.list_data[screen]["current_row"] = current_row
-            # colorset = self.list_data["colorset"]
+            self._list_data[screen]["current_row"] = current_row
+            # colorset = self._list_data["colorset"]
 
             self.curses_view.display_select(screen, buttons, current_row)
 
     # === View controls ===
 
     def _set_focus(self, focus):
+        """ Control the CurseView focus.
+
+        Parameters
+        ----------
+        focus : str ('main'/'menu'/'full')
+            A shortname to indicate where to place the focus
+        """
+
         if focus == "main":
             self.curses_view.focus = self.curses_view.main
         elif focus == "full":
@@ -592,19 +931,81 @@ class Controller:
             self.curses_view.focus = self.curses_view.menu
 
     def _set_head_view(self, action, **kwargs):
+        """ _set_view shortcut to control the content
+            of the head window of the CurseView
+
+        Parameters
+        ----------
+        view : Curse.window
+            Determine the CurseView used to draw the requested content
+        action : str
+            Determine the kind of content to draw
+        **kwargs : *
+            Used to pass various parameters depending upon the action
+        """
+
         return self._set_view("head", action, **kwargs)
 
     def _set_menu_view(self, action, **kwargs):
+        """ _set_view shortcut to control the content
+            of the menu window of the CurseView
+
+        Parameters
+        ----------
+        view : Curse.window
+            Determine the CurseView used to draw the requested content
+        action : str
+            Determine the kind of content to draw
+        **kwargs : *
+            Used to pass various parameters depending upon the action
+        """
+
         return self._set_view("menu", action, **kwargs)
 
     def _set_main_view(self, action, **kwargs):
+        """ _set_view shortcut to control the content
+            of the main window of the CurseView
+
+        Parameters
+        ----------
+        view : Curse.window
+            Determine the CurseView used to draw the requested content
+        action : str
+            Determine the kind of content to draw
+        **kwargs : *
+            Used to pass various parameters depending upon the action
+        """
+
         return self._set_view("main", action, **kwargs)
 
     def _set_full_view(self, action, **kwargs):
+        """ _set_view shortcut to control the content of
+            the base window (full screen) of the CurseView
+
+        Parameters
+        ----------
+        view : Curse.window
+            Determine the CurseView used to draw the requested content
+        action : str
+            Determine the kind of content to draw
+        **kwargs : *
+            Used to pass various parameters depending upon the action
+        """
+
         return self._set_view("full", action, **kwargs)
 
     def _set_view(self, view, action, **kwargs):
-        """ D """
+        """ Control the content of the given window of the CurseView.
+
+        Parameters
+        ----------
+        view : Curse.window
+            Determine the CurseView used to draw the requested content
+        action : str
+            Determine the kind of content to draw
+        **kwargs : *
+            Used to pass various parameters depending upon the action
+        """
 
         if view == "menu":
             screen = self.curses_view.menu
@@ -647,7 +1048,7 @@ class Controller:
             params = [x[2] if len(x) > 2 else None for x in options]
             buttons = self._align_to_larger(labels)
 
-            self.list_data[screen] = {
+            self._list_data[screen] = {
                 "screen": screen,
                 "current_row": current_row,
                 "labels": labels,
@@ -681,26 +1082,11 @@ class Controller:
                 kwargs.get("source"),
             )
 
-    #        # --- Print a sequence of one-line inputs ---
-    #        elif action == "input-lines":
-    #
-    #            if screen == "menu":
-    #                return
-    #
-    #            inputs = {}
-    #            for field in kwargs["fields"]:
-    #                inputs[field["name"]] = self._check_input(
-    #                    screen,
-    #                    field["label"],
-    #                    field["placeholder"],
-    #                    field["test"],
-    #                    field["errormsg"],
-    #                )
-    #            return inputs
-
     # === Form controls ===
 
     def _form_setup(self, screen, rows, exit_func, source=None):
+        """ Initialize a new form. """
+
         text_boxes, text_wins, error_box = self.curses_view.init_form(
             screen, rows, source
         )
@@ -733,6 +1119,7 @@ class Controller:
         source,
         j_save=[0],
     ):
+        """ Control the form navigation (TAB & SHIFT + TAB). """
 
         logging.debug(f"FORM INPUT SWAP {x}")
 
@@ -783,19 +1170,19 @@ class Controller:
         return x
 
     def _form_test(self, value, test, errormsg, error_win):
+        """ Control the form tests. """
 
         if test is None or eval(test) is True:
-            logging.debug(f"TEST {test} OK")
             error_win.clear()
             error_win.refresh()
             return True
         else:
-            logging.debug(f"TEST {test} ERROR")
             error_win.clear()
             error_win.addstr(errormsg)
             error_win.refresh()
 
     def _form_gather_inputs(self, text_boxes, rows, exit_func, source):
+        """ Gather form inputs and transmit to callback functions. """
 
         inputs = {}
         valid_rows = [x for x in rows if x.get("name", False)]
@@ -809,6 +1196,15 @@ class Controller:
         raise UnstackAll("SUBMIT")
 
     def _form_exit_new_tournament(self, inputs, source):
+        """ Process the new tournament informations and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
 
         logging.info(f"NEW TOURNAMENT VALUES: {inputs}")
         tournament = World.add_tournament(
@@ -824,6 +1220,15 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_edit_tournament(self, inputs, source):
+        """ Process the tournament modified informations and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
 
         logging.info(f"EDIT TOURNAMENT VALUES: {inputs}")
         source.name = inputs["name"]
@@ -838,6 +1243,15 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_new_actor(self, inputs, source):
+        """ Process the new actor informations and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
 
         logging.info(f"NEW ACTOR VALUES: {inputs}")
         tournament = World.get_active_tournament()
@@ -853,6 +1267,15 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_edit_actor(self, inputs, source):
+        """ Process the actor modified informations and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
 
         logging.info(f"EDIT ACTOR VALUES: {inputs}")
         source.family_name = inputs["family_name"]
@@ -864,6 +1287,15 @@ class Controller:
         self.go_back()
 
     def _form_exit_edit_final_note(self, inputs, source):
+        """ Process the final note input and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
 
         logging.info(f"EDIT FINAL NOTE: {inputs}")
         source.description = inputs["description"]
@@ -871,12 +1303,20 @@ class Controller:
         self.open_tournament_closed()
 
     def _form_exit_input_scores(self, inputs, source):
+        """ Process the round score inputs and transmit to the model.
+
+        Parameters
+        ----------
+        inputs : list
+            The collected input' value
+        source : list
+            The original values if provided (receive None otherwise)
+        """
         logging.info(f"INPUT SCORES: {inputs}")
 
         tournament = World.get_active_tournament()
 
         for i, k in enumerate(inputs):
-            logging.info(f"--->{inputs[k]}")
             tournament.set_results(i, *Round.convert_score_symbol(inputs[k]))
 
         self.start_new_round()
