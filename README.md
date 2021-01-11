@@ -73,6 +73,26 @@ This one is an example of report (showing all the actors of all tournaments)
 And finally, this third screenshot shows the interface of a closed tournament
 ![alt text](medias/closed_tournament.png)
 
+## Simple process example
+
+If you want to run the full tournament process without the Curses interface, you can try te following command
+
+```bash
+>>> CTM_algo_demo.py
+```
+
+and if you prefer to input the data yourself, you can add the -i or --inputs argument
+```bash
+>>> CTM_algo_demo.py --inputs
+```
+
+### Flake8 / PEP8
+
+If you need to generate a new flake8 report to check the PEP8 compliance of this projet, use the following command
+```bash
+>>> flake8 --format=html --htmldir=flake8_report
+```
+and you will find the html report in the 'flake8_report' folder.
 
 ## Ouputs
 

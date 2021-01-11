@@ -4,28 +4,43 @@
 """ The purpose of this module is to simulate a chess tournament managment tool
 """
 
-# import time
-from operator import attrgetter
+import argparse
 
 from model.world import World
 from model.tournament import Status, IsComplete
 from model.player import Player
+from model.round import Round
 
-# from manager.round import Round
-from utils import FakePlayer, get_fake_score
+from utils import FakePlayer, get_fake_score_from_elo
 
 FAKE_INPUTS = True
 
 
+def sepa(space=True):
+    if space:
+        print()
+    print('*'*50)
+    if space:
+        print()
+
+
 def main():
 
-    # ## Initialize Tournament with INPUTS ###
+    global FAKE_INPUTS
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--inputs', action="store_true", help='Request to self-inputs names and results')
+
+    args = parser.parse_args()
+    FAKE_INPUTS = not args.inputs
+
+    # === Initialize Tournament with INPUTS ===
     t01 = World.add_tournament(
-        "Tournoi 01", "Caen", "20/12/2020", "21/12/2020", "bullet"
+        "Tournoi de test", "Caen", "20/12/2020", "21/12/2020", "bullet"
     )
     World.set_active_tournament(t01)
 
-    # ## Initialize Players with INPUTS ###
+    # === Initialize Players with INPUTS ===
     num_players = 8
     fakeInputs = FakePlayer()
     fakePlayers = fakeInputs.gen(num_players)
@@ -65,16 +80,22 @@ def main():
 
     try:
         while True:
-            # ## Get Round 1 Games ###
+
+            # === Start a new Round ===
             t01.start_round()
 
+            sepa()
             print(f"----{t01.current_round().name}----")
+            for k, info in t01.get_overall_infos().items():
+                print(info)
+            print('-'*50, end='\n\n')
 
             games = t01.current_round().games
 
             # print("GAMES: ", games)
             # time.sleep(3)
-            # ## INPUT Round 1 results ###
+
+            # === INPUT Round 1 results ===
             for i, g in enumerate(games):
                 player1 = World.get_actor(g[0][0])
                 player2 = World.get_actor(g[1][0])
@@ -87,16 +108,21 @@ def main():
                 )
 
                 if FAKE_INPUTS:
-                    fake_score = get_fake_score()
-                    score1 = fake_score[0]
-                    score2 = fake_score[1]
+                    score_symbol = get_fake_score_from_elo(player1.elo, player2.elo, True)
+                    # score1 = fake_score[0]
+                    # score2 = fake_score[1]
                 else:
-                    score1 = input(f"Score pour {player_name1} :")
-                    score2 = input(f"Score pour {player_name2} :")
+                    score_symbol = input(f"{player_name1}  vs {player_name2} [ < | > | = ] :")
+                    # score1 = input(f"Score pour {player_name1} :")
+                    # score2 = input(f"Score pour {player_name2} :")
 
-                if score1 + score2 != 1:
-                    print("La somme des deux scores doit être de 1")
-                    continue
+                # if score1 + score2 != 1:
+                    # print("La somme des deux scores doit être de 1")
+                    # continue
+
+                print(f"Résultat: {player_name1} {score_symbol} {player_name2}")
+
+                score1, score2 = Round.convert_score_symbol(score_symbol)
 
                 t01.set_results(i, score1, score2)
                 print(f"{player_name1} +{score1} | {player_name2} +{score2}\n")
@@ -104,14 +130,14 @@ def main():
             print("Tous les scores de match ont été saisi")
             t01.current_round().close()
 
+            sepa()
     except IsComplete:
         desc = input("Veuillez saisir la note du directeur de tournoi : ")
         t01.description = desc
 
-    for player in sorted(
-        World.get_actors(t01), key=attrgetter("score", "elo"), reverse=True
-    ):
-        print(player)
+    sepa()
+    for k, info in t01.get_overall_infos().items():
+        print(info)
 
 
 if __name__ == "__main__":

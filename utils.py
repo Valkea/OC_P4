@@ -8,19 +8,19 @@ import random
 import datetime
 
 
-def get_fake_score_from_elo(elo1, elo2):
+def get_fake_score_from_elo(elo1, elo2, symbol=False):
 
     score1 = elo1 + random.randint(0, 500)
     score2 = elo2 + random.randint(0, 500)
 
-    print(f"{score1}/{elo1} && {score2}/{elo2}")
+    # print(f"{score1}/{elo1} && {score2}/{elo2}")
 
     if score1 > score2:
-        return [1, 0]
+        return [1, 0] if symbol is False else "<"
     elif score1 < score2:
-        return [0, 1]
+        return [0, 1] if symbol is False else ">"
     else:
-        return [0.5, 0.5]
+        return [0.5, 0.5] if symbol is False else "="
 
 
 def get_fake_score():
