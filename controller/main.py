@@ -56,6 +56,20 @@ def resetNav(f):
     return wrapper
 
 
+def logNav(f):
+    """ Decorator used to log the naviation calls & parameters  """
+
+    def wrapper(*args, **kwargs):
+        logging.info(f"NAV | {f.__name__}")
+        if len(args) > 1:
+            logging.debug(f"args | {args}")
+        if kwargs:
+            logging.debug(f"kwargs | {kwargs}")
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 class Controller:
     """This Class offers various methods to control the overall app.
 
@@ -202,6 +216,7 @@ class Controller:
 
     # === PUBLIC METHODS ===
 
+    @logNav
     def start(self):
         """ Start the 'infinite' loop than runs the app. """
 
@@ -226,6 +241,7 @@ class Controller:
         logging.info("> Close Controller")
         self.curses_view.close()
 
+    @logNav
     def start_new_round(self, tournament=None):
         """Start a new round in the active tournament.
 
@@ -240,7 +256,6 @@ class Controller:
             tournament = World.get_active_tournament()
 
         try:
-            logging.info("START_NEW_ROUND")
             tournament.start_round()
             self.open_tournament_opened(tournament)
 
@@ -259,6 +274,7 @@ class Controller:
     # === PUBLIC NAVIGATION METHODS ===
 
     @resetNav
+    @logNav
     def open_menu_base(self):
         """ Open the root page with the main menu. """
 
@@ -271,6 +287,7 @@ class Controller:
     # --- Tournament pages ---
 
     @saveNav
+    @logNav
     def open_input_tournament_new(self):
         """ Open the page used to input a new tournament. """
 
@@ -284,6 +301,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_input_tournament_edit(self, tournament=None):
         """Open the page used to edit an existing tournament.
 
@@ -293,8 +311,6 @@ class Controller:
             The optional tournament instance to target.
             Will use the current open tournament otherwise.
         """
-
-        logging.info(f"EDIT tournament: {tournament}")
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -312,6 +328,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_select_tournament_load(self):
         """ Open the page that offers to select an existing tournament then load it. """
 
@@ -324,6 +341,7 @@ class Controller:
             call_params={"world": World},
         )
 
+    @logNav
     def open_tournament_current(self, tournament=None):
         """Call the appropriate opening method depending on the tournament current Status.
 
@@ -352,6 +370,7 @@ class Controller:
             self.open_tournament_closed(tournament)
 
     @resetNav
+    @logNav
     def open_tournament_initialize(self, tournament=None):
         """Open the tournament page that corresponds to the Status.INITIALIZED status.
 
@@ -375,6 +394,7 @@ class Controller:
         self._set_menu_view("list", call=Menu.tournament_initialize)
 
     @saveNav
+    @logNav
     def open_input_round_results(self, tournament=None):
         """Open the page for the round results inputs.
 
@@ -384,8 +404,6 @@ class Controller:
             The optional tournament instance to target.
             Will use the current open tournament otherwise.
         """
-
-        logging.info(f"EDIT final note: {tournament}")
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -403,6 +421,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_input_final_note(self, tournament=None):
         """Open the page for the final note input.
 
@@ -412,8 +431,6 @@ class Controller:
             The optional tournament instance to target.
             Will use the current open tournament otherwise.
         """
-
-        logging.info(f"EDIT final note: {tournament}")
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -432,6 +449,7 @@ class Controller:
         )
 
     @resetNav
+    @logNav
     def open_tournament_opened(self, tournament=None):
         """Open the tournament page that corresponds to the Status.PLAYING status.
 
@@ -456,6 +474,7 @@ class Controller:
         self._set_menu_view("list", call=Menu.tournament_opened)
 
     @resetNav
+    @logNav
     def open_tournament_finalize(self, tournament=None):
         """Open the tournament page that corresponds to the Status.CLOSING status.
 
@@ -479,6 +498,7 @@ class Controller:
         self._set_menu_view("list", call=Menu.tournament_finalize)
 
     @resetNav
+    @logNav
     def open_tournament_closed(self, tournament=None):
         """Open the tournament page that corresponds to the Status.CLOSED status.
 
@@ -502,6 +522,7 @@ class Controller:
     # --- Actor' pages ---
 
     @saveNav
+    @logNav
     def open_input_actor_new(self):
         """ Open the page used to input a new actor. """
 
@@ -515,6 +536,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_input_actor_edit(self, actor):
         """Open the page used to edit an existing actor.
 
@@ -523,8 +545,6 @@ class Controller:
         actor : Player
             The Player instance to modifiy
         """
-
-        logging.info(f"EDIT actor: {actor}")
 
         self._set_focus("main")
         self._set_head_view(
@@ -539,6 +559,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_select_actor(self, sortby=None):
         """Open the page used to select an actor (for editing it).
 
@@ -557,6 +578,7 @@ class Controller:
             call_params={"sortby": sortby, "world": World},
         )
 
+    @logNav
     def open_menu_actor_sortby(self, sortby):
         """Open the menu used to sort the user-lists.
 
@@ -576,6 +598,7 @@ class Controller:
     # --- Report' pages---
 
     @saveNav
+    @logNav
     def open_reports(self, source):
         """Open the base menu used to acces the various reports from the root menu.
 
@@ -594,6 +617,7 @@ class Controller:
             self._set_menu_view("list", call=Menu.reports_tournament)
 
     @saveNav
+    @logNav
     def open_report_all_actors(self, sortby=None):
         """Open the page displaying all the actors of all the tournaments.
 
@@ -602,10 +626,6 @@ class Controller:
         sortby : str
             The optional sorting sequence name to apply on the result.
         """
-
-        logging.debug(
-            f"OPEN ALL ACTORS : SET ACTIVE T: {World.get_active_tournament()}"
-        )
 
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
@@ -618,6 +638,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_report_all_tournament(self):
         """ Open the page displaying all the existing tournaments. """
 
@@ -633,6 +654,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_select_tournament_report(self, route):
         """Open the page that offers to select an existing
             tournament then dislay the corresponding report.
@@ -653,6 +675,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_report_tournament_actors(self, tournament=None, sortby=None):
         """Open the page displaying the actors of
             the selected tournament (or current one).
@@ -683,6 +706,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_report_tournament_rounds(self, tournament=None):
         """Open the page displaying the rounds of
             the selected tournament (or current one).
@@ -711,6 +735,7 @@ class Controller:
         )
 
     @saveNav
+    @logNav
     def open_report_tournament_matchs(self, tournament=None):
         """Open the page displaying the games (matchs) of
             the selected tournament (or current one).
@@ -740,6 +765,7 @@ class Controller:
 
     # --- Save & Load pages ---
 
+    @logNav
     def open_save(self):
         """ Save the content of the app and display a message. """
 
@@ -748,12 +774,12 @@ class Controller:
         self.curses_view.display_error("Sauvegarde ...")
         TinyDbView.save_all()
 
-        logging.info("SAVED")
         curses.napms(500)
 
         self.curses_view.display_error("")
         self.go_back()
 
+    @logNav
     def open_load(self):
         """ Load the content of the app and display a message. """
 
@@ -762,7 +788,6 @@ class Controller:
         self.curses_view.display_error("Chargement ...")
         World.load(*TinyDbView.load_all())
 
-        logging.info("LOADED")
         curses.napms(500)
 
         self.curses_view.display_error("")
@@ -770,6 +795,7 @@ class Controller:
         self.open_select_tournament_load()
 
     @saveNav
+    @logNav
     def open_load_save(self):
         """ Open the menu offering to load or save data. """
 
@@ -777,11 +803,13 @@ class Controller:
 
     # --- Quit menu ---
 
+    @logNav
     def open_quit_menu(self):
         """ Open the menu offering to quit with or without saving data. """
 
         self._set_menu_view("list", call=Menu.quit)
 
+    @logNav
     def quit(self):
         """ Display an exit message and close the application. """
 
@@ -791,6 +819,7 @@ class Controller:
         curses.napms(500)
         sys.exit(0)
 
+    @logNav
     def save_n_quit(self):
         """ Save the data and display a message, then call quit()."""
 
@@ -801,6 +830,7 @@ class Controller:
 
     # --- Back menu ---
 
+    @logNav
     def go_back(self):
         """ Open the last page (minus the current one) registerd with the @saveNav decorator. """
 
@@ -811,6 +841,7 @@ class Controller:
 
     # === DEMO methods ===
 
+    @logNav
     def _generate_fake_players(self):
         """ Demo method used to quickly generate fake players (bind to CTRL+F12). """
 
@@ -1211,7 +1242,6 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        logging.info(f"NEW TOURNAMENT VALUES: {inputs}")
         tournament = World.add_tournament(
             inputs["name"],
             inputs["place"],
@@ -1235,7 +1265,6 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        logging.info(f"EDIT TOURNAMENT VALUES: {inputs}")
         source.name = inputs["name"]
         source.place = inputs["place"]
         source.start_date = inputs["start_date"]
@@ -1258,7 +1287,6 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        logging.info(f"NEW ACTOR VALUES: {inputs}")
         tournament = World.get_active_tournament()
         actor = Player(
             inputs["family_name"],
@@ -1282,7 +1310,6 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        logging.info(f"EDIT ACTOR VALUES: {inputs}")
         source.family_name = inputs["family_name"]
         source.first_name = inputs["first_name"]
         source.birthdate = inputs["birthdate"]
@@ -1302,7 +1329,6 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        logging.info(f"EDIT FINAL NOTE: {inputs}")
         source.description = inputs["description"]
 
         self.open_tournament_closed()
@@ -1317,7 +1343,6 @@ class Controller:
         source : list
             The original values if provided (receive None otherwise)
         """
-        logging.info(f"INPUT SCORES: {inputs}")
 
         tournament = World.get_active_tournament()
 

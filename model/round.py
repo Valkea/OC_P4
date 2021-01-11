@@ -212,7 +212,7 @@ class Round:
 
     @staticmethod
     def convert_score_symbol(symbol):
-        """ Convert the symbols <, > and = to (1,0), (0,1) and (.5,.5).
+        """Convert the symbols <, > and = to (1,0), (0,1) and (.5,.5).
 
         Return
         ------

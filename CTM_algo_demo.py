@@ -19,7 +19,7 @@ FAKE_INPUTS = True
 def sepa(space=True):
     if space:
         print()
-    print('*'*50)
+    print("*" * 50)
     if space:
         print()
 
@@ -29,7 +29,12 @@ def main():
     global FAKE_INPUTS
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--inputs', action="store_true", help='Request to self-inputs names and results')
+    parser.add_argument(
+        "-i",
+        "--inputs",
+        action="store_true",
+        help="Request to self-inputs names and results",
+    )
 
     args = parser.parse_args()
     FAKE_INPUTS = not args.inputs
@@ -88,7 +93,7 @@ def main():
             print(f"----{t01.current_round().name}----")
             for k, info in t01.get_overall_infos().items():
                 print(info)
-            print('-'*50, end='\n\n')
+            print("-" * 50, end="\n\n")
 
             games = t01.current_round().games
 
@@ -108,17 +113,21 @@ def main():
                 )
 
                 if FAKE_INPUTS:
-                    score_symbol = get_fake_score_from_elo(player1.elo, player2.elo, True)
+                    score_symbol = get_fake_score_from_elo(
+                        player1.elo, player2.elo, True
+                    )
                     # score1 = fake_score[0]
                     # score2 = fake_score[1]
                 else:
-                    score_symbol = input(f"{player_name1}  vs {player_name2} [ < | > | = ] :")
+                    score_symbol = input(
+                        f"{player_name1}  vs {player_name2} [ < | > | = ] :"
+                    )
                     # score1 = input(f"Score pour {player_name1} :")
                     # score2 = input(f"Score pour {player_name2} :")
 
                 # if score1 + score2 != 1:
-                    # print("La somme des deux scores doit être de 1")
-                    # continue
+                # print("La somme des deux scores doit être de 1")
+                # continue
 
                 print(f"Résultat: {player_name1} {score_symbol} {player_name2}")
 

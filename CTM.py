@@ -6,7 +6,7 @@ import traceback
 
 from controller.main import Controller
 
-logging.basicConfig(filename="CTM.log", filemode="w", level=logging.DEBUG)
+logging.basicConfig(filename="CTM.log", filemode="w", level=logging.INFO)
 
 try:
     control = Controller()

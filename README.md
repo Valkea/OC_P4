@@ -75,7 +75,7 @@ And finally, this third screenshot shows the interface of a closed tournament
 
 ## Simple process example
 
-If you want to run the full tournament process without the Curses interface, you can try te following command
+If you want to run the full tournament process without the Curses interface, you can try the following command
 
 ```bash
 >>> CTM_algo_demo.py
@@ -86,7 +86,7 @@ and if you prefer to input the data yourself, you can add the -i or --inputs arg
 >>> CTM_algo_demo.py --inputs
 ```
 
-### Flake8 / PEP8
+## Flake8 / PEP8
 
 If you need to generate a new flake8 report to check the PEP8 compliance of this projet, use the following command
 ```bash
