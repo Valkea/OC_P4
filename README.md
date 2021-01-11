@@ -94,6 +94,16 @@ If you need to generate a new flake8 report to check the PEP8 compliance of this
 ```
 and you will find the html report in the 'flake8_report' folder.
 
+## Tests
+You can test the modules of the script with pytest.
+
+```bash
+>>> python3 -m pytest -s 
+```
+**Warning**
+Don't run `pytest` directly, use `python3 -m pytest`.
+Otherwise the test modules won't find the modules.
+
 ## Ouputs
 
 ### Logs
