@@ -77,41 +77,14 @@ class World:
     # --- Tournament ---
 
     @classmethod
-    def add_tournament(
-        cls, name, place, start_date, end_date, gtype, desc="", rounds=4
-    ):
+    def add_tournament(cls, tournament):
         """Register a new tournament instance.
 
         Properties
         ----------
-        name : str
-            The tournament's name
-        place : str
-            The place where the tournament takes place
-        start_date : str
-            The stating date of the tournament
-        end_date : str
-            The ending date of the tournament
-        rounds : int
-            The number of rounds in the tournament (defaut is 4)
-        players : list(int)
-            The registered player instances id of the tournament
-        gtype : str
-            The game method used in the tournament
-        desc : str
-            The tournament director's notes
+        tournament : Tournament
+            The tournament instance to register
         """
-
-        tournament = Tournament(
-            cls,
-            name,
-            place,
-            start_date,
-            end_date,
-            gtype,
-            desc,
-            rounds,
-        )
 
         cls.tournaments.append(tournament)
 

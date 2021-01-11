@@ -1242,7 +1242,8 @@ class Controller:
             The original values if provided (receive None otherwise)
         """
 
-        tournament = World.add_tournament(
+        tournament = Tournament(
+            World,
             inputs["name"],
             inputs["place"],
             inputs["start_date"],
@@ -1251,6 +1252,8 @@ class Controller:
             inputs["description"],
             inputs["num_rounds"],
         )
+
+        World.add_tournament(tournament)
         World.set_active_tournament(tournament)
         self.open_tournament_initialize()
 
