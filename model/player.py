@@ -437,7 +437,7 @@ class Player:
             A string indicating the sorting sequence to use
         """
 
-        actors = Player.multisort(world.get_actors(), Player.get_sort_key(sortby))
+        actors = Player.multisort(world.get_all_actors(), Player.get_sort_key(sortby))
 
         if len(actors) > 0:
             retv = [(f" {actor.one_line()} ", None) for actor in actors]

@@ -11,7 +11,7 @@ class Menu:
     --------------
     base()
         This is the main menu
-    open_open_quit_menu()
+    open_quit_menu()
         This menu offers to save before quitting
     save_n_load()
         This menu offers to load from or save to JSON file
@@ -43,7 +43,7 @@ class Menu:
             ("Charger un tournoi", "open_select_tournament_load"),
             ("Rapports", "open_reports", "base"),
             ("Charger / Sauvegarder", "open_load_save"),
-            ("Quitter", "open_open_quit_menu"),
+            ("Quitter", "open_quit_menu"),
         )
 
     @staticmethod

@@ -57,7 +57,7 @@ def resetNav(f):
 
 
 class Controller:
-    """ This Class offers various methods to control the overall app.
+    """This Class offers various methods to control the overall app.
 
         By using this controller, you can collect data from models,
         display them with views  (CurseView & TinyDbView) and
@@ -209,7 +209,7 @@ class Controller:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
 
-            if key == 147:  # TAB
+            if key == 147 or key == 163:  # 2 above TAB or £ (Pounds)
                 self.curses_view.swap_focus()
             elif key == curses.KEY_RESIZE:
                 logging.warning("RESIZE")  # TODO ?
@@ -227,7 +227,7 @@ class Controller:
         self.curses_view.close()
 
     def start_new_round(self, tournament=None):
-        """ Start a new round in the active tournament.
+        """Start a new round in the active tournament.
 
         Parameters
         ----------
@@ -285,7 +285,7 @@ class Controller:
 
     @saveNav
     def open_input_tournament_edit(self, tournament=None):
-        """ Open the page used to edit an existing tournament.
+        """Open the page used to edit an existing tournament.
 
         Parameters
         ----------
@@ -325,7 +325,7 @@ class Controller:
         )
 
     def open_tournament_current(self, tournament=None):
-        """ Call the appropriate opening method depending on the tournament current Status.
+        """Call the appropriate opening method depending on the tournament current Status.
 
         Parameters
         ----------
@@ -353,7 +353,7 @@ class Controller:
 
     @resetNav
     def open_tournament_initialize(self, tournament=None):
-        """ Open the tournament page that corresponds to the Status.INITIALIZED status.
+        """Open the tournament page that corresponds to the Status.INITIALIZED status.
 
         Parameters
         ----------
@@ -376,7 +376,7 @@ class Controller:
 
     @saveNav
     def open_input_round_results(self, tournament=None):
-        """ Open the page for the round results inputs.
+        """Open the page for the round results inputs.
 
         Parameters
         ----------
@@ -404,7 +404,7 @@ class Controller:
 
     @saveNav
     def open_input_final_note(self, tournament=None):
-        """ Open the page for the final note input.
+        """Open the page for the final note input.
 
         Parameters
         ----------
@@ -433,7 +433,7 @@ class Controller:
 
     @resetNav
     def open_tournament_opened(self, tournament=None):
-        """ Open the tournament page that corresponds to the Status.PLAYING status.
+        """Open the tournament page that corresponds to the Status.PLAYING status.
 
         Parameters
         ----------
@@ -457,7 +457,7 @@ class Controller:
 
     @resetNav
     def open_tournament_finalize(self, tournament=None):
-        """ Open the tournament page that corresponds to the Status.CLOSING status.
+        """Open the tournament page that corresponds to the Status.CLOSING status.
 
         Parameters
         ----------
@@ -480,7 +480,7 @@ class Controller:
 
     @resetNav
     def open_tournament_closed(self, tournament=None):
-        """ Open the tournament page that corresponds to the Status.CLOSED status.
+        """Open the tournament page that corresponds to the Status.CLOSED status.
 
         Parameters
         ----------
@@ -516,7 +516,7 @@ class Controller:
 
     @saveNav
     def open_input_actor_edit(self, actor):
-        """ Open the page used to edit an existing actor.
+        """Open the page used to edit an existing actor.
 
         Parameters
         ----------
@@ -540,7 +540,7 @@ class Controller:
 
     @saveNav
     def open_select_actor(self, sortby=None):
-        """ Open the page used to select an actor (for editing it).
+        """Open the page used to select an actor (for editing it).
 
         Parameters
         ----------
@@ -558,7 +558,7 @@ class Controller:
         )
 
     def open_menu_actor_sortby(self, sortby):
-        """ Open the menu used to sort the user-lists.
+        """Open the menu used to sort the user-lists.
 
         Parameters
         ----------
@@ -577,7 +577,7 @@ class Controller:
 
     @saveNav
     def open_reports(self, source):
-        """ Open the base menu used to acces the various reports from the root menu.
+        """Open the base menu used to acces the various reports from the root menu.
 
         Parameters
         ----------
@@ -595,13 +595,18 @@ class Controller:
 
     @saveNav
     def open_report_all_actors(self, sortby=None):
-        """ Open the page displaying all the actors of all the tournaments.
+        """Open the page displaying all the actors of all the tournaments.
 
         Parameters
         ----------
         sortby : str
             The optional sorting sequence name to apply on the result.
         """
+
+        logging.debug(
+            f"OPEN ALL ACTORS : SET ACTIVE T: {World.get_active_tournament()}"
+        )
+
         self._set_focus("menu")
         self._set_head_view("print-line", text="Liste de l'ensemble des acteurs")
         self._set_menu_view("list", call=Menu.actors_sortby)
@@ -629,7 +634,7 @@ class Controller:
 
     @saveNav
     def open_select_tournament_report(self, route):
-        """ Open the page that offers to select an existing
+        """Open the page that offers to select an existing
             tournament then dislay the corresponding report.
 
         Parameters
@@ -649,7 +654,7 @@ class Controller:
 
     @saveNav
     def open_report_tournament_actors(self, tournament=None, sortby=None):
-        """ Open the page displaying the actors of
+        """Open the page displaying the actors of
             the selected tournament (or current one).
 
         Parameters
@@ -679,7 +684,7 @@ class Controller:
 
     @saveNav
     def open_report_tournament_rounds(self, tournament=None):
-        """ Open the page displaying the rounds of
+        """Open the page displaying the rounds of
             the selected tournament (or current one).
 
         Parameters
@@ -707,7 +712,7 @@ class Controller:
 
     @saveNav
     def open_report_tournament_matchs(self, tournament=None):
-        """ Open the page displaying the games (matchs) of
+        """Open the page displaying the games (matchs) of
             the selected tournament (or current one).
 
         Parameters
@@ -834,7 +839,7 @@ class Controller:
     # === PRIVATE METHODS ===
 
     def _align_to_larger(self, options):
-        """ Align the size of the provided list to the size
+        """Align the size of the provided list to the size
             of the larger item (filling with space).
 
         Parameters
@@ -847,7 +852,7 @@ class Controller:
         return [option.ljust(max_size) for option in options]
 
     def _move_selection(self, key):
-        """ Control the mouvement of the selection when
+        """Control the mouvement of the selection when
             displaying a menu or a  list of selectable items.
 
         Parameters
@@ -915,7 +920,7 @@ class Controller:
     # === View controls ===
 
     def _set_focus(self, focus):
-        """ Control the CurseView focus.
+        """Control the CurseView focus.
 
         Parameters
         ----------
@@ -931,7 +936,7 @@ class Controller:
             self.curses_view.focus = self.curses_view.menu
 
     def _set_head_view(self, action, **kwargs):
-        """ _set_view shortcut to control the content
+        """_set_view shortcut to control the content
             of the head window of the CurseView
 
         Parameters
@@ -947,7 +952,7 @@ class Controller:
         return self._set_view("head", action, **kwargs)
 
     def _set_menu_view(self, action, **kwargs):
-        """ _set_view shortcut to control the content
+        """_set_view shortcut to control the content
             of the menu window of the CurseView
 
         Parameters
@@ -963,7 +968,7 @@ class Controller:
         return self._set_view("menu", action, **kwargs)
 
     def _set_main_view(self, action, **kwargs):
-        """ _set_view shortcut to control the content
+        """_set_view shortcut to control the content
             of the main window of the CurseView
 
         Parameters
@@ -979,7 +984,7 @@ class Controller:
         return self._set_view("main", action, **kwargs)
 
     def _set_full_view(self, action, **kwargs):
-        """ _set_view shortcut to control the content of
+        """_set_view shortcut to control the content of
             the base window (full screen) of the CurseView
 
         Parameters
@@ -995,7 +1000,7 @@ class Controller:
         return self._set_view("full", action, **kwargs)
 
     def _set_view(self, view, action, **kwargs):
-        """ Control the content of the given window of the CurseView.
+        """Control the content of the given window of the CurseView.
 
         Parameters
         ----------
@@ -1164,7 +1169,7 @@ class Controller:
                 self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
                 return
 
-        elif x == 147:
+        elif x == 147 or x == 163:
             raise UnstackAll("TAB")
 
         return x
@@ -1196,7 +1201,7 @@ class Controller:
         raise UnstackAll("SUBMIT")
 
     def _form_exit_new_tournament(self, inputs, source):
-        """ Process the new tournament informations and transmit to the model.
+        """Process the new tournament informations and transmit to the model.
 
         Parameters
         ----------
@@ -1220,7 +1225,7 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_edit_tournament(self, inputs, source):
-        """ Process the tournament modified informations and transmit to the model.
+        """Process the tournament modified informations and transmit to the model.
 
         Parameters
         ----------
@@ -1243,7 +1248,7 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_new_actor(self, inputs, source):
-        """ Process the new actor informations and transmit to the model.
+        """Process the new actor informations and transmit to the model.
 
         Parameters
         ----------
@@ -1267,7 +1272,7 @@ class Controller:
         self.open_tournament_initialize()
 
     def _form_exit_edit_actor(self, inputs, source):
-        """ Process the actor modified informations and transmit to the model.
+        """Process the actor modified informations and transmit to the model.
 
         Parameters
         ----------
@@ -1287,7 +1292,7 @@ class Controller:
         self.go_back()
 
     def _form_exit_edit_final_note(self, inputs, source):
-        """ Process the final note input and transmit to the model.
+        """Process the final note input and transmit to the model.
 
         Parameters
         ----------
@@ -1303,7 +1308,7 @@ class Controller:
         self.open_tournament_closed()
 
     def _form_exit_input_scores(self, inputs, source):
-        """ Process the round score inputs and transmit to the model.
+        """Process the round score inputs and transmit to the model.
 
         Parameters
         ----------

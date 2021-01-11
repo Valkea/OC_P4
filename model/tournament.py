@@ -198,7 +198,7 @@ class Tournament:
         round_index = len(self.rounds)
         new_round = Round(
             self._world, f"Round {round_index+1}", round_index, self.players
-        )  # TODO voir pour players id dans Round
+        )
         self.rounds.append(new_round)
 
     def set_results(self, game_index, score1, score2):
@@ -279,7 +279,6 @@ class Tournament:
         self.rounds = [
             Round(self._world, **x, players_id=self.players) for x in self.rounds
         ]
-        logging.debug(f"RELOAD DATA: {self.status}")
         name, member = self.status["__enum__"].split(".")
         self.status = getattr(PUBLIC_ENUMS[name], member)
 
