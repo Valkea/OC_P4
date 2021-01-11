@@ -124,8 +124,13 @@ class Player:
 
     @birthdate.setter
     def birthdate(self, v):
-        s = re.search("^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", v).groups()
-        self._birthdate = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
+        try:
+            s = re.search(
+                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{4})$", v
+            ).groups()
+            self._birthdate = datetime.datetime(int(s[2]), int(s[1]), int(s[0]))
+        except Exception:
+            raise SyntaxError("D/M/YYYY format requested")
 
     @property
     def age(self):
@@ -417,7 +422,9 @@ class Player:
             A string indicating the sorting sequence to use
         """
 
-        actors = Player.multisort(world.get_actors(), Player.get_sort_key(sortby))
+        actors = Player.multisort(
+            world.get_actors(tournament), Player.get_sort_key(sortby)
+        )
 
         if len(actors) > 0:
             retv = [(f" {actor.one_line()} ", None) for actor in actors]

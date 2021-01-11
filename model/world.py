@@ -3,9 +3,10 @@
 
 """ This module handles the app world """
 
+import logging
+
 from model.player import Player
 from model.tournament import Tournament
-import logging
 
 
 class World:
@@ -50,6 +51,14 @@ class World:
     active_tournament = None
 
     @classmethod
+    def clear(cls):
+        """ Remove the current content of the class. """
+
+        cls.actors = {}
+        cls.tournaments = []
+        cls.active_tournament = None
+
+    @classmethod
     def load(cls, tournaments, actors):
         """Replace the class attributes with the provided ones.
 
@@ -61,9 +70,7 @@ class World:
             list of players arguments dictionaries
         """
 
-        cls.actors = {}
-        cls.tournaments = []
-        cls.active_tournament = None
+        cls.clear()
 
         for actor in actors:
             cls.actors[actor["uid"]] = Player(**actor)
@@ -71,8 +78,8 @@ class World:
         for tournament in tournaments:
             # tournament = json.loads(tournament, object_hook=as_enum)
             new_tournament = Tournament(cls, **tournament)
-            cls.set_active_tournament(new_tournament)
             cls.tournaments.append(new_tournament)
+            cls.set_active_tournament(new_tournament)
 
     # --- Tournament ---
 
@@ -85,6 +92,9 @@ class World:
         tournament : Tournament
             The tournament instance to register
         """
+
+        if type(tournament) is not Tournament:
+            raise TypeError("Tournament instance expected")
 
         cls.tournaments.append(tournament)
 
@@ -99,6 +109,14 @@ class World:
         tournament : Tournament
             The tournament instance to set as the currently active one
         """
+
+        logging.debug(f"Tournament: {tournament}")
+
+        if tournament is not None and type(tournament) is not Tournament:
+            raise TypeError("Tournament instance expected")
+
+        if tournament is not None and tournament not in cls.tournaments:
+            raise UnregisteredTournamentError()
 
         cls.active_tournament = tournament
 
@@ -126,8 +144,14 @@ class World:
         if type(actor) is not Player:
             raise TypeError("Player instance expected")
 
+        if tournament is not None and type(tournament) is not Tournament:
+            raise TypeError("Tournament instance expected")
+
         if tournament is None:
             tournament = cls.get_active_tournament()
+
+        if tournament is None:
+            raise NoActiveTournamentError()
 
         cls.actors[actor.uid] = actor
         tournament.add_player(actor.uid)
@@ -140,9 +164,12 @@ class World:
 
         Parameters
         ----------
-        actor_id : Player
+        actor_id : str
             the requested Player's instance UID
         """
+
+        if type(actor_id) is not str:
+            raise TypeError("str UID expected")
 
         return cls.actors.get(actor_id)
 
@@ -157,10 +184,14 @@ class World:
             If None, the currently active one is used
         """
 
+        if tournament is not None and type(tournament) is not Tournament:
+            raise TypeError("Tournament instance expected")
+
         if tournament is None:
             tournament = cls.get_active_tournament()
 
-        logging.debug(f"GET_ACTORS: {tournament}")
+        if tournament is None:
+            raise NoActiveTournamentError()
 
         actors_id = tournament.players
 
@@ -171,3 +202,11 @@ class World:
         """ Get all the actors instances """
 
         return [v for k, v in cls.actors.items()]
+
+
+class NoActiveTournamentError(Exception):
+    pass
+
+
+class UnregisteredTournamentError(Exception):
+    pass

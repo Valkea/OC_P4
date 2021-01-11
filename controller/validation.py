@@ -30,7 +30,7 @@ class Validation:
 
         try:
             s = re.search(
-                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{2,4})$", v
+                "^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{4})$", v
             ).groups()
             if int(s[0]) > 31 or int(s[1]) > 12 or len(s) != 3:
                 return False

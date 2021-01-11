@@ -176,8 +176,11 @@ class Tournament:
             if the tournament is not initialized yet or already closed.
         """
 
-        if self.status == Status.UNINITIALIZED or self.status == Status.CLOSED:
+        if self.status == Status.UNINITIALIZED:
             raise IsNotReady()
+
+        if self.status == Status.CLOSED or self.status == Status.CLOSING:
+            raise IsComplete()
 
         if len(self.players) <= self.num_rounds:
             raise WrongPlayersNumber(
@@ -239,6 +242,9 @@ class Tournament:
         player_id : int
             the Player's instance ID to register as a participant of the tournament
         """
+
+        if type(player_id) != str:
+            raise TypeError("str UID required")
 
         self.players.append(player_id)
 

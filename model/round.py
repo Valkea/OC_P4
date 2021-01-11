@@ -278,8 +278,8 @@ class Round:
 
                     retv.append(
                         (
-                            f"({player1.one_line(age=False, sex=False, score=False, extra=f'PtS:{score1:3}')}) vs "
-                            + f"({player2.one_line(age=False, sex=False, score=False, extra=f'PTs:{score2:3}')})",
+                            f"({player1.one_line(age=False, sex=False, score=False, extra=f'PTS:{score1:3}')}) vs "
+                            + f"({player2.one_line(age=False, sex=False, score=False, extra=f'PTS:{score2:3}')})",
                             None,
                         )
                     )
