@@ -903,7 +903,7 @@ class Controller:
 
             current_row = sdata["current_row"]
             buttons = sdata["buttons"]
-            colors = sdata["colors"]
+            # colors = sdata["colors"]
 
             # clear existing texts
             self.curses_view.menu.clear()
@@ -930,12 +930,13 @@ class Controller:
                     return
 
                 if actions[current_row] is None:
-                    labels = sdata["labels"]
-                    self._set_main_view(
-                        "print-line",
-                        text=f"You selected '{labels[current_row]}'",
-                        colors=colors,
-                    )
+                    return
+                    # labels = sdata["labels"]
+                    # self._set_main_view(
+                    #     "print-line",
+                    #     text=f"You selected '{labels[current_row]}'",
+                    #     colors=colors,
+                    # )
                 else:
                     if params[current_row] is None:
                         eval(f"self.{actions[current_row]}")()

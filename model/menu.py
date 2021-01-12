@@ -41,6 +41,7 @@ class Menu:
         return (
             ("Créer un nouveau tournoi", "open_input_tournament_new"),
             ("Charger un tournoi", "open_select_tournament_load"),
+            ("", None),
             ("Rapports", "open_reports", "base"),
             ("Charger / Sauvegarder", "open_load_save"),
             ("Quitter", "open_quit_menu"),
@@ -74,6 +75,7 @@ class Menu:
             ("Modifier un acteur", "open_select_actor"),
             ("Modifier le tournoi", "open_input_tournament_edit"),
             ("Commencer le tournoi", "start_new_round"),
+            ("", None),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
@@ -84,6 +86,7 @@ class Menu:
         return (
             ("Saisir les résultats du round", "open_input_round_results"),
             ("Modifier un acteur", "open_select_actor"),  # R1
+            ("", None),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
@@ -97,6 +100,7 @@ class Menu:
                 "open_input_final_note",
             ),
             ("Modifier un acteur", "open_select_actor"),  # R1
+            ("", None),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
@@ -107,6 +111,7 @@ class Menu:
         return (
             ("Modifier la note de fin de tournoi", "open_input_final_note"),
             ("Modifier un acteur", "open_select_actor"),  # R1
+            ("", None),
             ("Rapports", "open_reports", "tournament"),  # R1
             ("Charger / Sauvegarder", "open_load_save"),
             ("Fermer le tournoi", "open_menu_base"),  # R1
