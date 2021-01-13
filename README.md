@@ -27,15 +27,15 @@ let's create a virtual environment and install the required Python libraries
 (Windows):
 ```bash
 >>> py -m venv venv
->>> .\venv/Scripts/activate
->>> pip install -r requirements.txt
+>>> .\venv\Scripts\activate
+>>> py -m pip install -r requirements.txt
 ```
 
 The curses package comes with the Python standard library. In Linux and Mac, the curses dependencies should already be installed so there is no extra steps needed. On Windows, you need to install one special Python package, windows-curses available on PyPI to add support.
 
 #### Needed in Windows only
 ```bash
->>> python -m pip install windows-curses
+>>> py -m pip install windows-curses
 ```
 
 You can verify everything works by running a Python interpreter and attempting to import curses. If you do not get any errors, you are in good shape.
@@ -55,6 +55,11 @@ we can start CTM by using the following command
 or by directly calling the controller
 ```bash
 >>> python3 -m controller
+```
+
+In Windows you need to use
+```bash
+>>> py -m controller
 ```
 
 ## Commands
