@@ -1127,7 +1127,7 @@ class Controller:
         gathered = []
 
         h, w = screen.getmaxyx()
-        estimated_size = len(rows)*4 + 3
+        estimated_size = len(rows)*4 + 5
         if(estimated_size > h):
             send_rows = rows[:1]
         else:
