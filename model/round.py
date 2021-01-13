@@ -99,7 +99,7 @@ class Round:
         if type(v) is datetime.datetime or v is None:
             self._start_time = v
         else:
-            self._start_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
+            self._start_time = datetime.datetime.strptime(v, "%d/%m/%Y %H:%M:%S")
 
     @property
     def close_time(self):
@@ -112,7 +112,7 @@ class Round:
         if type(v) is datetime.datetime or v is None:
             self._close_time = v
         else:
-            self._close_time = datetime.datetime.strptime(v, "%m/%d/%Y %H:%M:%S")
+            self._close_time = datetime.datetime.strptime(v, "%d/%m/%Y %H:%M:%S")
 
     # === PUBLIC METHODS ===
 
