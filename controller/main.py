@@ -1124,25 +1124,48 @@ class Controller:
     def _form_setup(self, screen, rows, exit_func, source=None):
         """ Initialize a new form. """
 
-        text_boxes, text_wins, error_box = self.curses_view.init_form(
-            screen, rows, source
-        )
+        gathered = []
+
+        h, w = screen.getmaxyx()
+        estimated_size = len(rows)*4 + 3
+        if(estimated_size > h):
+            send_rows = rows[:1]
+        else:
+            send_rows = rows
 
         def swapfield(x):
             self._form_input_swap(
-                x, rows, text_boxes, text_wins, error_box, swapfield, exit_func, source
+                x, send_rows, text_boxes, text_wins, error_box, swapfield, exit_func, source
             )
             return x
 
-        try:
-            j = 0
-            text_boxes[j].edit(swapfield)
+        while 1:
 
-        except UnstackAll as e:
-            if str(e) == "SUBMIT":
-                self.curses_view.close_form(screen)
-            elif str(e) == "TAB":
-                return
+            text_boxes, text_wins, error_box = self.curses_view.init_form(
+                screen, send_rows, source
+            )
+
+            try:
+                j = 0
+                text_boxes[j].edit(swapfield)
+
+            except UnstackAll as e:
+                if str(e) == "GATHER":
+
+                    for tb in text_boxes:
+                        gathered.append(tb.gather().strip())
+
+                    if(len(gathered) < len(rows)):
+                        i = len(gathered)
+                        send_rows = rows[i:i+1]
+                        continue
+
+                    else:
+                        self.curses_view.close_form(screen)
+                        self._form_gather_inputs(gathered, rows, exit_func, source)
+                        break
+                elif str(e) == "TAB":
+                    return
 
     def _form_input_swap(
         self,
@@ -1188,7 +1211,8 @@ class Controller:
                     j = 0
                     j_save[0] = j
 
-                    self._form_gather_inputs(text_boxes, rows, exit_func, source)
+                    raise UnstackAll("GATHER")
+                    # self._form_gather_inputs(text_boxes, rows, exit_func, source)
             else:
                 self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
 
@@ -1218,19 +1242,17 @@ class Controller:
             error_win.addstr(errormsg)
             error_win.refresh()
 
-    def _form_gather_inputs(self, text_boxes, rows, exit_func, source):
+    def _form_gather_inputs(self, values, rows, exit_func, source):
         """ Gather form inputs and transmit to callback functions. """
 
         inputs = {}
         valid_rows = [x for x in rows if x.get("name", False)]
 
-        for row, tb in zip(valid_rows, text_boxes):
+        for i, row in enumerate(valid_rows):
             if row.get("name", False):
-                inputs[row["name"]] = tb.gather().strip()
+                inputs[row["name"]] = values[i]
 
         exit_func(inputs, source)
-
-        raise UnstackAll("SUBMIT")
 
     def _form_exit_new_tournament(self, inputs, source):
         """Process the new tournament informations and transmit to the model.

@@ -436,6 +436,8 @@ class Tournament:
             {"label": ""},
         ]
 
+        fields = []  # TODO temp to avoid crash in small screen resolutions
+
         for i, game in enumerate(self.current_round().games):
             max_size = 30
             player1 = self._world.get_actor(game[0][0])

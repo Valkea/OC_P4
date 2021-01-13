@@ -368,22 +368,27 @@ class CurseView:
         error_win : Curses.window
         """
 
+        min_input_width = 35
+
         maxW = max([len(x["label"]) for x in rows])
+        maxW = max(maxW, min_input_width)
 
         text_boxes = []
         text_wins = []
 
         s = 4
+        estimated_size = len(rows) * s
         h, w = screen.getmaxyx()
         x = w // 2 - maxW // 2
-        y = (h - self._headH - len(rows) * s) // 2
+        y = (h - estimated_size) // 2
+        y -= 3
 
         for i, row in enumerate(rows):
             y += s
 
             # label display
             label = row["label"]
-            screen.addstr(y - self.head.getmaxyx()[0], x, label)
+            screen.addstr(y-1, x, label)
 
             # note display
             has_name = row.get("name", False)
@@ -396,7 +401,7 @@ class CurseView:
             if input_size:
                 width = input_size
             else:
-                width = max(maxW, 35)
+                width = max(maxW, min_input_width)
 
             # same_row option
             x_off = x
@@ -422,7 +427,7 @@ class CurseView:
             text_boxes.append(tb)
             text_wins.append(sub2)
 
-        error_win = screen.subwin(3, max(maxW, 35), y + 5, x)
+        error_win = screen.subwin(2, max(maxW, min_input_width), y + 5, x)
 
         return text_boxes, text_wins, error_win
 
