@@ -388,7 +388,7 @@ class CurseView:
 
             # label display
             label = row["label"]
-            screen.addstr(y-1, x, label)
+            screen.addstr(y - 1, x, label)
 
             # note display
             has_name = row.get("name", False)

@@ -1127,15 +1127,24 @@ class Controller:
         gathered = []
 
         h, w = screen.getmaxyx()
-        estimated_size = len(rows)*4 + 5
-        if(estimated_size > h):
-            send_rows = rows[:1]
+        estimated_size = len(rows) * 4 + 5
+        max_inputs = (h - 5) // 4
+
+        if estimated_size > h:
+            send_rows = rows[:max_inputs]
         else:
             send_rows = rows
 
         def swapfield(x):
             self._form_input_swap(
-                x, send_rows, text_boxes, text_wins, error_box, swapfield, exit_func, source
+                x,
+                send_rows,
+                text_boxes,
+                text_wins,
+                error_box,
+                swapfield,
+                exit_func,
+                source,
             )
             return x
 
@@ -1155,9 +1164,9 @@ class Controller:
                     for tb in text_boxes:
                         gathered.append(tb.gather().strip())
 
-                    if(len(gathered) < len(rows)):
+                    if len(gathered) < len(rows):
                         i = len(gathered)
-                        send_rows = rows[i:i+1]
+                        send_rows = rows[i: i + max_inputs]
                         continue
 
                     else:
