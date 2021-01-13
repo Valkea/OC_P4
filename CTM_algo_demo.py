@@ -10,6 +10,7 @@ from model.world import World
 from model.tournament import Status, IsComplete
 from model.player import Player
 from model.round import Round
+from model.tournament import Tournament
 
 from utils import FakePlayer, get_fake_score_from_elo
 
@@ -40,9 +41,10 @@ def main():
     FAKE_INPUTS = not args.inputs
 
     # === Initialize Tournament with INPUTS ===
-    t01 = World.add_tournament(
-        "Tournoi de test", "Caen", "20/12/2020", "21/12/2020", "bullet"
+    t01 = Tournament(
+        World, "Tournoi de test", "Caen", "20/12/2020", "21/12/2020", "bullet"
     )
+    World.add_tournament(t01)
     World.set_active_tournament(t01)
 
     # === Initialize Players with INPUTS ===
