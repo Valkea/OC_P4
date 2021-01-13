@@ -17,9 +17,17 @@ let's duplicate the project github repository
 ### Secondly,
 let's create a virtual environment and install the required Python libraries
 
+(Linux or Mac)
 ```bash
 >>> python3 -m venv venv
 >>> source venv/bin/activate
+>>> pip install -r requirements.txt
+```
+
+(Windows):
+```bash
+>>> py -m venv venv
+>>> .\venv/Scripts/activate
 >>> pip install -r requirements.txt
 ```
 
@@ -36,6 +44,7 @@ You can verify everything works by running a Python interpreter and attempting t
 >>> import curses
 >>>
 ```
+If that doesn't work, you need to visit http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses, download the version of curses that corresponds to your Windows and version of Python, and then pip install the whl file with the python you plan on using.
 
 ### Finally,
 we can start CTM by using the following command
