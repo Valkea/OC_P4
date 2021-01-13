@@ -12,12 +12,12 @@ import logging
 
 from controller.validation import Validation
 
-from view.tiny import TinyDbView
+from model.tiny import TinyDbView
 from view.curses import CurseView
 
 from model.player import Player
 from model.round import Round
-from model.menu import Menu
+from view.menu import Menu
 from model.world import World
 from model.tournament import (
     Tournament,
