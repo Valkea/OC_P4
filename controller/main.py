@@ -224,12 +224,14 @@ class Controller:
             key = self.curses_view.screen.getch()
             logging.debug(f"LOOP : key = {key}")
 
-            if key == 147 or key == 163:  # 2 above TAB or £ (Pounds)
+            if key == 147 or key == 64 or key == 163:  # 2 above TAB or @ or £ (Pounds)
                 self.curses_view.swap_focus()
             elif key == curses.KEY_RESIZE:
                 logging.warning("RESIZE")  # TODO ?
-            elif key == 300:  # CTRL + F12
-                self._generate_fake_players()
+            elif key == 43:  # +
+                t = World.get_active_tournament()
+                if t is not None and t.status == Status.INITIALIZED:
+                    self._generate_fake_players()
             elif key == 263:  # BACKSPACE
                 self.go_back()
 
@@ -849,7 +851,7 @@ class Controller:
             logging.warning("GEN FAKE USERS: need an active tournament")
             return
 
-        num_players = 2
+        num_players = 1
         fakeInputs = FakePlayer()
         fakePlayers = fakeInputs.gen(num_players)
 
@@ -1234,7 +1236,7 @@ class Controller:
                 self.curses_view.set_input_focus(text_wins[j], text_boxes[j], swap_func)
                 return
 
-        elif x == 147 or x == 163:
+        elif x == 147 or x == 64 or x == 163:
             raise UnstackAll("TAB")
 
         return x

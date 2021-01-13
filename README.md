@@ -62,18 +62,36 @@ In Windows you need to use
 >>> py -m controller
 ```
 
-## Commands
+## Controls
+
+### Main
+__The app is split into two parts__; menu part at the bottom and the central part above.
+You can't focus both pats at the same time, so in order to swap between the content and the menu, you will have to use the shortcut __@__ (or £)
+__The current focus has a white border around it__.
 
 ### Menu
-You can naviguate in the app using the menu selector with UP, DOWN and ENTER keys.
+You can navigate any selector in the focused part, using __UP__, __DOWN__ and __ENTER__ keys.
+Also, instead of using the "<< RETOUR" selection whenever available, you can hit the __BACKSPACE__ key instead.
 
-### Swap between parallel views
-The app is split into two main parts; the central part and the menu part.
-At some point, you may need to switch between the both parts, and in this case you need to use the 'small 2 above the TAB' key (or £ if you can't get it).
+### Forms
+You can navigate between the form input fields by using __TAB__ (or ENTER) to go to the next field, and __SHIFT + TAB__ to go to the previous field.
+If you use TAB or ENTER in the last field, it will submit the data.
 
 ### Bonus
-Also, you can hit BACKSPACE to act as the "<< Retour" selection.
-And when initializing a new tournament, you can add some extra players by hitting CTRL+F12
+__+__ in order to add a fake player on the tournament initialization screen.
+
+### Shotcuts
+__@__ or __£__ int order to swap between the focus between the content and the menu.
+
+__UP__ / __DOWN__ in order to navigate in any selector (either in the menu or in the content).
+__ENTER__ in order to confirm a selector choice or to confirm a form imput field.
+
+__TAB__ in order to navigate to the net input field.
+__SHIFT + TAB__ in order to naviguate to the previous input field.
+
+__+__ in order to add a fake player on the tournament initialization screen.
+
+__BACKSPACE__ in order to go to the previous screen (not available on all pages, and you need to change focus with @ or £ first if you are editing a form)
 
 
 ## Some screenshots
