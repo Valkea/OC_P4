@@ -320,6 +320,9 @@ class Controller:
             Will use the current open tournament otherwise.
         """
 
+        self._form_backspace_protection()
+
+
         if tournament is None:
             tournament = World.get_active_tournament()
 
@@ -413,6 +416,9 @@ class Controller:
             Will use the current open tournament otherwise.
         """
 
+        self._form_backspace_protection()
+
+
         if tournament is None:
             tournament = World.get_active_tournament()
 
@@ -439,6 +445,9 @@ class Controller:
             The optional tournament instance to target.
             Will use the current open tournament otherwise.
         """
+
+        self._form_backspace_protection()
+
 
         if tournament is None:
             tournament = World.get_active_tournament()
@@ -534,6 +543,9 @@ class Controller:
     def open_input_actor_new(self):
         """ Open the page used to input a new actor. """
 
+        self._form_backspace_protection()
+
+
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouvel acteur")
         self._set_menu_view("list", call=Menu.only_back)
@@ -553,6 +565,9 @@ class Controller:
         actor : Player
             The Player instance to modifiy
         """
+
+        self._form_backspace_protection()
+
 
         self._set_focus("main")
         self._set_head_view(
@@ -1140,8 +1155,8 @@ class Controller:
     # === Form controls ===
 
     def _form_backspace_protection(self):
-        """Print a screen just before the form prints its content,
-        so that this content will be used to redraw the area when swaping between views."""
+        """ Print a screen just before the form prints its content,
+            so that this content will be used to redraw the area when swaping between views. """
 
         self._set_main_view(
             "list",
@@ -1193,7 +1208,7 @@ class Controller:
 
                     if len(gathered) < len(rows):
                         i = len(gathered)
-                        send_rows = rows[i : i + max_inputs]
+                        send_rows = rows[i: i + max_inputs]
                         continue
 
                     else:
