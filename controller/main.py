@@ -12,12 +12,12 @@ import logging
 
 from controller.validation import Validation
 
-from model.tiny import TinyDbView
+from view.menu import Menu
 from view.curses import CurseView
 
+from model.tiny import TinyDbIO
 from model.player import Player
 from model.round import Round
-from view.menu import Menu
 from model.world import World
 from model.tournament import (
     Tournament,
@@ -74,7 +74,7 @@ class Controller:
     """This Class offers various methods to control the overall app.
 
         By using this controller, you can collect data from models,
-        display them with views  (CurseView & TinyDbView) and
+        display them with views  (CurseView & Menu) and
         control the overall tournament process.
 
     Attributes
@@ -774,7 +774,7 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Sauvegarde ...")
-        TinyDbView.save_all()
+        TinyDbIO.save_all()
 
         curses.napms(500)
 
@@ -788,7 +788,7 @@ class Controller:
         self._set_focus("menu")
 
         self.curses_view.display_error("Chargement ...")
-        World.load(*TinyDbView.load_all())
+        World.load(*TinyDbIO.load_all())
 
         curses.napms(500)
 
@@ -826,7 +826,7 @@ class Controller:
         """ Save the data and display a message, then call quit()."""
 
         self._set_full_view("print-line", text="Sauvegarde...")
-        TinyDbView.save_all()
+        TinyDbIO.save_all()
         curses.napms(500)
         self.quit()
 

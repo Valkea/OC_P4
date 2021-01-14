@@ -11,7 +11,7 @@ from tinydb import TinyDB
 from model.world import World
 
 
-class TinyDbView:
+class TinyDbIO:
     """This class provide various methods to save & load the app data.
 
     Class Methods
