@@ -158,6 +158,8 @@ class Controller:
 
     go_back()
         Open the last page (minus the current one) registerd with the @saveNav decorator
+    go_back_last(self):
+        Open the last page registerd with the @saveNav decorator
 
     Private Methods
     ---------------
@@ -182,6 +184,8 @@ class Controller:
     _set_view(view, action, **kwargs)
         Control the content of the given window of the CurseView
 
+    _form_backspace_protection(self):
+        Print a screen just before the form prints its content, to avoid problems with view swapping
     _form_setup(screen, rows, exit_func, source=None)
         Initialize a new form
     _form_input_swap(x, rows, text_boxes, text_wins, error_box, swap_func, exit_func, source)
@@ -292,6 +296,8 @@ class Controller:
     @logNav
     def open_input_tournament_new(self):
         """ Open the page used to input a new tournament. """
+
+        self._form_backspace_protection()
 
         self._set_focus("main")
         self._set_head_view("print-line", text="Nouveau tournoi")
@@ -841,6 +847,16 @@ class Controller:
             target = nav_history[-1]
             target[0](*target[1], **target[2])
 
+    @logNav
+    def go_back_last(self):
+        """ Open the last page registerd with the @saveNav decorator. """
+
+        logging.debug(f"Nav history: {nav_history}")
+
+        if len(nav_history) > 1:
+            target = nav_history[-1]
+            target[0](*target[1], **target[2])
+
     # === DEMO methods ===
 
     @logNav
@@ -1123,6 +1139,15 @@ class Controller:
 
     # === Form controls ===
 
+    def _form_backspace_protection(self):
+        """Print a screen just before the form prints its content,
+        so that this content will be used to redraw the area when swaping between views."""
+
+        self._set_main_view(
+            "list",
+            call=Menu.form_backspace,
+        )
+
     def _form_setup(self, screen, rows, exit_func, source=None):
         """ Initialize a new form. """
 
@@ -1168,7 +1193,7 @@ class Controller:
 
                     if len(gathered) < len(rows):
                         i = len(gathered)
-                        send_rows = rows[i: i + max_inputs]
+                        send_rows = rows[i : i + max_inputs]
                         continue
 
                     else:

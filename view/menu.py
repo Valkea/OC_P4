@@ -17,6 +17,8 @@ class Menu:
         This menu offers to load from or save to JSON file
     only_back()
         Simple menu with a unique "back" button
+    form_backspace()
+        Simple button to reload the current form if the swap view button was called
 
     tournament_initialize()
         Tournament main menu when the tournament is created but not started yet
@@ -65,6 +67,10 @@ class Menu:
     @staticmethod
     def only_back():
         return (("<< RETOUR", "go_back"),)
+
+    @staticmethod
+    def form_backspace():
+        return (("Retour au formulaire", "go_back_last"),)
 
     # === TOURNAMENT ===
 
